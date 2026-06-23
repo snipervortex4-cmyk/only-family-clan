@@ -679,7 +679,12 @@ let c=document.getElementById("code");
 let msg=document.getElementById("msg");
 
 if(c.value==="OnlyFamily"){
+document.getElementById("login").style.opacity="0";
+
+setTimeout(()=>{
 document.getElementById("login").style.display="none";
+},400);
+
 document.body.style.overflow="auto";
 
 let audio=document.getElementById("enterSound");
@@ -687,7 +692,7 @@ audio.volume=0.6;
 audio.play();
 
 }else{
-msg.innerText="Wrong Code";
+msg.innerText="❌ Wrong Code";
 msg.classList.add("shake");
 
 setTimeout(()=>{
@@ -695,7 +700,11 @@ msg.classList.remove("shake");
 },300);
 }
 }
-   function show(id){
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-   }
+
+function show(id){
+document.querySelectorAll('.section').forEach(s=>{
+s.classList.remove('active');
+});
+
+document.getElementById(id).classList.add('active');
+}
