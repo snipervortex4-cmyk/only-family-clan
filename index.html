@@ -259,6 +259,74 @@ line-height:1.6;
   html {
   scroll-behavior: smooth;
   }
+   /* =========================
+   PRO CYBER GLOW UPGRADE
+========================= */
+
+/* background particles effect */
+body::before {
+  content: "";
+  position: fixed;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, #00ffcc11 2px, transparent 2px);
+  background-size: 50px 50px;
+  animation: moveBg 20s linear infinite;
+  z-index: -2;
+}
+
+@keyframes moveBg {
+  from { transform: translate(0,0); }
+  to { transform: translate(-50px,-50px); }
+}
+
+/* stronger glow cards */
+.card {
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 25px #00ffcc55;
+}
+
+/* login shake effect */
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
+}
+
+.shake {
+  animation: shake 0.3s;
+}
+
+/* button glow */
+button {
+  transition: 0.3s;
+}
+
+button:hover {
+  box-shadow: 0 0 15px #00ffcc;
+  transform: scale(1.05);
+}
+
+/* title stronger glitch */
+.title {
+  text-shadow: 0 0 10px #00ffcc;
+}
+
+/* smooth fade section switch */
+.section {
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+     }
 </style>
 </head>
 
@@ -294,57 +362,35 @@ line-height:1.6;
 
 <!-- HOME -->
 <div id="home" class="section active">
-<div class="card">
+<div class="card" style="text-align:center;">
 
-<h2>🔥 ONLY・FAMILY CHAMPIONSHIP</h2>
+<h1 style="color:#00ffcc; font-size:28px; text-shadow:0 0 15px #00ffcc;">
+⚔️ ONLY・FAMILY ESPORTS
+</h1>
 
-<p style="color:#00ffcc;font-weight:bold; letter-spacing:1px;">
-CODM Competitive Clan | Pro League Division | Elite Scrim Team
+<p style="color:#aaa;">
+ELITE CODM COMPETITIVE CLAN
 </p>
 
 <hr style="border:0;border-top:1px solid #00ffcc33;margin:15px 0;">
 
-<h3>👑 LEADERSHIP</h3>
-<p>👑 Leader: Maru</p>
-<p>📱 Telegram Id: @VoidSpctre</p>
-<p>⚡ IGL Role: Tactical Control & Team Strategy</p>
+<h2>🔥 STATUS</h2>
+<p>🟢 ACTIVE • PRO SCRIMS • TOURNAMENT READY</p>
+
+<h2>👑 LEADER</h2>
+<p>Maru | Tactical IGL</p>
+
+<h2>📡 CONTACT</h2>
+<p>Telegram: @VoidSpctre</p>
 
 <hr style="border:0;border-top:1px solid #00ffcc33;margin:15px 0;">
 
-<h3>🎯 MISSION</h3>
-<p>
-ONLY・FAMILY is a high-level competitive Call of Duty Mobile clan focused on professional scrims, tournament dominance, and disciplined teamwork.
-</p>
-
-<p>
-We don’t play casual — we build synergy, skill, and winning mentality.
-</p>
-
-<hr style="border:0;border-top:1px solid #00ffcc33;margin:15px 0;">
-
-<h3>📊 CLAN STATUS</h3>
-<p>🟢 Status: ACTIVE</p>
-<p>🏆 Mode: SCRIMS • TOURNAMENT • COMPETITIVE LEAGUE</p>
-<p>👥 Members: ELITE CORE ROSTER</p>
-
-<hr style="border:0;border-top:1px solid #00ffcc33;margin:15px 0;">
-
-<h3>⚡ RULE CORE</h3>
-<p>• Skill > Everything</p>
-<p>• No toxicity</p>
-<p>• Full discipline required</p>
-<p>• Team coordination is priority</p>
-
-<hr style="border:0;border-top:1px solid #00ffcc33;margin:15px 0;">
-
-<h3>📡 LIVE INFO</h3>
-<p>🟢 Recruitment: OPEN</p>
-<p>🟢 Scrim Time: ACTIVE</p>
-<p>🟢 War Readiness: MAXIMUM</p>
+<button onclick="show('roster')">
+VIEW ROSTER
+</button>
 
 </div>
 </div>
-
 <!-- RULES -->
 <div id="rules" class="section">
 <div class="card">
@@ -583,9 +629,10 @@ document.getElementById("loader").style.display="none";
 },2500);
 
 function check(){
-let c=document.getElementById("code").value;
+let c=document.getElementById("code");
+let msg=document.getElementById("msg");
 
-if(c==="OnlyFamily"){
+if(c.value==="OnlyFamily"){
 document.getElementById("login").style.display="none";
 document.body.style.overflow="auto";
 
@@ -594,16 +641,15 @@ audio.volume=0.6;
 audio.play();
 
 }else{
-document.getElementById("msg").innerText="Wrong Code";
+msg.innerText="Wrong Code";
+msg.classList.add("shake");
+
+setTimeout(()=>{
+msg.classList.remove("shake");
+},300);
 }
 }
-
-function show(id){
-document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-document.getElementById(id).classList.add('active');
-}
-
-</script>
-
-</body>
-</html>
+   function show(id){
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+   }
