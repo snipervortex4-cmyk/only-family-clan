@@ -8,7 +8,6 @@
 
 <style>
 
-/* RESET */
 body{
 margin:0;
 font-family:'Roboto', sans-serif;
@@ -17,7 +16,6 @@ color:#fff;
 overflow:hidden;
 }
 
-/* LOADER */
 #loader{
 position:fixed;
 inset:0;
@@ -37,7 +35,6 @@ animation:fadeOut 1s ease 2.5s forwards;
 to{opacity:0;visibility:hidden;}
 }
 
-/* LOGIN */
 #login{
 position:fixed;
 inset:0;
@@ -47,27 +44,14 @@ justify-content:center;
 align-items:center;
 flex-direction:column;
 z-index:9999;
-animation:zoom 0.8s ease;
 }
 
-@keyframes zoom{
-from{transform:scale(1.2);opacity:0;}
-to{transform:scale(1);opacity:1;}
-}
-
-#login h2{
-color:#00ffcc;
-text-shadow:0 0 20px #00ffcc;
-}
+#login h2{color:#00ffcc;text-shadow:0 0 20px #00ffcc;}
 
 #login input{
-padding:12px;
-width:240px;
-margin:10px;
-background:#111;
-border:1px solid #00ffcc;
-color:#fff;
-text-align:center;
+padding:12px;width:240px;margin:10px;
+background:#111;border:1px solid #00ffcc;
+color:#fff;text-align:center;
 }
 
 #login button{
@@ -78,13 +62,10 @@ cursor:pointer;
 font-weight:bold;
 }
 
-/* SIDEBAR */
 .sidebar{
 position:fixed;
-left:0;
-top:0;
-width:220px;
-height:100%;
+left:0;top:0;
+width:220px;height:100%;
 background:#0a0a0a;
 border-right:1px solid #00ffcc33;
 padding-top:20px;
@@ -99,7 +80,6 @@ color:#00ffcc;
 cursor:pointer;
 text-align:left;
 padding-left:20px;
-transition:0.3s;
 }
 
 .sidebar button:hover{
@@ -107,70 +87,28 @@ background:#00ffcc;
 color:#000;
 }
 
-/* MAIN */
 .content{
 margin-left:230px;
 padding:20px;
+overflow:auto;
+height:100vh;
 }
 
 .bg{
 position:fixed;
-width:100%;
-height:100%;
+width:100%;height:100%;
 background:radial-gradient(circle,#00ffcc22,#000 70%);
 z-index:-1;
-animation:bg 6s infinite alternate;
 }
 
-@keyframes bg{
-from{transform:scale(1);}
-to{transform:scale(1.2);}
-}
-
-/* GLITCH TITLE */
 .title{
 text-align:center;
 font-size:44px;
 margin:20px;
 color:#00ffcc;
-position:relative;
 font-weight:bold;
-text-transform:uppercase;
-animation:glitch 2s infinite;
 }
 
-.title::before,
-.title::after{
-content:"ONLY・FAMILY ESPORTS";
-position:absolute;
-left:0;
-right:0;
-opacity:0.7;
-}
-
-.title::before{
-color:#ff00ff;
-animation:gl1 0.3s infinite;
-}
-
-.title::after{
-color:#00ffff;
-animation:gl2 0.3s infinite;
-}
-
-@keyframes gl1{
-0%{transform:translate(2px,0);}
-50%{transform:translate(-2px,1px);}
-100%{transform:translate(2px,-1px);}
-}
-
-@keyframes gl2{
-0%{transform:translate(-2px,0);}
-50%{transform:translate(2px,-1px);}
-100%{transform:translate(-2px,1px);}
-}
-
-/* SECTIONS */
 .section{display:none;}
 .active{display:block;}
 
@@ -191,10 +129,8 @@ line-height:1.6;
 
 <body>
 
-<!-- LOADER -->
 <div id="loader">LOADING ONLY・FAMILY...</div>
 
-<!-- LOGIN -->
 <div id="login">
 <h2>ENTER ACCESS CODE</h2>
 <input type="password" id="code" placeholder="CODE">
@@ -202,17 +138,14 @@ line-height:1.6;
 <p id="msg"></p>
 </div>
 
-<!-- SOUND (NEW 🔊) -->
 <audio id="enterSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8b1b1c8b0.mp3?filename=game-ui-6-143726.mp3"></audio>
 
-<!-- SIDEBAR -->
 <div class="sidebar">
 <button onclick="show('home')">HOME</button>
 <button onclick="show('rules')">RULES</button>
 <button onclick="show('roster')">ROSTER</button>
 </div>
 
-<!-- MAIN -->
 <div class="content">
 
 <div class="bg"></div>
@@ -225,68 +158,19 @@ line-height:1.6;
 
 <h2>🔥 ONLY・FAMILY CHAMPIONSHIP</h2>
 
-<p style="color:#00ffcc;font-weight:bold;">
-CODM Competitive Clan | Pro League Division
-</p>
-
-<hr style="border:0;border-top:1px solid #00ffcc33;margin:15px 0;">
+<p>CODM Competitive Clan | Pro League Division</p>
 
 <p>👑 Leader: Maru</p>
 <p>🎯 Motto: Skill decides everything</p>
 
 <p>📢 Clan Status: ACTIVE • ELITE ROSTER ONLINE</p>
 
-<hr style="border:0;border-top:1px solid #00ffcc33;margin:15px 0;">
-
-<h3>🧿 PLAYER INFO</h3>
-
-<p>👤 Owner: Maru</p>
 <p>📱 Telegram: @VoidSpctre</p>
 <p>🏷 Clan Tag: ONLY・FAMILY</p>
-<p>🌍 Region: International / Competitive Global</p>
 
-<hr style="border:0;border-top:1px solid #00ffcc33;margin:15px 0;">
+<p>🌍 Region: International</p>
 
-<h3>⚔️ CLAN DESCRIPTION</h3>
-
-<p>
-ONLY・FAMILY is a competitive Call of Duty Mobile clan focused on
-high-level scrims, tournament participation, and pro-league discipline.
-</p>
-
-<p>
-We operate under strict rules, teamwork structure, and tactical gameplay
-with zero tolerance for disrespect or non-serious players.
-</p>
-
-<hr style="border:0;border-top:1px solid #00ffcc33;margin:15px 0;">
-
-<h3>🏆 ACHIEVEMENTS</h3>
-
-<p>🥇 Ranked Scrims: ACTIVE</p>
-<p>🥈 Tournament Wins: 3+ (UNOFFICIAL)</p>
-<p>🥉 Active Members: 5 CORE PLAYERS</p>
-
-<hr style="border:0;border-top:1px solid #00ffcc33;margin:15px 0;">
-
-<h3>📡 LIVE STATUS</h3>
-
-<p>🟢 Server Status: ONLINE</p>
-<p>🟢 Scrim Mode: ENABLED</p>
-<p>🟢 Recruitment: OPEN</p>
-
-<hr style="border:0;border-top:1px solid #00ffcc33;margin:15px 0;">
-
-<h3>⚡ SYSTEM NOTICE</h3>
-
-<p>
-This clan is built for competitive players only.
-Casual behavior = instant removal.
-</p>
-
-<p>
-“Skill decides everything.”
-</p>
+<p>“Skill decides everything.”</p>
 
 </div>
 </div>
@@ -294,433 +178,55 @@ Casual behavior = instant removal.
 <!-- RULES -->
 <div id="rules" class="section">
 <div class="card">
-
 <h2>RULES</h2>
 
 <div class="rules">
 
 🌍 ONLY・FAMILY CLAN WAR RULES LIST
 
-> Elite Competitive Regulations | No Mercy | Pro League Standard
+💠1.1 هر‌گونه تخلف —> حذف مستقیم
 
+💠2.1 Best of 3 (Bo3)
 
-
----
-
-1. 🎮 OFFICIAL OVERVIEW
-
-💠1.1 هر‌گونه تخلف —> حذف مستقیم ، بدون هشدار
-
----
-
-2. 🧩 MATCH STRUCTURE (STANDARD FORMAT)
-
-💠2.1 فرمت : Best of 3 (Bo3)
-
-💠2.2 ساختار مسابقه :
-
-💠Match 1 → Sniper Only | Firing Range
-
-💠Match 2 → انتخاب مپ توسط بازنده مچ اول
-
-💠Match 3 → انتخاب مپ توسط برنده مچ اول
-
-💠2.3 مپ منتخب بایستی از مپ های سرچ اند دیستروی رنک باشد
-
-💠2.4 هر مچ شامل ۵ راند سرچ اند دیستروی می‌باشد
-
-💠2.5 تغییر قوانین در طول وار ممنوع می‌باشد
-
----
-
-3. ⏱️ TIMING RULES
-
-💠3.1 حداکثر تأخیر قابل پذیرش —> ۵ دقیقه
-💠3.2 تاخیر —> Forfeit مستیقم
-💠3.3 قطع اتصال —> ادامه بدون ReHost
-💠3.4 سوء‌استفاده از تأخیر —> حذف تیم 
-
----
-
-4. 👥 PLAYER ELIGIBILITY
-
-💠4.1 حضور فقط اعضای رسمی کلن
-💠4.2 داشتن تگ کلن الزامی است
-💠4.3 موارد غیرمجاز :
-
-💠شرکت در وار با اکانت فیک
-
-💠ورود غیرمجاز به وار
-
-➡️ نتیجه : Blacklist + حذف فوری
-
----
-
-5. 🎧 COMMUNICATION RULES
-
-💠5.1 اتصال میکروفون الزامی است (در صورت مشکل با خاموش و روشن کردن اینترنت متصل به آن رفع شود)
-💠5.2 فقط Leader و Vice Master حق استفاده از میکروفون و صحبت دارند
-💠5.3 Toxicity یا Noise —> Mute / Kick
-
----
-
-6. 👁️ SPECTATOR & STREAM
-
-💠6.1‌ ورود اسپکتیتور به روم ممنوع می‌باشد
-💠6.2 حضور با حالت استریمر مود ممنوع می‌باشد
-💠6.3 استریم اسنایپ کردن —> حذف فوری
-
----
-
-7. ‼️WEAPON BAN SYSTEM
-
-💠7.1 Banned ASSAULT RIFLES 
-
-❌ M16 | Swordfish | Oden | EM2 | LAG 53 | Vargo-S
-
-💠Banned Attachemnts : 
-
-Man-O-War —> Ammunition : Thermite Ammo
-AS VAL —> Ammunition : 15 Round FMJ
-CR-56 AMAX —> Ammunition: M67 Ammo
-Kilo 141 —> Ammunition: 100 Round Reload
-Maddox —> Barrel : Echo Fire Mod
-Type 19 —> Ammunition: Hi-Accuracy Sniper Ammo
-
----
-
-💠7.2 Banned SMGs
-
-❌ Chicom | Fennec | MAC-10 | KSP-45 | OTs 9 | TEC-9 | ISO | USS9 | Sten
-
-💠Banned Attachemnts : 
-
-Pharo —> Underbarrel : Underbarrel Stun Gun
-Striker 45 —> Ammunition : .45 Hollow Point 12-R Mags
-CX-9 —> Ammunition : 9mm Hollow Point 12-R Mags
-
----
-
-💠7.3 Banned LMGs
-
-❌ All LMGs Are Banned
-
----
-
-💠7.4 Banned SNIPERS
-
-❌ XPR-50 | Arctic .50 | M21 EBR | NA-45 | SVD | 
-
-💠Banned Attachemnts :  
-
-DL Q33 —> Ammunition : Maevwat Omega-1
-Rytec AMR —> All Ammunitions
-
----
-
-💠7.5 Banned MARKSMAN’s & Banned SHOTGUNS 
-
+💠7.5 MARKSMAN & SHOTGUNS BANNED
 ❌ All MARKSMAN’s & SHOTGUNS Are Banned
 
----
+💠7.6 PISTOLS & LAUNCHERS BANNED
+❌ All PISTOLS & LAUNCHERS Are Banned
 
-💠7.6 Banned PISTOLS & LAUNCHERS 
+💠7.7 MELEE RULE
+❌ Knife kill forbidden
 
-❌ All PISTOLS & LAUNCHERS Are Banned 
+💠10 PENALTY SYSTEM
+- First: Round loss
+- Second: Team removal
+- Third: Forfeit
 
----
-
-💠7.7 MELEE
-
-✔️ Only In LOADOUT
-❌ کیل گرفتن با نایف ممنوع می‌باشد
-
----
-
-8. 💣 EQUIPMENTS 
-
-✔️ Frag Grenade / Smok / Slim Shot / Trophy System 
-❌ اسپم یا Abuse ممنوع می‌باشد
-
----
-
-9. 🧿 Banned PERKS 
-
-❌  Red PERKS : Martyrdom | Restock | Tactician
-Green PERKS : Vulture | Tracker | Quick Fix | Recon
-Blue PERKS : Alert | Shrapnel
-
----
-
-10. ⚖️ PENALTY SYSTEM
-
-تخلف اول → حذف راند
-
-تخلف دوم → حذف تیمی
-
-تخلف سوم → Forfeit
-
-سوءاستفاده → Disqualification
-
----
-
-11. 🚨 COMPETITIVE RULES
-
-💠11.1 بی‌احترامی در روم ممنوع می‌باشد
-
-💠11.2 بحث در روم ممنوع می‌باشد  
-
----
-
-12. 🏁 FINAL AUTHORITY
-
-12.1 تصمیم نهایی با ادمین می‌باشد
-12.2 هیچ‌گونه اعتراض در طول وار قابل پذیرش نیست
-
----
-
-🌍 ONLY・FAMILY
-
-> “Skill decides everything.”
-
-</div>
-</div>
-</div>
-  <!-- ROSTER -->
-<div id="roster" class="section">
-
-<div class="card">
-<h2>🏆 ELITE WAR ROSTER</h2>
-
-<div class="rules">
-
-╭━━━〔 ⚔️ ONLY・FAMILY ELITE SQUAD ⚔️ 〕━━━╮
-┃        CODM COMPETITIVE LINEUP
-╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-👑 LEADER / IGL
-┃ 🎮 IGN : 𝙤𝙣𝙡𝙮ゝMaru
-┃ 🆔 UID : 7098766198632349698
-┗ 📱 DEVICE : Poco X 6 Pro
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-⚡ ENTRY FRAGGER
-┃ 🎮 IGN : 𝙤𝙣𝙡𝙮ゝLUIGI
-┃ 🆔 UID : 7424150550676963329
-┗ 📱 DEVICE : Poco X 7
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🛡 SUPPORT PLAYER
-┃ 🎮 IGN : 𝙤𝙣𝙡𝙮ゝfans
-┃ 🆔 UID : 7065612241814945793
-┗ 📱 DEVICE : iPhone 13 Normal
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🎯 RIFLER
-┃ 🎮 IGN : 𝙤𝙣𝙡𝙮ゝgl0ry
-┃ 🆔 UID : 7304502075479228417
-┗ 📱 DEVICE : Poco X 7 Pro
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🧠 FLEX / IGL SUPPORT
-┃ 🎮 IGN : 𝙤𝙣𝙡𝙮ゝDemo
-┃ 🆔 UID : 7136200059792130049
-┗ 📱 DEVICE : iPad Pro 2025
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🔥 STATUS : ACTIVE COMPETITIVE ROSTER
-🏆 MODE : SCRIMS • TOURNAMENT • PRO LEAGUE READY
-
-“Skill decides everything.”
-
-</div>
-</div>
-</div>
+💠12 FINAL AUTHORITY
+Decision is final by admin
 
 </div>
 
-<script>
-
-/* LOADER */
-setTimeout(()=>{
-document.getElementById("loader").style.display="none";
-},2500);
-
-/* LOGIN + SOUND */
-function check(){
-let c=document.getElementById("code").value;
-
-if(c==="OnlyFamily"){
-document.getElementById("login").style.display="none";
-document.body.style.overflow="auto";
-
-/* 🔊 PLAY SOUND */
-let audio=document.getElementById("enterSound");
-audio.volume=0.6;
-audio.play();
-
-}else{
-document.getElementById("msg").innerText="Wrong Code";
-}
-}
-
-/* NAV */
-function show(id){
-document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-document.getElementById(id).classList.add('active');
-}
-
-</script>
-
-</body>
-</html>ns
-
----
-
-💠7.5 Banned MARKSMAN’s & Banned SHOTGUNS 
-
-❌ All MARKSMAN’s & SHOTGUNS Are Banned
-
----
-
-💠7.6 Banned PISTOLS & LAUNCHERS 
-
-❌ All PISTOLS & LAUNCHERS Are Banned 
-
----
-
-💠7.7 MELEE
-
-✔️ Only In LOADOUT
-❌ کیل گرفتن با نایف ممنوع می‌باشد
-
----
-
-8. 💣 EQUIPMENTS 
-
-✔️ Frag Grenade / Smok / Slim Shot / Trophy System 
-❌ اسپم یا Abuse ممنوع می‌باشد
-
----
-
-9. 🧿 Banned PERKS 
-
-❌  Red PERKS : Martyrdom | Restock | Tactician
-Green PERKS : Vulture | Tracker | Quick Fix | Recon
-Blue PERKS : Alert | Shrapnel
-
----
-
-10. ⚖️ PENALTY SYSTEM
-
-تخلف اول → حذف راند
-
-تخلف دوم → حذف تیمی
-
-تخلف سوم → Forfeit
-
-سوءاستفاده → Disqualification
-
----
-
-11. 🚨 COMPETITIVE RULES
-
-💠11.1 بی‌احترامی در روم ممنوع می‌باشد
-
-💠11.2 بحث در روم ممنوع می‌باشد  
-
----
-
-12. 🏁 FINAL AUTHORITY
-
-12.1 تصمیم نهایی با ادمین می‌باشد
-12.2 هیچ‌گونه اعتراض در طول وار قابل پذیرش نیست
-
----
-
-🌍 ONLY・FAMILY
-
-> “Skill decides everything.”
-</div>
 </div>
 </div>
 
 <!-- ROSTER -->
 <div id="roster" class="section">
 <div class="card">
-
-<h2>🏆 ONLY・FAMILY ELITE WAR ROSTER</h2>
+<h2>ELITE ROSTER</h2>
 
 <div class="rules">
 
-╭━━━〔 ⚔️ CODM • COMPETITIVE SQUAD ⚔️ 〕━━━╮
-┃        ONLY・FAMILY OFFICIAL LINEUP
-╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
+👑 LEADER: Maru
+⚡ ENTRY FRAGGER: LUIGI
+🛡 SUPPORT: fans
+🎯 RIFLER: gl0ry
+🧠 FLEX: Demo
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-👑 LEADER / IGL
-━━━━━━━━━━━━━━━━━━━━━━
-┃ 🎮 IGN : 𝙤𝙣𝙡𝙮ゝMaru
-┃ 🆔 UID : 7098766198632349698
-┃ 📱 DEVICE : Poco X 6 Pro
-┃ 🎯 ROLE : In-Game Leader
-┃ ⚡ STATUS : ACTIVE
-━━━━━━━━━━━━━━━━━━━━━━
-
-⚡ ENTRY FRAGGER
-━━━━━━━━━━━━━━━━━━━━━━
-┃ 🎮 IGN : 𝙤𝙣𝙡𝙮ゝLUIGI
-┃ 🆔 UID : 7424150550676963329
-┃ 📱 DEVICE : Poco X 7
-┃ 🎯 ROLE : Entry Fragger
-┃ ⚡ STATUS : ACTIVE
-━━━━━━━━━━━━━━━━━━━━━━
-
-🛡 SUPPORT PLAYER
-━━━━━━━━━━━━━━━━━━━━━━
-┃ 🎮 IGN : 𝙤𝙣𝙡𝙮ゝfans
-┃ 🆔 UID : 7065612241814945793
-┃ 📱 DEVICE : iPhone 13 Normal
-┃ 🎯 ROLE : Support
-┃ ⚡ STATUS : ACTIVE
-━━━━━━━━━━━━━━━━━━━━━━
-
-🎯 RIFLER
-━━━━━━━━━━━━━━━━━━━━━━
-┃ 🎮 IGN : 𝙤𝙣𝙡𝙮ゝgl0ry
-┃ 🆔 UID : 7304502075479228417
-┃ 📱 DEVICE : Poco X 7 Pro
-┃ 🎯 ROLE : Rifle / Aim Anchor
-┃ ⚡ STATUS : ACTIVE
-━━━━━━━━━━━━━━━━━━━━━━
-
-🧠 FLEX / IGL SUPPORT
-━━━━━━━━━━━━━━━━━━━━━━
-┃ 🎮 IGN : 𝙤𝙣𝙡𝙮ゝDemo
-┃ 🆔 UID : 7136200059792130049
-┃ 📱 DEVICE : iPad Pro 2025
-┃ 🎯 ROLE : Flex Player
-┃ ⚡ STATUS : ACTIVE
-━━━━━━━━━━━━━━━━━━━━━━
-
-🔥 TEAM STATUS : ELITE ACTIVE ROSTER
-🏆 MODE : SCRIMS • TOURNAMENT • PRO LEAGUE READY
-🌍 REGION : INTERNATIONAL
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-💬 MOTTO:
-“Skill decides everything.”
+STATUS: ACTIVE COMPETITIVE TEAM
 
 </div>
+
 </div>
 </div>
 
@@ -728,32 +234,23 @@ Blue PERKS : Alert | Shrapnel
 
 <script>
 
-/* LOADER */
 setTimeout(()=>{
 document.getElementById("loader").style.display="none";
 },2500);
 
-/* LOGIN */
 function check(){
 let c=document.getElementById("code").value;
 if(c==="OnlyFamily"){
 document.getElementById("login").style.display="none";
 document.body.style.overflow="auto";
+document.getElementById("enterSound").play();
 }else{
 document.getElementById("msg").innerText="Wrong Code";
 }
 }
 
-/* NAV */
 function show(id){
 document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-document.getElementById(id).classList.add('active');
-}
-
-</script>
-
-</body>
-</html>emove('active'));
 document.getElementById(id).classList.add('active');
 }
 
