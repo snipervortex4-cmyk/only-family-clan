@@ -8,173 +8,96 @@
 
 <style>
 body{
-    margin:0;
-    font-family:'Roboto', sans-serif;
-    background:#000;
-    color:#fff;
-    overflow:hidden;
+margin:0;
+font-family:'Roboto', sans-serif;
+background:#000;
+color:#fff;
+overflow:hidden;
 }
 
 /* LOGIN SCREEN */
-#login{
-    position:fixed;
-    inset:0;
-    background:#000;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    z-index:2000;
+#loginScreen{
+position:fixed;
+inset:0;
+background:#000;
+display:flex;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+z-index:9999;
 }
 
-#login input{
-    padding:12px;
-    width:220px;
-    margin:8px;
-    background:#111;
-    border:1px solid #00ffcc;
-    color:#fff;
+#loginScreen input{
+padding:12px;
+width:220px;
+margin:10px;
+border:1px solid #00ffcc;
+background:#111;
+color:#fff;
+text-align:center;
 }
 
-#login button{
-    padding:10px 20px;
-    background:#00ffcc;
-    border:none;
-    cursor:pointer;
-    font-weight:bold;
+#loginScreen button{
+padding:10px 20px;
+background:#00ffcc;
+border:none;
+cursor:pointer;
+font-weight:bold;
 }
 
-/* LOADER */
-#loader{
-    position:fixed;
-    inset:0;
-    background:#000;
-    display:none;
-    justify-content:center;
-    align-items:center;
-    z-index:1999;
-}
-
-.loaderText{
-    color:#00ffcc;
-    font-size:18px;
-    animation:blink 1s infinite;
-}
-
-@keyframes blink{
-    50%{opacity:0.3;}
-}
-
-/* BACKGROUND */
+/* MAIN SITE */
 .bg{
-    position:fixed;
-    width:100%;
-    height:100%;
-    background:radial-gradient(circle,#00ffcc22,#000 70%);
-    z-index:-1;
+position:fixed;
+width:100%;
+height:100%;
+background:radial-gradient(circle,#00ffcc22,#000 70%);
+z-index:-1;
 }
 
-/* SIDEBAR */
-.sidebar{
-    position:fixed;
-    left:0;
-    top:0;
-    height:100%;
-    width:240px;
-    background:rgba(0,0,0,0.8);
-    backdrop-filter:blur(12px);
-    border-right:1px solid #00ffcc33;
-    padding-top:50px;
-}
-
-.sidebar button{
-    width:100%;
-    background:none;
-    border:none;
-    color:#00ffcc;
-    padding:15px;
-    text-align:left;
-    cursor:pointer;
-    transition:0.3s;
-    transform:perspective(300px) rotateY(0deg);
-}
-
-.sidebar button:hover{
-    background:#00ffcc;
-    color:#000;
-    transform:perspective(300px) rotateY(10deg);
-}
-
-.active-btn{
-    background:#00ffcc;
-    color:#000;
-}
-
-/* CONTENT */
-.content{
-    margin-left:240px;
-    padding:25px;
-}
-
-/* TITLE TYPEWRITER */
 .title{
-    text-align:center;
-    font-size:40px;
-    color:#00ffcc;
-    margin-bottom:20px;
-    white-space:nowrap;
-    overflow:hidden;
-    border-right:2px solid #00ffcc;
-    width:0;
-    animation:type 3s steps(25,end) forwards, blink2 0.7s infinite;
+text-align:center;
+font-size:44px;
+margin:20px;
+color:#00ffcc;
 }
 
-@keyframes type{
-    to{width:100%;}
+.nav{
+display:flex;
+justify-content:center;
+gap:10px;
+padding:10px;
 }
 
-@keyframes blink2{
-    50%{border-color:transparent;}
+.nav button{
+background:transparent;
+border:1px solid #00ffcc;
+color:#00ffcc;
+padding:10px;
+cursor:pointer;
 }
 
-/* SECTIONS */
+.nav button:hover{
+background:#00ffcc;
+color:#000;
+}
+
 .section{
-    display:none;
-    animation:fade 0.4s ease;
+display:none;
+width:90%;
+margin:30px auto;
 }
 
 .active{display:block;}
 
-@keyframes fade{
-    from{opacity:0; transform:translateY(20px);}
-    to{opacity:1; transform:translateY(0);}
-}
-
-/* CARD */
 .card{
-    background:rgba(255,255,255,0.05);
-    padding:20px;
-    border-left:3px solid #00ffcc;
-    margin-bottom:20px;
-    border-radius:10px;
-    transition:0.3s;
+background:rgba(255,255,255,0.05);
+padding:20px;
+border-left:3px solid #00ffcc;
 }
 
-.card:hover{
-    transform:scale(1.02);
-    box-shadow:0 0 20px #00ffcc33;
-}
-
-/* MUSIC BUTTON */
-#musicBtn{
-    position:fixed;
-    bottom:20px;
-    right:20px;
-    background:#00ffcc;
-    border:none;
-    padding:10px 15px;
-    cursor:pointer;
-    font-weight:bold;
+.rules{
+white-space:pre-wrap;
+line-height:1.6;
 }
 </style>
 </head>
@@ -182,35 +105,30 @@ body{
 <body>
 
 <!-- LOGIN -->
-<div id="login">
-<h2 style="color:#00ffcc;">ONLY・FAMILY ACCESS</h2>
-<input id="pass" placeholder="Enter Access Key">
-<button onclick="enter()">ENTER</button>
+<div id="loginScreen">
+<h2>ENTER ACCESS CODE</h2>
+<input type="password" id="code" placeholder="CODE">
+<button onclick="checkLogin()">ENTER</button>
+<p id="msg"></p>
 </div>
 
-<!-- LOADER -->
-<div id="loader">
-<div class="loaderText">Loading Clan Data...</div>
-</div>
-
+<!-- MAIN -->
 <div class="bg"></div>
 
-<!-- SIDEBAR -->
-<div class="sidebar">
-<button class="navbtn active-btn" onclick="show('home',this)">🏠 HOME</button>
-<button class="navbtn" onclick="show('rules',this)">📜 RULES</button>
-<button class="navbtn" onclick="show('roster',this)">👥 ROSTER</button>
-</div>
-
-<div class="content">
-
 <div class="title">ONLY・FAMILY ESPORTS</div>
+
+<div class="nav">
+<button onclick="show('home')">HOME</button>
+<button onclick="show('rules')">RULES</button>
+<button onclick="show('roster')">ROSTER</button>
+</div>
 
 <!-- HOME -->
 <div id="home" class="section active">
 <div class="card">
 <h2>🔥 ONLY・FAMILY CHAMPIONSHIP</h2>
 <p>CODM Competitive Clan</p>
+<p>Mode: Pro League Standard</p>
 <p>Leader: Maru</p>
 <p>Motto: Skill decides everything</p>
 </div>
@@ -219,66 +137,77 @@ body{
 <!-- RULES -->
 <div id="rules" class="section">
 <div class="card">
-<h2>RULES</h2>
-<div class="rules">
-Elite Competitive Rules...
+<h2>🌍 RULES</h2>
 
-(No changes applied)
+<div class="rules">
+🌍 ONLY・FAMILY CLAN WAR RULES LIST
+
+1. OFFICIAL OVERVIEW → Immediate disqualification for violations
+
+2. MATCH STRUCTURE → Bo3 format
+
+3. TIMING RULES → max 5 min delay
+
+4. PLAYER ELIGIBILITY → official members only
+
+5. COMMUNICATION → leader + vice only
+
+6. STREAM RULES → no spectators
+
+7. WEAPON BAN → restricted list applies
+
+8. EQUIPMENT → grenades allowed
+
+9. PENALTY SYSTEM → 3 strikes = DQ
+
+“Skill decides everything.”
 </div>
+
 </div>
 </div>
 
 <!-- ROSTER -->
 <div id="roster" class="section">
 <div class="card">
-<h2>ROSTER</h2>
+<h2>TEAM ROSTER</h2>
+
 <div class="rules">
-Maru / LUIGI / fans / gl0ry / Demo
-</div>
-</div>
+PLAYER 01 - Maru
+UID: 7098766198632349698
+
+PLAYER 02 - LUIGI
+UID: 7424150550676963329
+
+PLAYER 03 - fans
+UID: 7065612241814945793
+
+PLAYER 04 - gl0ry
+UID: 7304502075479228417
+
+PLAYER 05 - Demo
+UID: 7136200059792130049
 </div>
 
 </div>
-
-<!-- MUSIC -->
-<audio id="bgMusic" loop>
-<source src="https://cdn.pixabay.com/audio/2022/10/16/audio_12b6b7.mp3">
-</audio>
-
-<button id="musicBtn" onclick="toggleMusic()">🎵 MUSIC</button>
+</div>
 
 <script>
-
-function enter(){
-let pass = document.getElementById("pass").value;
-
-if(pass === "ONLY"){
-document.getElementById("login").style.display="none";
-document.getElementById("loader").style.display="flex";
-
-setTimeout(()=>{
-document.getElementById("loader").style.display="none";
-},2000);
-
-}else{
-alert("Wrong Key");
-}
-}
-
-function show(id,btn){
+function show(id){
 document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
 document.getElementById(id).classList.add('active');
-
-document.querySelectorAll('.navbtn').forEach(b=>b.classList.remove('active-btn'));
-btn.classList.add('active-btn');
 }
 
-function toggleMusic(){
-let m = document.getElementById("bgMusic");
-if(m.paused) m.play();
-else m.pause();
-}
+/* LOGIN SYSTEM */
+function checkLogin(){
+let code = document.getElementById("code").value;
 
+if(code === "1234"){
+document.getElementById("loginScreen").style.display="none";
+document.body.style.overflow="auto";
+}else{
+document.getElementById("msg").innerText="❌ Wrong Code";
+}
+}
 </script>
 
 </body>
