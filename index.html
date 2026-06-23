@@ -5,11 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ONLY・FAMILY ESPORTS</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
-
 <style>
+body{
+margin:0;
+font-family:Arial;
+background:#000;
+color:#00ffcc;
+overflow:hidden;
+}
 
-/* LOADER */
+/* ========== LOADER ========== */
 #loader{
 position:fixed;
 inset:0;
@@ -17,11 +22,10 @@ background:#000;
 display:flex;
 justify-content:center;
 align-items:center;
-flex-direction:column;
-z-index:10000;
-color:#00ffcc;
+z-index:9999;
 font-size:22px;
 letter-spacing:4px;
+color:#00ffcc;
 animation:fadeOut 1s ease 2.5s forwards;
 }
 
@@ -29,42 +33,26 @@ animation:fadeOut 1s ease 2.5s forwards;
 to{opacity:0;visibility:hidden;}
 }
 
-/* LOGIN */
+/* ========== LOGIN ========== */
 #login{
 position:fixed;
 inset:0;
-background:radial-gradient(circle,#111,#000);
 display:flex;
+flex-direction:column;
 justify-content:center;
 align-items:center;
-flex-direction:column;
-z-index:9999;
-animation:zoom 0.8s ease;
-}
-
-#login{
-animation: zoomIn 0.6s ease;
+background:rgba(0,0,0,0.9);
+z-index:9998;
+animation:zoomIn 0.6s ease;
 }
 
 @keyframes zoomIn{
-from{
-transform: scale(1.3);
-opacity: 0;
-}
-to{
-transform: scale(1);
-opacity: 1;
-}
-}
-
-#login h2{
-color:#00ffcc;
-text-shadow:0 0 20px #00ffcc;
+from{transform:scale(1.2);opacity:0;}
+to{transform:scale(1);opacity:1;}
 }
 
 #login input{
-padding:12px;
-width:240px;
+padding:10px;
 margin:10px;
 background:#111;
 border:1px solid #00ffcc;
@@ -77,19 +65,47 @@ padding:10px 20px;
 background:#00ffcc;
 border:none;
 cursor:pointer;
-font-weight:bold;
 }
 
-/* SIDEBAR */
+.hide-login{
+opacity:0;
+pointer-events:none;
+transition:0.4s;
+}
+
+/* ========== BLUR BACKGROUND WHEN LOGIN ACTIVE ========== */
+body.login-active .content,
+body.login-active .sidebar,
+body.login-active .bg{
+filter:blur(6px) brightness(0.4);
+}
+
+/* ========== BACKGROUND CYBER ========== */
+.bg{
+position:fixed;
+width:200%;
+height:200%;
+background:radial-gradient(circle,#00ffcc22 2px,transparent 2px);
+background-size:50px 50px;
+animation:move 20s linear infinite;
+z-index:-1;
+}
+
+@keyframes move{
+from{transform:translate(0,0);}
+to{transform:translate(-50px,-50px);}
+}
+
+/* ========== SIDEBAR ========== */
 .sidebar{
 position:fixed;
 left:0;
 top:0;
-width:220px;
+width:200px;
 height:100%;
 background:#0a0a0a;
-border-right:1px solid #00ffcc33;
 padding-top:20px;
+border-right:1px solid #00ffcc33;
 }
 
 .sidebar button{
@@ -99,9 +115,6 @@ background:transparent;
 border:none;
 color:#00ffcc;
 cursor:pointer;
-text-align:left;
-padding-left:20px;
-transition:0.3s;
 }
 
 .sidebar button:hover{
@@ -109,310 +122,55 @@ background:#00ffcc;
 color:#000;
 }
 
-/* MAIN */
+/* ========== CONTENT ========== */
 .content{
-margin-left:230px;
+display:none;
 padding:20px;
+margin-left:200px;
+animation:fadeIn 0.6s ease;
 }
 
-.bg{
-position:fixed;
-width:100%;
-height:100%;
-background:radial-gradient(circle,#00ffcc22,#000 70%);
-z-index:-1;
-animation:bg 6s infinite alternate;
+@keyframes fadeIn{
+from{opacity:0;transform:translateY(10px);}
+to{opacity:1;transform:translateY(0);}
 }
 
-@keyframes bg{
-from{transform:scale(1);}
-to{transform:scale(1.2);}
-}
-
-/* GLITCH TITLE */
-.title{
-text-align:center;
-font-size:44px;
-margin:20px;
-color:#00ffcc;
-position:relative;
-font-weight:bold;
-text-transform:uppercase;
-animation:glitch 2s infinite;
-}
-
-.title::before,
-.title::after{
-content:"ONLY・FAMILY ESPORTS";
-position:absolute;
-left:0;
-right:0;
-opacity:0.7;
-}
-
-.title::before{
-color:#ff00ff;
-animation:gl1 0.3s infinite;
-}
-
-.title::after{
-color:#00ffff;
-animation:gl2 0.3s infinite;
-}
-
-@keyframes glitch{
-0%{transform:translate(0,0);}
-20%{transform:translate(2px,-2px);}
-40%{transform:translate(-2px,2px);}
-60%{transform:translate(2px,2px);}
-80%{transform:translate(-2px,-2px);}
-100%{transform:translate(0,0);}
-}
-
-@keyframes gl1{
-0%{transform:translate(2px,0);}
-50%{transform:translate(-2px,1px);}
-100%{transform:translate(2px,-1px);}
-}
-
-@keyframes gl2{
-0%{transform:translate(-2px,0);}
-50%{transform:translate(2px,-1px);}
-100%{transform:translate(-2px,1px);}
-}
-
-/* SECTIONS */
+/* ========== SECTIONS ========== */
 .section{display:none;}
-.active{display:block;}
+.section.active{display:block;}
 
 .card{
 background:rgba(255,255,255,0.05);
 padding:20px;
 border-left:3px solid #00ffcc;
-margin-bottom:15px;
+margin:10px 0;
 }
 
-.rules{
-white-space:pre-wrap;
-line-height:1.6;
-}
-/* =========================
-   RESPONSIVE DESIGN
-========================= */
-
-/* TABLET & SMALL DESKTOP */
-@media (max-width: 1024px) {
-  .sidebar {
-    width: 180px;
-  }
-
-  .content {
-    margin-left: 190px;
-  }
-
-  .title {
-    font-size: 34px;
-  }
-}
-
-/* MOBILE */
-@media (max-width: 768px) {
-
-  body {
-    font-size: 14px;
-  }
-
-  .sidebar {
-    width: 100%;
-    height: auto;
-    position: relative;
-    display: flex;
-    justify-content: space-around;
-    padding: 10px 0;
-  }
-
-  .sidebar button {
-    padding: 10px;
-    text-align: center;
-    padding-left: 0;
-  }
-
-  .content {
-    margin-left: 0;
-    padding: 10px;
-  }
-
-  .title {
-    font-size: 26px;
-  }
-
-  .card {
-    padding: 12px;
-  }
-
-  #login input {
-    width: 80%;
-  }
-
-}
-
-/* VERY SMALL PHONES */
-@media (max-width: 480px) {
-  .title {
-    font-size: 20px;
-  }
-
-  #login h2 {
-    font-size: 18px;
-  }
-}
-  html {
-  scroll-behavior: smooth;
-  }
-   /* =========================
-   PRO CYBER GLOW UPGRADE
-========================= */
-
-/* background particles effect */
-body::before {
-  content: "";
-  position: fixed;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, #00ffcc11 2px, transparent 2px);
-  background-size: 50px 50px;
-  animation: moveBg 20s linear infinite;
-  z-index: -2;
-}
-
-@keyframes moveBg {
-  from { transform: translate(0,0); }
-  to { transform: translate(-50px,-50px); }
-}
-
-/* stronger glow cards */
-.card {
-  transition: 0.3s;
-}
-
-.card:hover {
-  transform: scale(1.02);
-  box-shadow: 0 0 25px #00ffcc55;
-}
-
-/* login shake effect */
-@keyframes shake {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  50% { transform: translateX(5px); }
-  75% { transform: translateX(-5px); }
-  100% { transform: translateX(0); }
-}
-
-.shake {
-  animation: shake 0.3s;
-}
-
-/* button glow */
-button {
-  transition: 0.3s;
-}
-
-button:hover {
-  box-shadow: 0 0 15px #00ffcc;
-  transform: scale(1.05);
-}
-
-/* title stronger glitch */
-.title {
-  text-shadow: 0 0 10px #00ffcc;
-}
-
-/* smooth fade section switch */
-.section {
-  animation: fadeIn 0.4s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-     }
-   /* ===== CYBER UPGRADE PACK ===== */
-
-/* glass login */
-#login{
-backdrop-filter: blur(10px);
-background: rgba(0,0,0,0.85);
-}
-
-/* neon button upgrade */
-button{
-border-radius: 6px;
-letter-spacing:1px;
-}
-
-button:hover{
-box-shadow: 0 0 20px #00ffcc, 0 0 40px #00ffcc33;
-}
-
-/* card glow upgrade */
-.card{
-border-radius: 10px;
-transition: all 0.3s ease;
-}
-
-.card:hover{
-transform: translateY(-5px) scale(1.01);
-box-shadow: 0 0 30px #00ffcc33;
-}
-
-/* section animation fix */
-.section{
-opacity:0;
-transform: translateY(10px);
-transition:0.4s ease;
-}
-
-.section.active{
-opacity:1;
-transform: translateY(0);
-}
-
-/* input glow */
-#login input:focus{
-outline:none;
-box-shadow: 0 0 15px #00ffcc;
-        }
-   .hide-login{
-opacity:0;
-pointer-events:none;
-transition:0.4s ease;
-   }
-   body.login-active .content,
-body.login-active .sidebar,
-body.login-active .bg,
-body.login-active .title {
-  filter: blur(6px) brightness(0.4);
-  transition: 0.4s ease;
+/* ========== HACK TEXT ========== */
+#hackText{
+margin-left:200px;
+white-space:pre;
+padding:10px;
+color:#00ffcc;
 }
 </style>
 </head>
 
-<body>
+<body class="login-active">
 
 <!-- LOADER -->
-<div id="loader">LOADING ONLY・FAMILY...</div>
+<div id="loader">LOADING SYSTEM...</div>
 
 <!-- LOGIN -->
 <div id="login">
-<h2>ENTER ACCESS CODE</h2>
-<input type="password" id="code" placeholder="CODE">
+<h2>ENTER CODE</h2>
+<input id="code" type="password">
 <button onclick="check()">ENTER</button>
 <p id="msg"></p>
 </div>
 
-<!-- SOUND -->
-<audio id="enterSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8b1b1c8b0.mp3"></audio>
+<!-- BACKGROUND -->
+<div class="bg"></div>
 
 <!-- SIDEBAR -->
 <div class="sidebar">
@@ -421,307 +179,102 @@ body.login-active .title {
 <button onclick="show('roster')">ROSTER</button>
 </div>
 
-<!-- MAIN -->
+<!-- CONTENT -->
 <div class="content">
 
-<div class="bg"></div>
+<h1>ONLY FAMILY ESPORTS</h1>
 
-<div class="title">ONLY・FAMILY ESPORTS</div>
-
-<!-- HOME -->
 <div id="home" class="section active">
-<div class="card" style="text-align:center;">
-
-<h1 style="color:#00ffcc; font-size:28px; text-shadow:0 0 15px #00ffcc;">
-⚔️ ONLY・FAMILY ESPORTS
-</h1>
-
-<p style="color:#aaa;">
-ELITE CODM COMPETITIVE CLAN
-</p>
-
-<hr style="border:0;border-top:1px solid #00ffcc33;margin:15px 0;">
-
-<h2>🔥 STATUS</h2>
-<p>🟢 ACTIVE • PRO SCRIMS • TOURNAMENT READY</p>
-
-<h2>👑 LEADER</h2>
-<p>Maru | Tactical IGL</p>
-
-<h2>📡 CONTACT</h2>
-<p>Telegram: @VoidSpctre</p>
-
-<hr style="border:0;border-top:1px solid #00ffcc33;margin:15px 0;">
-
-<button onclick="show('roster')">
-VIEW ROSTER
-</button>
-
+<div class="card">
+<h2>HOME</h2>
+<p>🔥 Welcome to ONLY FAMILY ESPORTS</p>
 </div>
 </div>
-<!-- RULES -->
+
 <div id="rules" class="section">
 <div class="card">
 <h2>RULES</h2>
-<div class="rules">
-🌍 ONLY・FAMILY CLAN WAR RULES LIST
-
-> Elite Competitive Regulations | No Mercy | Pro League Standard
-
-━━━━━━━━━━━━━━━━━━━━━━
-
-1. 🎮 OFFICIAL OVERVIEW
-
-💠1.1 هرگونه تخلف → حذف مستقیم، بدون هشدار
-
-━━━━━━━━━━━━━━━━━━━━━━
-
-2. 🧩 MATCH STRUCTURE (STANDARD FORMAT)
-
-💠2.1 فرمت: Best of 3 (Bo3)
-
-💠2.2 ساختار مسابقه:
-• Match 1 → Sniper Only | Firing Range
-• Match 2 → انتخاب مپ توسط بازنده مچ اول
-• Match 3 → انتخاب مپ توسط برنده مچ اول
-
-💠2.3 مپ منتخب باید از مپ‌های Search & Destroy رنک باشد
-
-💠2.4 هر مچ شامل 5 راند Search & Destroy می‌باشد
-
-💠2.5 تغییر قوانین در طول وار ممنوع است
-
-━━━━━━━━━━━━━━━━━━━━━━
-
-3. ⏱️ TIMING RULES
-
-💠3.1 حداکثر تأخیر قابل قبول → 5 دقیقه
-💠3.2 تأخیر → Forfeit مستقیم
-💠3.3 قطع اتصال → ادامه بدون ReHost
-💠3.4 سوءاستفاده از تأخیر → حذف تیم
-
-━━━━━━━━━━━━━━━━━━━━━━
-
-4. 👥 PLAYER ELIGIBILITY
-
-💠4.1 فقط اعضای رسمی کلن
-💠4.2 داشتن تگ کلن الزامی است
-
-💠4.3 موارد غیرمجاز:
-• شرکت در وار با اکانت فیک
-• ورود غیرمجاز به وار
-
-➡️ نتیجه: Blacklist + حذف فوری
-
-━━━━━━━━━━━━━━━━━━━━━━
-
-5. 🎧 COMMUNICATION RULES
-
-💠5.1 میکروفون الزامی است (در صورت مشکل، با ری‌استارت اینترنت رفع شود)
-💠5.2 فقط Leader و Vice Master حق صحبت دارند
-💠5.3 Toxicity یا Noise → Mute / Kick
-
-━━━━━━━━━━━━━━━━━━━━━━
-
-6. 👁️ SPECTATOR & STREAM
-
-💠6.1 ورود اسپکتیتور ممنوع
-💠6.2 استریمر مود ممنوع
-💠6.3 استریم اسنایپ → حذف فوری
-
-━━━━━━━━━━━━━━━━━━━━━━
-
-7. ‼️ WEAPON BAN SYSTEM
-
-💠7.1 BANNED ASSAULT RIFLES
-❌ M16 | Swordfish | Oden | EM2 | LAG 53 | Vargo-S
-
-💠Attachments:
-• Man-O-War → Thermite Ammo
-• AS VAL → 15 Round FMJ
-• CR-56 AMAX → M67 Ammo
-• Kilo 141 → 100 Round Reload
-• Maddox → Echo Fire Mod
-• Type 19 → Hi-Accuracy Sniper Ammo
-
-━━━━━━━━━━━━━━━━━━━━━━
-
-💠7.2 BANNED SMGs
-❌ Chicom | Fennec | MAC-10 | KSP-45 | OTs 9 | TEC-9 | ISO | USS9 | Sten
-
-💠Attachments:
-• Pharo → Underbarrel Stun Gun
-• Striker 45 → .45 Hollow Point 12-R Mags
-• CX-9 → 9mm Hollow Point 12-R Mags
-
-━━━━━━━━━━━━━━━━━━━━━━
-
-💠7.3 LMGs
-❌ تمام LMG ها ممنوع هستند
-
-━━━━━━━━━━━━━━━━━━━━━━
-
-💠7.4 SNIPERS
-❌ XPR-50 | Arctic .50 | M21 EBR | NA-45 | SVD
-
-💠Attachments:
-• DL Q33 → Maevwat Omega-1
-• Rytec AMR → All Ammunitions
-
-━━━━━━━━━━━━━━━━━━━━━━
-
-💠7.5 MARKSMAN & SHOTGUNS
-❌ تمام Marksman و Shotgun ها ممنوع هستند
-
-━━━━━━━━━━━━━━━━━━━━━━
-
-💠7.6 PISTOLS & LAUNCHERS
-❌ همه ممنوع
-
-━━━━━━━━━━━━━━━━━━━━━━
-
-💠7.7 MELEE
-✔️ فقط داخل Loadout
-❌ کیل با نایف ممنوع
-
-━━━━━━━━━━━━━━━━━━━━━━
-
-8. 💣 EQUIPMENTS
-✔️ Frag / Smoke/ Trophy System
-❌ ممنوع Spam و Abuse
-
-━━━━━━━━━━━━━━━━━━━━━━
-
-9. 🧿 BANNED PERKS
-
-🔴 Red: Martyrdom | Restock | Tactician
-🟢 Green: Vulture | Tracker | Quick Fix | Recon
-🔵 Blue: Alert | Shrapnel
-
-━━━━━━━━━━━━━━━━━━━━━━
-
-10. ⚖️ PENALTY SYSTEM
-
-• تخلف اول → حذف راند
-• تخلف دوم → حذف تیمی
-• تخلف سوم → Forfeit
-• سوءاستفاده → Disqualification
-
-━━━━━━━━━━━━━━━━━━━━━━
-
-11. 🚨 COMPETITIVE RULES
-
-💠11.1 بی‌احترامی ممنوع
-💠11.2 بحث در روم ممنوع
-
-━━━━━━━━━━━━━━━━━━━━━━
-
-12. 🏁 FINAL AUTHORITY
-
-💠12.1 تصمیم نهایی با ادمین
-💠12.2 هیچ اعتراض پذیرفته نمی‌شود
-
-━━━━━━━━━━━━━━━━━━━━━━
-
-🌍 ONLY・FAMILY
-
-“Skill decides everything.”
-</div>
+<p>Put your rules here...</p>
 </div>
 </div>
 
-<!-- ROSTER -->
 <div id="roster" class="section">
-
 <div class="card">
-<h2>🏆 ELITE WAR ROSTER</h2>
-
-<div class="rules">
-
-╭━━━〔 ⚔️ ONLY・FAMILY • ELITE SQUAD ⚔️ 〕━━━╮
-┃        CODM COMPETITIVE LINEUP
-╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-👑 LEADER / IGL
-┃ 🎮 IGN : 𝙤𝙣𝙡𝙮ゝMaru
-┃ 🆔 UID : 7098766198632349698
-┗ 📱 DEVICE : Poco X 6 Pro
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-⚡ ENTRY FRAGGER
-┃ 🎮 IGN : 𝙤𝙣𝙡𝙮ゝLUIGI
-┃ 🆔 UID : 7424150550676963329
-┗ 📱 DEVICE : Poco X 7
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🛡 SUPPORT PLAYER
-┃ 🎮 IGN : 𝙤𝙣𝙡𝙮ゝfans
-┃ 🆔 UID : 7065612241814945793
-┗ 📱 DEVICE : iPhone 13 Normal
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🎯 RIFLER
-┃ 🎮 IGN : 𝙤𝙣𝙡𝙮ゝgl0ry
-┃ 🆔 UID : 7304502075479228417
-┗ 📱 DEVICE : Poco X 7 Pro
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🧠 FLEX / SUPPORT IGL
-┃ 🎮 IGN : 𝙤𝙣𝙡𝙮ゝDemo
-┃ 🆔 UID : 7136200059792130049
-┗ 📱 DEVICE : iPad Pro 2025
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🔥 TEAM STATUS : ACTIVE • COMPETITIVE READY
-🏆 MODE : SCRIMS • TOURNAMENT • PRO LEAGUE
-
-💠 ONLY・FAMILY ESPORTS
-“Skill decides everything.”
-
+<h2>ROSTER</h2>
+<p>Put your roster here...</p>
 </div>
 </div>
 
 </div>
+
+<!-- HACK TEXT -->
+<div id="hackText"></div>
 
 <script>
-   document.body.classList.add("login-active");
-document.body.style.overflow = "hidden";
+
+/* loader */
 setTimeout(()=>{
 document.getElementById("loader").style.display="none";
 },2500);
 
+/* section switch */
+function show(id){
+document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+}
+
+/* hack animation */
+let hackLines = [
+"ACCESSING SYSTEM...",
+"CONNECTING SERVER...",
+"BYPASSING SECURITY...",
+"SCANNING DATA...",
+"ACCESS GRANTED ✔"
+];
+
+let line = 0;
+let char = 0;
+
+function typeHack(){
+let box = document.getElementById("hackText");
+if(!box || line >= hackLines.length) return;
+
+let text = hackLines[line];
+
+if(char < text.length){
+box.innerHTML += text[char];
+char++;
+setTimeout(typeHack, 50);
+}else{
+box.innerHTML += "<br>";
+line++;
+char = 0;
+setTimeout(typeHack, 300);
+}
+}
+
+/* login check */
 function check(){
-let c = document.getElementById("code");
-let msg = document.getElementById("msg");
+let c=document.getElementById("code");
+let msg=document.getElementById("msg");
 
-if(c.value.trim() === "OnlyFamily"){
+if(c.value.trim()==="OnlyFamily"){
 
-let login = document.getElementById("login");
-login.classList.add("hide-login");
+document.getElementById("login").classList.add("hide-login");
 
 setTimeout(()=>{
-login.style.display = "none";
+document.getElementById("login").style.display="none";
+document.querySelector(".content").style.display="block";
 document.body.classList.remove("login-active");
-document.body.style.overflow = "auto";
-},600);
-
-let audio = document.getElementById("enterSound");
-audio.volume = 0.6;
-audio.play();
+typeHack();
+},500);
 
 }else{
-msg.innerText = "❌ Wrong Code";
-msg.classList.add("shake");
+msg.innerText="❌ Wrong Code";
+}
+}
 
-setTimeout(()=>{
-msg.classList.remove("shake");
-},300);
-}
-}
+</script>
+
+</body>
+</html>
