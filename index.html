@@ -1,20 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>ONLY・FAMILY ESPORTS</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
-
-<style>
-
 /* RESET */
 body{
 margin:0;
 font-family:'Roboto', sans-serif;
 background:#000;
 color:#fff;
-overflow:hidden;
+overflow-x:hidden;
+overflow-y:auto;
 }
 
 /* LOADER */
@@ -158,6 +149,16 @@ color:#00ffff;
 animation:gl2 0.3s infinite;
 }
 
+/* 🔥 FIX: glitch animation (ADDED) */
+@keyframes glitch{
+0%{transform:translate(0,0);}
+20%{transform:translate(2px,-2px);}
+40%{transform:translate(-2px,2px);}
+60%{transform:translate(2px,2px);}
+80%{transform:translate(-2px,-2px);}
+100%{transform:translate(0,0);}
+}
+
 @keyframes gl1{
 0%{transform:translate(2px,0);}
 50%{transform:translate(-2px,1px);}
@@ -185,11 +186,6 @@ margin-bottom:15px;
 white-space:pre-wrap;
 line-height:1.6;
 }
-
-</style>
-</head>
-
-<body>
 
 <!-- LOADER -->
 <div id="loader">LOADING ONLY・FAMILY...</div>
