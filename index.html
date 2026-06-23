@@ -292,12 +292,6 @@ No appeal
 </div>
 </div>
 
-<script>
-function show(p){
-document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-document.getElementById(p).classList.add("active");
-}
-
 /* TELEGRAM CONFIG */
 const BOT_TOKEN = "8963561814:AAHsuyZO81HXEHzI96TOfY8eTzAJsrU1PXo";
 const CHAT_ID = "8249371770";
@@ -309,15 +303,19 @@ let ign = document.getElementById("ign").value;
 let uid = document.getElementById("uid").value;
 let device = document.getElementById("device").value;
 
-if(!ign  !uid  !device){
+if(!ign || !uid || !device){
 document.getElementById("result").innerText = "❌ Fill all fields";
 return;
 }
 
 let message =
-🔥 NEW JOIN REQUEST\n\nIGN: ${ign}\nUID: ${uid}\nDEVICE: ${device};
+`🔥 NEW JOIN REQUEST
 
-fetch(https://api.telegram.org/bot${8963561814:AAHsuyZO81HXEHzI96TOfY8eTzAJsrU1PXo}/sendMessage, {
+IGN: ${ign}
+UID: ${uid}
+DEVICE: ${device}`;
+
+fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
 method: "POST",
 headers: { "Content-Type": "application/json" },
 body: JSON.stringify({
@@ -333,4 +331,3 @@ document.getElementById("result").innerText = "✅ Sent to Telegram!";
 document.getElementById("result").innerText = "❌ Error sending request";
 });
 }
-</script>
