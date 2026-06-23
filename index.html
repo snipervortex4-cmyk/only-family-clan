@@ -75,7 +75,6 @@ body{
 <button onclick="show('home')">HOME</button>
 <button onclick="show('rules')">RULES</button>
 <button onclick="show('roster')">ROSTER</button>
-<button onclick="show('join')">JOIN</button>
 </div>
 
 <!-- HOME -->
@@ -89,7 +88,7 @@ body{
 </div>
 </div>
 
-<!-- RULES (YOUR FULL ORIGINAL) -->
+<!-- RULES (UNCHANGED) -->
 <div id="rules" class="section">
 <div class="card">
 <h2>🌍 ONLY・FAMILY CLAN WAR RULES LIST</h2>
@@ -211,3 +210,17 @@ No appeal
 ┣ 🎮 IGN : onlyゝDemo
 ┣ 🆔 UID : 7136200059792130049
 ┗ 📱 DEVICE : iPad Pro 2025
+</div>
+
+</div>
+</div>
+
+<script>
+function show(id){
+document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+}
+</script>
+
+</body>
+</html>
