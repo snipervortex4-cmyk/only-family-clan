@@ -292,9 +292,16 @@ No appeal
 </div>
 </div>
 
+<script>
 /* TELEGRAM CONFIG */
-const BOT_TOKEN = "8963561814:AAHsuyZO81HXEHzI96TOfY8eTzAJsrU1PXo";
+const BOT_TOKEN = "YOUR_BOT_TOKEN";
 const CHAT_ID = "8249371770";
+
+/* NAV */
+function show(p){
+document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+document.getElementById(p).classList.add("active");
+}
 
 /* SEND FUNCTION */
 function sendTelegram(){
@@ -331,3 +338,4 @@ document.getElementById("result").innerText = "✅ Sent to Telegram!";
 document.getElementById("result").innerText = "❌ Error sending request";
 });
 }
+</script>
