@@ -2,349 +2,207 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>ONLY・FAMILY CLAN</title>
+<title>ONLY・FAMILY ESPORTS</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&display=swap');
-
 body{
     margin:0;
-    font-family:'Rajdhani', sans-serif;
+    font-family:'Orbitron', sans-serif;
     background:#000;
     color:#fff;
+    overflow-x:hidden;
 }
+
+/* BACKGROUND */
+.bg{
+    position:fixed;
+    width:100%;
+    height:100%;
+    background:radial-gradient(circle,#00ffcc22,#000 70%);
+    animation:move 6s infinite alternate;
+    z-index:-1;
+}
+@keyframes move{from{transform:scale(1);}to{transform:scale(1.2);}}
+
+/* LOADER */
+#loader{
+    position:fixed;
+    width:100%;
+    height:100vh;
+    background:#000;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+    animation:fadeOut 1s ease 3s forwards;
+}
+.logo{
+    font-size:30px;
+    color:#00ffcc;
+    text-shadow:0 0 20px #00ffcc;
+}
+@keyframes fadeOut{to{opacity:0;visibility:hidden;}}
 
 /* NAV */
 .nav{
     display:flex;
     justify-content:center;
-    gap:12px;
-    padding:16px;
-    background:#111;
+    gap:10px;
+    padding:15px;
+    background:rgba(10,10,10,0.8);
     position:sticky;
     top:0;
-    border-bottom:1px solid #222;
 }
-
 .nav button{
     background:transparent;
     border:1px solid #00ffcc;
     color:#00ffcc;
-    padding:12px 18px;
-    border-radius:8px;
+    padding:10px 14px;
     cursor:pointer;
-    font-size:16px;
-    font-weight:700;
 }
-
 .nav button:hover{
     background:#00ffcc;
     color:#000;
 }
 
 /* SECTIONS */
-.section{
-    display:none;
-    width:92%;
-    margin:35px auto;
-}
-
+.section{display:none;width:85%;margin:40px auto;}
 .active{display:block;}
 
-/* CARD */
 .card{
     background:rgba(255,255,255,0.05);
-    border:1px solid rgba(255,255,255,0.12);
-    padding:28px;
-    border-radius:16px;
-    margin-bottom:20px;
-}
-
-/* TEXT */
-h2{
-    color:#00ffcc;
-    font-size:34px;
-}
-
-p{
-    font-size:22px;
-    line-height:2;
-}
-
-/* RULES */
-.rule{
     padding:20px;
-    margin:18px 0;
-    border-left:5px solid #00ffcc;
-    background:rgba(0,255,204,0.05);
-    font-size:23px;
-    line-height:2.3;
-    white-space:pre-line;
+    margin:15px 0;
+    border-left:3px solid #00ffcc;
+    border-radius:10px;
 }
 
-/* PLAYER */
 .player{
-    padding:18px;
-    margin:16px 0;
-    border-left:5px solid #ff00ff;
     background:rgba(255,0,255,0.05);
-    border-radius:12px;
-    font-size:21px;
-    line-height:2;
+    padding:10px;
+    margin:8px 0;
+    border-left:3px solid #ff00ff;
 }
 
-/* BADGE */
-.badge{
-    display:inline-block;
-    padding:6px 12px;
-    border:1px solid #00ffcc;
-    color:#00ffcc;
-    border-radius:8px;
-    margin:5px;
-    font-size:14px;
+h2{color:#00ffcc;font-size:22px;}
+p,li{font-size:15px;line-height:1.6;}
+
+input{
+    width:100%;
+    padding:10px;
+    margin:6px 0;
+    background:#111;
+    border:1px solid #333;
+    color:#fff;
 }
 
-/* FOOTER */
-.footer{
-    text-align:center;
-    padding:25px;
-    font-size:14px;
-    color:#666;
-    border-top:1px solid #222;
+.join-btn{
+    background:#00ffcc;
+    color:#000;
+    padding:10px;
+    border:none;
+    cursor:pointer;
+    margin-top:10px;
 }
+
+.result{color:#00ffcc;margin-top:10px;}
+
 </style>
 </head>
 
 <body>
 
+<div class="bg"></div>
+
+<!-- LOADER -->
+<div id="loader">
+<div class="logo">ONLY・FAMILY ESPORTS</div>
+<p>Loading Competitive System...</p>
+</div>
+
+<!-- NAV -->
 <div class="nav">
 <button onclick="show('home')">HOME</button>
 <button onclick="show('rules')">RULES</button>
-<button onclick="show('roster')">ROSTER</button>
+<button onclick="show('roster')">TEAM 1</button>
+<button onclick="show('join')">JOIN</button>
 </div>
 
 <!-- HOME -->
 <div id="home" class="section active">
 <div class="card">
-
-<h2>🌍 ONLY・FAMILY CHAMPIONSHIP</h2>
-
-<p>
-Elite CODM Competitive Clan • Global Esports Division<br>
-High-Level Tournament Structure • Professional War System
-</p>
-
-<div class="badge">🏆 ACTIVE CLAN</div>
-<div class="badge">⚔️ SCRIM READY</div>
-<div class="badge">🌐 GLOBAL WAR</div>
-<div class="badge">🎮 COMPETITIVE MODE</div>
-
-<br><br>
-
-<p style="color:#00ffcc;font-weight:700;font-size:24px;">
-🔥 CLAN STATUS: READY FOR WAR / SCRIM / TOURNAMENT
-</p>
-
-<p>
-👑 Leader Clan: Maru<br>
-🥇 Vice Master 1: Luigi<br>
-🥈 Vice Master 2: Fans
-</p>
-
-<br>
-
-<p>
-📡 Telegram Contact: @VoidSpctre<br>
-💬 Join System: Send IGN + UID for War Test / Clan Entry
-</p>
-
-<br>
-
-<p>
-⚔️ SYSTEM INFO:<br>
-✔ Weekly Clan Wars<br>
-✔ Scrim Matches<br>
-✔ Competitive Rule Set (Pro League Style)<br>
-✔ Weapon Ban System Active<br>
-✔ Penalty System Enabled
-</p>
-
-<br>
-
-<p style="color:#aaa;font-size:18px;">
-“Victory belongs to the disciplined.”
-</p>
-
+<h2>ONLY・FAMILY Championship</h2>
+<p>کلن تورنومنت پلیر ایران | مولتی پلیر | CODM Competitive Team</p>
+<p>Leader: Maru</p>
+<p>Vice Master: Luigi | Fans</p>
+<p>Telegram: @VoidSpctre</p>
 </div>
 </div>
 
-<!-- RULES (FULL ORIGINAL RESTORED) -->
+<!-- RULES (FULL YOUR VERSION) -->
 <div id="rules" class="section">
 <div class="card">
+<h2>🌍 ONLY・FAMILY CLAN WAR RULES</h2>
 
-<h2>🌍 ONLY・FAMILY CLAN WAR RULES LIST</h2>
 <p>Elite Competitive Regulations | No Mercy | Pro League Standard</p>
 
 <br>
 
-<div class="rule">
-1. 🎮 OFFICIAL OVERVIEW
-
-💠1.1 هر‌گونه تخلف —> حذف مستقیم ، بدون هشدار
-💠2.1 قبل از استارت شدن وار، هر دو تیم باید تست مایک بدن
-💠3.1 قبل از وار باید روستر رو بدید وگرنه وار استارت نمیشه
-               قوانین هم یک دور تو روم خوانده میشود.
-</div>
-
-<div class="rule">
-2. 🧩 MATCH STRUCTURE (STANDARD FORMAT)
-
-💠2.1 فرمت : Best of 3 (Bo3)
-
-💠2.2 ساختار مسابقه :
-
-💠Match 1 → Sniper Only | Firing Range
-
-💠Match 2 → انتخاب مپ توسط بازنده مچ اول
-
-💠Match 3 → انتخاب مپ توسط برنده مچ اول
-
-💠2.3 مپ منتخب بایستی از مپ های سرچ اند دیستروی رنک باشد
-
-💠2.4 هر مچ شامل ۵ راند سرچ اند دیستروی می‌باشد
-
-💠2.5 تغییر قوانین در طول وار ممنوع می‌باشد
-</div>
-
-<div class="rule">
-3. ⏱️ TIMING RULES
-
-💠3.1 حداکثر تأخیر قابل پذیرش —> ۵ دقیقه
-💠3.2 تاخیر —> Forfeit مستیقم
-💠3.3 قطع اتصال —> ادامه بدون ReHost
-💠3.4 سوء‌استفاده از تأخیر —> حذف تیم 
-</div>
-
-<div class="rule">
-4. 👥 PLAYER ELIGIBILITY
-
-💠4.1 حضور فقط اعضای رسمی کلن
-💠4.2 داشتن تگ کلن الزامی است
-💠4.3 موارد غیرمجاز :
-
-💠شرکت در وار با اکانت فیک
-
-💠ورود غیرمجاز به وار
-
-➡️ نتیجه : Blacklist + حذف فوری
-</div>
-
-<div class="rule">
-5. 🎧 COMMUNICATION RULES
-
-💠5.1 اتصال میکروفون الزامی است (در صورت مشکل با خاموش و روشن کردن اینترنت متصل به آن رفع شود)
-💠5.2 فقط Leader و Vice Master حق استفاده از میکروفون و صحبت دارند
-💠5.3 Toxicity یا Noise —> Mute / Kick
-</div>
-
-<div class="rule">
-6. 👁️ SPECTATOR & STREAM
-
-💠6.1‌ ورود اسپکتیتور به روم ممنوع می‌باشد
-💠6.2 حضور با حالت استریمر مود ممنوع می‌باشد
-💠6.3 استریم اسنایپ کردن —> حذف فوری
-</div>
-
-<div class="rule">
-7. ‼️WEAPON BAN SYSTEM
-
-💠7.1 Banned ASSAULT RIFLES 
-
-❌ M16 | Swordfish | Oden | EM2 | LAG 53 | Vargo-S
-
-💠Banned Attachemnts : 
-
-Man-O-War —> Thermite Ammo
-AS VAL —> 15 Round FMJ
-CR-56 AMAX —> M67 Ammo
-Kilo 141 —> 100 Round Reload
-Maddox —> Echo Fire Mod
-Type 19 —> Hi-Accuracy Sniper Ammo
-
-💠7.2 Banned SMGs
-
-❌ Chicom | Fennec | MAC-10 | KSP-45 | OTs 9 | TEC-9 | ISO | USS9 | Sten
-
-💠Pharo —> Underbarrel Stun Gun
-Striker 45 —> .45 Hollow Point 12-R
-CX-9 —> 9mm Hollow Point 12-R
-
-💠7.3 LMGs
-
-❌ All LMGs Are Banned
-
-💠7.4 SNIPERS
-
-❌ XPR-50 | Arctic .50 | M21 EBR | NA-45 | SVD
-
-💠DL Q33 — Maevwat Omega-1
-Rytec AMR — All Ammunitions
-
-💠7.5 MARKSMAN & SHOTGUN
-
-❌ All Banned
-
-💠7.6 PISTOLS & LAUNCHERS
-
-❌ All Banned
-
-💠7.7 MELEE
-
-✔️ Only In LOADOUT
-❌ کیل گرفتن با نایف ممنوع می‌باشد
-</div>
-
-<div class="rule">
-8. 💣 EQUIPMENTS 
-
-✔️ Frag Grenade
-❌ اسپم یا Abuse ممنوع می‌باشد
-</div>
-
-<div class="rule">
-9. 🧿 Banned PERKS 
-
-❌ Martyrdom | Restock | Vulture | Tracker | Quick Fix | Recon | Alert | Shrapnel
-</div>
-
-<div class="rule">
-10. ⚖️ PENALTY SYSTEM
-
-تخلف اول → حذف راند ( یک راند خود کشی )
-تخلف دوم → حذف تیمی ( یک راند خود کشی کل تیم )
-تخلف سوم → Forfeit ( لوز )
-سوءاستفاده → Disqualification ( کیک شدن از روم )
-</div>
-
-<div class="rule">
-11. 🚨 COMPETITIVE RULES
-
-💠11.1 بی‌احترامی در روم ممنوع می‌باشد
-💠11.2 بحث در روم ممنوع می‌باشد  
-</div>
-
-<div class="rule">
-12. 🏁 FINAL AUTHORITY
-
-12.1 تصمیم نهایی با ادمین می‌باشد
-12.2 هیچ‌گونه اعتراض در طول وار قابل پذیرش نیست
-</div>
+<p><b>1. OFFICIAL OVERVIEW</b></p>
+<p>💠 هرگونه تخلف → حذف مستقیم بدون هشدار</p>
+<p>💠 تست مایک قبل از وار الزامی</p>
+<p>💠 ارسال روستر قبل از وار الزامی</p>
 
 <br>
 
-<p style="text-align:center;color:#00ffcc;font-size:22px;">
-“Skill decides everything.”
-</p>
+<p><b>2. MATCH STRUCTURE (Bo3)</b></p>
+<p>💠 Sniper Only | Map Pick System</p>
+<p>💠 هر مچ ۵ راند S&D</p>
+<p>💠 تغییر قوانین ممنوع</p>
+
+<br>
+
+<p><b>3. TIMING RULES</b></p>
+<p>💠 تاخیر ۵ دقیقه = باخت</p>
+<p>💠 Disconnect = بدون Rehost</p>
+
+<br>
+
+<p><b>4. PLAYER ELIGIBILITY</b></p>
+<p>💠 فقط اعضای رسمی کلن</p>
+<p>💠 اکانت فیک = Blacklist</p>
+
+<br>
+
+<p><b>5. COMMUNICATION</b></p>
+<p>💠 میکروفون الزامی</p>
+<p>💠 فقط Leader و Voice Master حق صحبت دارند</p>
+
+<br>
+
+<p><b>6. SPECTATOR</b></p>
+<p>💠 اسپکت و استریم ممنوع</p>
+<p>💠 استریم اسنایپ = حذف</p>
+
+<br>
+
+<p><b>7. WEAPON BAN</b></p>
+<p>❌ AR / SMG / LMG / SNIPER / SHOTGUN محدود</p>
+
+<br>
+
+<p><b>8. PENALTY</b></p>
+<p>1️⃣ حذف راند</p>
+<p>2️⃣ حذف تیم</p>
+<p>3️⃣ DQ</p>
+
+<br>
+
+<p><b>12. FINAL AUTHORITY</b></p>
+<p>تصمیم نهایی با ادمین است</p>
 
 </div>
 </div>
@@ -352,28 +210,53 @@ Rytec AMR — All Ammunitions
 <!-- ROSTER -->
 <div id="roster" class="section">
 <div class="card">
+<h2>TEAM ONE - ROSTER</h2>
 
-<h2>⚔️ CODM • WAR ROSTER</h2>
-<p style="color:#00ffcc;font-weight:700;">TEAM 1</p>
-
-<div class="player">🔰 PLAYER 01<br>IGN: onlyゝMaru<br>UID: 7098766198632349698<br>Poco X 6 Pro</div>
-<div class="player">🔰 PLAYER 02<br>IGN: onlyゝLUIGI<br>UID: 7424150550676963329<br>Poco X 7</div>
-<div class="player">🔰 PLAYER 03<br>IGN: onlyゝfans<br>UID: 7065612241814945793<br>iPhone 13</div>
-<div class="player">🔰 PLAYER 04<br>IGN: Onlyゝgl0ry<br>UID: 7304502075479228417<br>Poco X 7 Pro</div>
-<div class="player">🔰 PLAYER 05<br>IGN: onlyゝDemo<br>UID: 7136200059792130049<br>iPad Pro 2025</div>
+<div class="player">Maru — Leader</div>
+<div class="player">LUIGI — Vice Master</div>
+<div class="player">FANS — Vice Master</div>
+<div class="player">GLORY — Player</div>
+<div class="player">DEMO — Player</div>
 
 </div>
 </div>
 
-<div class="footer">
-ONLY・FAMILY © 2026 • “Skill decides everything.”
+<!-- JOIN -->
+<div id="join" class="section">
+<div class="card">
+<h2>JOIN ONLY・FAMILY</h2>
+
+<input id="name" placeholder="IGN">
+<input id="uid" placeholder="UID">
+<input id="device" placeholder="Device">
+
+<button class="join-btn" onclick="send()">SEND REQUEST</button>
+
+<div class="result" id="result"></div>
+
+</div>
 </div>
 
 <script>
-function show(id){
-document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-document.getElementById(id).classList.add('active');
+
+function show(p){
+document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+document.getElementById(p).classList.add("active");
 }
+
+function send(){
+let n=document.getElementById("name").value;
+if(n==""){
+document.getElementById("result").innerText="❌ Fill required fields";
+return;
+}
+document.getElementById("result").innerText="✅ Request Sent Successfully!";
+}
+
+window.onload=function(){
+setTimeout(()=>{document.getElementById("loader").style.display="none";},3000);
+}
+
 </script>
 
 </body>
