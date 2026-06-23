@@ -88,6 +88,12 @@ height:100%;
 background:#0a0a0a;
 border-right:1px solid #00ffcc33;
 padding-top:20px;
+animation:slideLeft 1s ease;
+}
+
+@keyframes slideLeft{
+from{transform:translateX(-100%);opacity:0;}
+to{transform:translateX(0);opacity:1;}
 }
 
 .sidebar button{
@@ -105,14 +111,22 @@ transition:0.3s;
 .sidebar button:hover{
 background:#00ffcc;
 color:#000;
+transform:translateX(5px);
 }
 
 /* MAIN */
 .content{
 margin-left:230px;
 padding:20px;
+animation:fadeIn 1s ease;
 }
 
+@keyframes fadeIn{
+from{opacity:0;}
+to{opacity:1;}
+}
+
+/* BACKGROUND */
 .bg{
 position:fixed;
 width:100%;
@@ -172,7 +186,12 @@ animation:gl2 0.3s infinite;
 
 /* SECTIONS */
 .section{display:none;}
-.active{display:block;}
+.active{display:block;animation:pop 0.4s ease;}
+
+@keyframes pop{
+from{transform:translateY(10px);opacity:0;}
+to{transform:translateY(0);opacity:1;}
+}
 
 .card{
 background:rgba(255,255,255,0.05);
@@ -181,6 +200,7 @@ border-left:3px solid #00ffcc;
 margin-bottom:15px;
 }
 
+/* RULES TEXT */
 .rules{
 white-space:pre-wrap;
 line-height:1.6;
@@ -201,9 +221,6 @@ line-height:1.6;
 <button onclick="check()">ENTER</button>
 <p id="msg"></p>
 </div>
-
-<!-- SOUND (NEW 🔊) -->
-<audio id="enterSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8b1b1c8b0.mp3?filename=game-ui-6-143726.mp3"></audio>
 
 <!-- SIDEBAR -->
 <div class="sidebar">
@@ -231,60 +248,48 @@ CODM Competitive Clan | Pro League Division
 
 <hr style="border:0;border-top:1px solid #00ffcc33;margin:15px 0;">
 
-<p>👑 Leader: Maru</p>
-<p>🎯 Motto: Skill decides everything</p>
-
-<p>📢 Clan Status: ACTIVE • ELITE ROSTER ONLINE</p>
-
-<hr style="border:0;border-top:1px solid #00ffcc33;margin:15px 0;">
-
-<h3>🧿 PLAYER INFO</h3>
-
-<p>👤 Owner: Maru</p>
+<h3>👑 LEADER INFO</h3>
+<p>👤 Name: Maru</p>
 <p>📱 Telegram: @VoidSpctre</p>
-<p>🏷 Clan Tag: ONLY・FAMILY</p>
-<p>🌍 Region: International / Competitive Global</p>
+<p>🏆 Role: Founder / IGL</p>
 
 <hr style="border:0;border-top:1px solid #00ffcc33;margin:15px 0;">
 
-<h3>⚔️ CLAN DESCRIPTION</h3>
+<h3>⚔️ CLAN STATUS</h3>
+<p>🟢 Status: ACTIVE</p>
+<p>🔥 Mode: PRO LEAGUE SCRIMS</p>
+<p>🎯 Focus: Competitive / Tournament / Ranked Scrims</p>
 
+<hr style="border:0;border-top:1px solid #00ffcc33;margin:15px 0;">
+
+<h3>🧿 CLAN DESCRIPTION</h3>
 <p>
-ONLY・FAMILY is a competitive Call of Duty Mobile clan focused on
-high-level scrims, tournament participation, and pro-league discipline.
+ONLY・FAMILY is a high-level CODM competitive clan built for serious players only.
+We focus on discipline, teamwork, and tournament performance.
 </p>
 
 <p>
-We operate under strict rules, teamwork structure, and tactical gameplay
-with zero tolerance for disrespect or non-serious players.
+Casual gameplay is not allowed. Only skilled and active players remain in roster.
 </p>
 
 <hr style="border:0;border-top:1px solid #00ffcc33;margin:15px 0;">
 
 <h3>🏆 ACHIEVEMENTS</h3>
-
 <p>🥇 Ranked Scrims: ACTIVE</p>
 <p>🥈 Tournament Wins: 3+ (UNOFFICIAL)</p>
-<p>🥉 Active Members: 5 CORE PLAYERS</p>
+<p>🥉 Core Players: 5 ACTIVE MEMBERS</p>
 
 <hr style="border:0;border-top:1px solid #00ffcc33;margin:15px 0;">
 
-<h3>📡 LIVE STATUS</h3>
-
-<p>🟢 Server Status: ONLINE</p>
-<p>🟢 Scrim Mode: ENABLED</p>
+<h3>📡 LIVE SYSTEM</h3>
+<p>🟢 Server: ONLINE</p>
 <p>🟢 Recruitment: OPEN</p>
+<p>🟢 Training Mode: ENABLED</p>
 
 <hr style="border:0;border-top:1px solid #00ffcc33;margin:15px 0;">
 
-<h3>⚡ SYSTEM NOTICE</h3>
-
-<p>
-This clan is built for competitive players only.
-Casual behavior = instant removal.
-</p>
-
-<p>
+<h3>⚡ MOTTO</h3>
+<p style="color:#00ffcc;font-weight:bold;">
 “Skill decides everything.”
 </p>
 
@@ -292,6 +297,14 @@ Casual behavior = instant removal.
 </div>
 
 <!-- RULES -->
+<div id="rules" class="section">
+<div class="card">
+<h2>RULES</h2>
+<div class="rules">
+🌍 ONLY・FAMILY CLAN WAR RULES LIST
+
+> Elite Competitive Regulations | No Mercy | Pro League Standard
+
 <div id="rules" class="section">
 <div class="card">
 
@@ -486,64 +499,86 @@ Blue PERKS : Alert | Shrapnel
 </div>
 </div>
 </div>
-  <!-- ROSTER -->
-<div id="roster" class="section">
 
+</div>
+</div>
+</div>
+
+<!-- ROSTER -->
+<div id="roster" class="section">
 <div class="card">
-<h2>🏆 ELITE WAR ROSTER</h2>
+
+<h2>🏆 ONLY・FAMILY ELITE WAR ROSTER</h2>
 
 <div class="rules">
 
-╭━━━〔 ⚔️ ONLY・FAMILY ELITE SQUAD ⚔️ 〕━━━╮
-┃        CODM COMPETITIVE LINEUP
+╭━━━〔 ⚔️ CODM • COMPETITIVE SQUAD ⚔️ 〕━━━╮
+┃        ONLY・FAMILY OFFICIAL LINEUP
 ╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 👑 LEADER / IGL
+━━━━━━━━━━━━━━━━━━━━━━
 ┃ 🎮 IGN : 𝙤𝙣𝙡𝙮ゝMaru
 ┃ 🆔 UID : 7098766198632349698
-┗ 📱 DEVICE : Poco X 6 Pro
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+┃ 📱 DEVICE : Poco X 6 Pro
+┃ 🎯 ROLE : In-Game Leader
+┃ ⚡ STATUS : ACTIVE
+━━━━━━━━━━━━━━━━━━━━━━
 
 ⚡ ENTRY FRAGGER
+━━━━━━━━━━━━━━━━━━━━━━
 ┃ 🎮 IGN : 𝙤𝙣𝙡𝙮ゝLUIGI
 ┃ 🆔 UID : 7424150550676963329
-┗ 📱 DEVICE : Poco X 7
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+┃ 📱 DEVICE : Poco X 7
+┃ 🎯 ROLE : Entry Fragger
+┃ ⚡ STATUS : ACTIVE
+━━━━━━━━━━━━━━━━━━━━━━
 
 🛡 SUPPORT PLAYER
+━━━━━━━━━━━━━━━━━━━━━━
 ┃ 🎮 IGN : 𝙤𝙣𝙡𝙮ゝfans
 ┃ 🆔 UID : 7065612241814945793
-┗ 📱 DEVICE : iPhone 13 Normal
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+┃ 📱 DEVICE : iPhone 13 Normal
+┃ 🎯 ROLE : Support
+┃ ⚡ STATUS : ACTIVE
+━━━━━━━━━━━━━━━━━━━━━━
 
 🎯 RIFLER
+━━━━━━━━━━━━━━━━━━━━━━
 ┃ 🎮 IGN : 𝙤𝙣𝙡𝙮ゝgl0ry
 ┃ 🆔 UID : 7304502075479228417
-┗ 📱 DEVICE : Poco X 7 Pro
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+┃ 📱 DEVICE : Poco X 7 Pro
+┃ 🎯 ROLE : Rifle / Aim Anchor
+┃ ⚡ STATUS : ACTIVE
+━━━━━━━━━━━━━━━━━━━━━━
 
 🧠 FLEX / IGL SUPPORT
+━━━━━━━━━━━━━━━━━━━━━━
 ┃ 🎮 IGN : 𝙤𝙣𝙡𝙮ゝDemo
 ┃ 🆔 UID : 7136200059792130049
-┗ 📱 DEVICE : iPad Pro 2025
+┃ 📱 DEVICE : iPad Pro 2025
+┃ 🎯 ROLE : Flex Player
+┃ ⚡ STATUS : ACTIVE
+━━━━━━━━━━━━━━━━━━━━━━
+
+🔥 TEAM STATUS : ELITE ACTIVE ROSTER
+🏆 MODE : SCRIMS • TOURNAMENT • PRO LEAGUE READY
+🌍 REGION : INTERNATIONAL
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-🔥 STATUS : ACTIVE COMPETITIVE ROSTER
-🏆 MODE : SCRIMS • TOURNAMENT • PRO LEAGUE READY
-
+💬 MOTTO:
 “Skill decides everything.”
 
 </div>
+
+</div>
 </div>
 
 </div>
+
 <script>
 
 /* LOADER */
@@ -551,19 +586,12 @@ setTimeout(()=>{
 document.getElementById("loader").style.display="none";
 },2500);
 
-/* LOGIN + SOUND */
+/* LOGIN */
 function check(){
 let c=document.getElementById("code").value;
-
 if(c==="1234"){
 document.getElementById("login").style.display="none";
 document.body.style.overflow="auto";
-
-/* 🔊 PLAY SOUND */
-let audio=document.getElementById("enterSound");
-audio.volume=0.6;
-audio.play();
-
 }else{
 document.getElementById("msg").innerText="Wrong Code";
 }
@@ -572,6 +600,13 @@ document.getElementById("msg").innerText="Wrong Code";
 /* NAV */
 function show(id){
 document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+}
+
+</script>
+
+</body>
+</html>emove('active'));
 document.getElementById(id).classList.add('active');
 }
 
