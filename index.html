@@ -186,7 +186,79 @@ margin-bottom:15px;
 white-space:pre-wrap;
 line-height:1.6;
 }
+/* =========================
+   RESPONSIVE DESIGN
+========================= */
 
+/* TABLET & SMALL DESKTOP */
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 180px;
+  }
+
+  .content {
+    margin-left: 190px;
+  }
+
+  .title {
+    font-size: 34px;
+  }
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+
+  body {
+    font-size: 14px;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+  }
+
+  .sidebar button {
+    padding: 10px;
+    text-align: center;
+    padding-left: 0;
+  }
+
+  .content {
+    margin-left: 0;
+    padding: 10px;
+  }
+
+  .title {
+    font-size: 26px;
+  }
+
+  .card {
+    padding: 12px;
+  }
+
+  #login input {
+    width: 80%;
+  }
+
+}
+
+/* VERY SMALL PHONES */
+@media (max-width: 480px) {
+  .title {
+    font-size: 20px;
+  }
+
+  #login h2 {
+    font-size: 18px;
+  }
+}
+  html {
+  scroll-behavior: smooth;
+  }
 </style>
 </head>
 
