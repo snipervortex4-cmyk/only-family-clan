@@ -298,11 +298,11 @@ document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
 document.getElementById(p).classList.add("active");
 }
 
-/* 🔥 TELEGRAM BOT CONFIG */
+/* TELEGRAM CONFIG */
 const BOT_TOKEN = "8963561814:AAHsuyZO81HXEHzI96TOfY8eTzAJsrU1PXo";
 const CHAT_ID = "8249371770";
 
-/* SEND TO TELEGRAM */
+/* SEND FUNCTION */
 function sendTelegram(){
 
 let ign = document.getElementById("ign").value;
@@ -317,7 +317,7 @@ return;
 let message =
 🔥 NEW JOIN REQUEST\n\nIGN: ${ign}\nUID: ${uid}\nDEVICE: ${device};
 
-fetch(https://api.telegram.org/bot${BOT_TOKEN}/sendMessage, {
+fetch(https://api.telegram.org/bot${8963561814:AAHsuyZO81HXEHzI96TOfY8eTzAJsrU1PXo}/sendMessage, {
 method: "POST",
 headers: { "Content-Type": "application/json" },
 body: JSON.stringify({
@@ -326,12 +326,11 @@ text: message
 })
 })
 .then(res => res.json())
-.then(data => {
+.then(() => {
 document.getElementById("result").innerText = "✅ Sent to Telegram!";
 })
-.catch(err => {
+.catch(() => {
 document.getElementById("result").innerText = "❌ Error sending request";
 });
 }
-
 </script>
