@@ -29,11 +29,11 @@ body{
     to{transform:scale(1.2);}
 }
 
-/* 🔥 ANIMATED NAME */
+/* 🔥 CLAN NAME ANIMATION */
 .title{
     text-align:center;
     font-size:42px;
-    margin-top:25px;
+    margin-top:20px;
     color:#00ffcc;
     letter-spacing:4px;
     text-shadow:0 0 10px #00ffcc,0 0 25px #00ffcc;
@@ -46,7 +46,7 @@ body{
 }
 
 @keyframes slide{
-    from{transform:translateY(-25px);opacity:0;}
+    from{transform:translateY(-20px);opacity:0;}
     to{transform:translateY(0);opacity:1;}
 }
 
@@ -80,7 +80,6 @@ body{
     padding:20px;
     margin:15px 0;
     border-left:3px solid #00ffcc;
-    border-radius:10px;
 }
 
 .player{
@@ -92,7 +91,7 @@ body{
 
 h2{color:#00ffcc;font-size:22px;}
 
-p,li{
+p{
     font-size:15px;
     line-height:1.6;
 }
@@ -116,6 +115,23 @@ input{
 
 .result{color:#00ffcc;margin-top:10px;}
 
+/* LOADER */
+#loader{
+    position:fixed;
+    width:100%;
+    height:100vh;
+    background:#000;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+}
+
+#loader h1{
+    color:#00ffcc;
+    text-shadow:0 0 20px #00ffcc;
+}
 </style>
 </head>
 
@@ -123,7 +139,18 @@ input{
 
 <div class="bg"></div>
 
-<!-- 🔥 ANIMATED CLAN NAME -->
+<!-- 🔥 LOADER -->
+<div id="loader">
+<h1>ONLY・FAMILY ESPORTS</h1>
+<p>Loading System...</p>
+</div>
+
+<!-- 🔊 SOUND -->
+<audio id="loadSound" autoplay>
+<source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_5c6d3a7d6c.mp3?filename=interface-124464.mp3">
+</audio>
+
+<!-- 🔥 NAME -->
 <div class="title">ONLY・FAMILY</div>
 
 <!-- NAV -->
@@ -138,87 +165,68 @@ input{
 <div id="home" class="section active">
 <div class="card">
 <h2>ONLY・FAMILY Championship</h2>
-<p>کلن تورنومنت پلیر ایران | مولتی پلیر | CODM Competitive Team</p>
+<p>کلن تورنومنت پلیر ایران | CODM Competitive Team</p>
 <p>Leader: Maru</p>
 <p>Vice Master: Luigi | Fans</p>
 <p>Telegram: @VoidSpctre</p>
 </div>
 </div>
 
-<!-- RULES (COMPLETE - NO CUTS) -->
+<!-- RULES -->
 <div id="rules" class="section">
 <div class="card">
-
 <h2>🌍 ONLY・FAMILY CLAN WAR RULES LIST</h2>
+
 <p>Elite Competitive Regulations | No Mercy | Pro League Standard</p>
 
 <br>
 
-<p><b>1. OFFICIAL OVERVIEW</b></p>
-<p>💠1.1 هر‌گونه تخلف —> حذف مستقیم ، بدون هشدار</p>
-<p>💠2.1 قبل از استارت شدن وار، هر دو تیم باید تست مایک بدن</p>
-<p>💠3.1 قبل از وار باید روستر رو بدید وگرنه وار استارت نمیشه</p>
-<p>قوانین هم یک دور تو روم خوانده میشود.</p>
+<p>💠1. OFFICIAL OVERVIEW</p>
+<p>💠 هرگونه تخلف → حذف مستقیم بدون هشدار</p>
+<p>💠 تست مایک قبل از وار الزامی</p>
+<p>💠 ارسال روستر قبل از وار الزامی</p>
 
 <br>
 
-<p><b>2. MATCH STRUCTURE (STANDARD FORMAT)</b></p>
-<p>💠2.1 Best of 3 (Bo3)</p>
-<p>💠Match 1 → Sniper Only | Firing Range</p>
-<p>💠Match 2 → Map pick by loser</p>
-<p>💠Match 3 → Map pick by winner</p>
-<p>💠هر مچ ۵ راند S&D</p>
+<p>💠2. MATCH STRUCTURE (Bo3)</p>
+<p>💠 Sniper Only | Map Pick System</p>
+<p>💠 هر مچ ۵ راند S&D</p>
 
 <br>
 
-<p><b>3. TIMING RULES</b></p>
-<p>💠تاخیر ۵ دقیقه = Forfeit</p>
-<p>💠Disconnect = بدون Rehost</p>
+<p>💠3. TIMING RULES</p>
+<p>💠 تاخیر ۵ دقیقه = باخت</p>
+<p>💠 Disconnect = بدون Rehost</p>
 
 <br>
 
-<p><b>4. PLAYER ELIGIBILITY</b></p>
-<p>💠فقط اعضای رسمی کلن</p>
-<p>💠اکانت فیک = Blacklist</p>
+<p>💠4. PLAYER ELIGIBILITY</p>
+<p>💠 اکانت فیک = Blacklist</p>
 
 <br>
 
-<p><b>5. COMMUNICATION RULES</b></p>
-<p>💠مایک الزامی</p>
-<p>💠فقط Leader و Voice Master حق صحبت دارند</p>
+<p>💠5. COMMUNICATION</p>
+<p>💠 فقط Leader و Voice Master حق صحبت دارند</p>
 
 <br>
 
-<p><b>6. SPECTATOR & STREAM</b></p>
-<p>💠اسپکت و استریم ممنوع</p>
-<p>💠استریم اسنایپ = حذف</p>
+<p>💠6. SPECTATOR</p>
+<p>💠 استریم و اسپکت ممنوع</p>
 
 <br>
 
-<p><b>7. WEAPON BAN SYSTEM</b></p>
+<p>💠7. WEAPON BAN</p>
 <p>❌ AR / SMG / LMG / SNIPER / SHOTGUN محدود</p>
 
 <br>
 
-<p><b>8. EQUIPMENT</b></p>
-<p>✔ Frag allowed | ❌ Abuse banned</p>
+<p>💠8. PENALTY</p>
+<p>1️⃣ حذف راند  2️⃣ حذف تیم  3️⃣ DQ</p>
 
 <br>
 
-<p><b>9. PERKS BAN</b></p>
-<p>❌ Martyrdom | Restock | Tracker | Quick Fix | Alert</p>
-
-<br>
-
-<p><b>10. PENALTY SYSTEM</b></p>
-<p>1️⃣ حذف راند</p>
-<p>2️⃣ حذف تیم</p>
-<p>3️⃣ DQ</p>
-
-<br>
-
-<p><b>12. FINAL AUTHORITY</b></p>
-<p>تصمیم نهایی با ادمین است</p>
+<p>💠12. FINAL AUTHORITY</p>
+<p>تصمیم نهایی با ادمین</p>
 
 </div>
 </div>
@@ -267,6 +275,12 @@ document.getElementById("result").innerText="❌ Fill required fields";
 return;
 }
 document.getElementById("result").innerText="✅ Request Sent Successfully!";
+}
+
+window.onload=function(){
+let audio=document.getElementById("loadSound");
+audio.play().catch(()=>{});
+setTimeout(()=>{document.getElementById("loader").style.display="none";},2500);
 }
 
 </script>
