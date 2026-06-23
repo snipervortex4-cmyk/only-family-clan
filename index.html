@@ -17,7 +17,7 @@ color:#fff;
 overflow:hidden;
 }
 
-/* ================= LOADER ================= */
+/* LOADER */
 #loader{
 position:fixed;
 inset:0;
@@ -37,7 +37,7 @@ animation:fadeOut 1s ease 2.5s forwards;
 to{opacity:0;visibility:hidden;}
 }
 
-/* ================= LOGIN ================= */
+/* LOGIN */
 #login{
 position:fixed;
 inset:0;
@@ -68,11 +68,6 @@ background:#111;
 border:1px solid #00ffcc;
 color:#fff;
 text-align:center;
-transition:0.3s;
-}
-
-#login input:focus{
-transform:scale(1.05);
 }
 
 #login button{
@@ -81,40 +76,6 @@ background:#00ffcc;
 border:none;
 cursor:pointer;
 font-weight:bold;
-transition:0.3s;
-}
-
-#login button:hover{
-box-shadow:0 0 15px #00ffcc;
-}
-
-/* ================= MAIN ================= */
-.bg{
-position:fixed;
-width:100%;
-height:100%;
-background:radial-gradient(circle,#00ffcc22,#000 70%);
-z-index:-1;
-animation:bg 6s infinite alternate;
-}
-
-@keyframes bg{
-from{transform:scale(1);}
-to{transform:scale(1.2);}
-}
-
-.title{
-text-align:center;
-font-size:44px;
-margin:20px;
-color:#00ffcc;
-text-shadow:0 0 15px #00ffcc;
-animation:slide 1s ease;
-}
-
-@keyframes slide{
-from{transform:translateY(-30px);opacity:0;}
-to{transform:translateY(0);opacity:1;}
 }
 
 /* SIDEBAR */
@@ -136,9 +97,9 @@ background:transparent;
 border:none;
 color:#00ffcc;
 cursor:pointer;
-transition:0.3s;
 text-align:left;
 padding-left:20px;
+transition:0.3s;
 }
 
 .sidebar button:hover{
@@ -146,22 +107,71 @@ background:#00ffcc;
 color:#000;
 }
 
-/* CONTENT */
+/* MAIN */
 .content{
 margin-left:230px;
 padding:20px;
 }
 
-.section{
-display:none;
-animation:fade 0.4s ease;
+.bg{
+position:fixed;
+width:100%;
+height:100%;
+background:radial-gradient(circle,#00ffcc22,#000 70%);
+z-index:-1;
+animation:bg 6s infinite alternate;
 }
 
-@keyframes fade{
-from{opacity:0;transform:translateY(10px);}
-to{opacity:1;transform:translateY(0);}
+@keyframes bg{
+from{transform:scale(1);}
+to{transform:scale(1.2);}
 }
 
+/* GLITCH TITLE */
+.title{
+text-align:center;
+font-size:44px;
+margin:20px;
+color:#00ffcc;
+position:relative;
+font-weight:bold;
+text-transform:uppercase;
+animation:glitch 2s infinite;
+}
+
+.title::before,
+.title::after{
+content:"ONLY・FAMILY ESPORTS";
+position:absolute;
+left:0;
+right:0;
+opacity:0.7;
+}
+
+.title::before{
+color:#ff00ff;
+animation:gl1 0.3s infinite;
+}
+
+.title::after{
+color:#00ffff;
+animation:gl2 0.3s infinite;
+}
+
+@keyframes gl1{
+0%{transform:translate(2px,0);}
+50%{transform:translate(-2px,1px);}
+100%{transform:translate(2px,-1px);}
+}
+
+@keyframes gl2{
+0%{transform:translate(-2px,0);}
+50%{transform:translate(2px,-1px);}
+100%{transform:translate(-2px,1px);}
+}
+
+/* SECTIONS */
+.section{display:none;}
 .active{display:block;}
 
 .card{
@@ -192,6 +202,9 @@ line-height:1.6;
 <p id="msg"></p>
 </div>
 
+<!-- SOUND (NEW 🔊) -->
+<audio id="enterSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8b1b1c8b0.mp3?filename=game-ui-6-143726.mp3"></audio>
+
 <!-- SIDEBAR -->
 <div class="sidebar">
 <button onclick="show('home')">HOME</button>
@@ -199,7 +212,7 @@ line-height:1.6;
 <button onclick="show('roster')">ROSTER</button>
 </div>
 
-<!-- CONTENT -->
+<!-- MAIN -->
 <div class="content">
 
 <div class="bg"></div>
@@ -220,29 +233,14 @@ line-height:1.6;
 <div id="rules" class="section">
 <div class="card">
 <h2>RULES</h2>
-
 <div class="rules">
-
-🌍 ONLY・FAMILY CLAN WAR RULES LIST
-
-1. OFFICIAL OVERVIEW → instant DQ for violation
-
-2. BO3 FORMAT
-
-3. 5 MIN DELAY MAX
-
-4. OFFICIAL MEMBERS ONLY
-
-5. NO SPECTATORS
-
-6. WEAPON BAN ACTIVE
-
-7. PENALTY SYSTEM 3 STRIKES
-
-“Skill decides everything.”
-
+1. BO3 FORMAT  
+2. 5 MIN DELAY MAX  
+3. OFFICIAL MEMBERS ONLY  
+4. NO SPECTATORS  
+5. WEAPON BAN ACTIVE  
+6. 3 STRIKE PENALTY  
 </div>
-
 </div>
 </div>
 
@@ -250,15 +248,13 @@ line-height:1.6;
 <div id="roster" class="section">
 <div class="card">
 <h2>ROSTER</h2>
-
 <div class="rules">
-Maru - 7098766198632349698
-LUIGI - 7424150550676963329
-fans - 7065612241814945793
-gl0ry - 7304502075479228417
-Demo - 7136200059792130049
+Maru - 7098766198632349698  
+LUIGI - 7424150550676963329  
+fans - 7065612241814945793  
+gl0ry - 7304502075479228417  
+Demo - 7136200059792130049  
 </div>
-
 </div>
 </div>
 
@@ -271,12 +267,19 @@ setTimeout(()=>{
 document.getElementById("loader").style.display="none";
 },2500);
 
-/* LOGIN */
+/* LOGIN + SOUND */
 function check(){
 let c=document.getElementById("code").value;
+
 if(c==="1234"){
 document.getElementById("login").style.display="none";
 document.body.style.overflow="auto";
+
+/* 🔊 PLAY SOUND */
+let audio=document.getElementById("enterSound");
+audio.volume=0.6;
+audio.play();
+
 }else{
 document.getElementById("msg").innerText="Wrong Code";
 }
