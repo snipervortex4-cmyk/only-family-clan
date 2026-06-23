@@ -7,6 +7,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
 
 <style>
+
+/* RESET */
 body{
 margin:0;
 font-family:'Roboto', sans-serif;
@@ -15,8 +17,8 @@ color:#fff;
 overflow:hidden;
 }
 
-/* LOGIN SCREEN */
-#loginScreen{
+/* ================= LOADER ================= */
+#loader{
 position:fixed;
 inset:0;
 background:#000;
@@ -24,34 +26,81 @@ display:flex;
 justify-content:center;
 align-items:center;
 flex-direction:column;
-z-index:9999;
+z-index:10000;
+color:#00ffcc;
+font-size:22px;
+letter-spacing:4px;
+animation:fadeOut 1s ease 2.5s forwards;
 }
 
-#loginScreen input{
+@keyframes fadeOut{
+to{opacity:0;visibility:hidden;}
+}
+
+/* ================= LOGIN ================= */
+#login{
+position:fixed;
+inset:0;
+background:radial-gradient(circle,#111,#000);
+display:flex;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+z-index:9999;
+animation:zoom 0.8s ease;
+}
+
+@keyframes zoom{
+from{transform:scale(1.2);opacity:0;}
+to{transform:scale(1);opacity:1;}
+}
+
+#login h2{
+color:#00ffcc;
+text-shadow:0 0 20px #00ffcc;
+}
+
+#login input{
 padding:12px;
-width:220px;
+width:240px;
 margin:10px;
-border:1px solid #00ffcc;
 background:#111;
+border:1px solid #00ffcc;
 color:#fff;
 text-align:center;
+transition:0.3s;
 }
 
-#loginScreen button{
+#login input:focus{
+transform:scale(1.05);
+}
+
+#login button{
 padding:10px 20px;
 background:#00ffcc;
 border:none;
 cursor:pointer;
 font-weight:bold;
+transition:0.3s;
 }
 
-/* MAIN SITE */
+#login button:hover{
+box-shadow:0 0 15px #00ffcc;
+}
+
+/* ================= MAIN ================= */
 .bg{
 position:fixed;
 width:100%;
 height:100%;
 background:radial-gradient(circle,#00ffcc22,#000 70%);
 z-index:-1;
+animation:bg 6s infinite alternate;
+}
+
+@keyframes bg{
+from{transform:scale(1);}
+to{transform:scale(1.2);}
 }
 
 .title{
@@ -59,32 +108,58 @@ text-align:center;
 font-size:44px;
 margin:20px;
 color:#00ffcc;
+text-shadow:0 0 15px #00ffcc;
+animation:slide 1s ease;
 }
 
-.nav{
-display:flex;
-justify-content:center;
-gap:10px;
-padding:10px;
+@keyframes slide{
+from{transform:translateY(-30px);opacity:0;}
+to{transform:translateY(0);opacity:1;}
 }
 
-.nav button{
+/* SIDEBAR */
+.sidebar{
+position:fixed;
+left:0;
+top:0;
+width:220px;
+height:100%;
+background:#0a0a0a;
+border-right:1px solid #00ffcc33;
+padding-top:20px;
+}
+
+.sidebar button{
+width:100%;
+padding:12px;
 background:transparent;
-border:1px solid #00ffcc;
+border:none;
 color:#00ffcc;
-padding:10px;
 cursor:pointer;
+transition:0.3s;
+text-align:left;
+padding-left:20px;
 }
 
-.nav button:hover{
+.sidebar button:hover{
 background:#00ffcc;
 color:#000;
 }
 
+/* CONTENT */
+.content{
+margin-left:230px;
+padding:20px;
+}
+
 .section{
 display:none;
-width:90%;
-margin:30px auto;
+animation:fade 0.4s ease;
+}
+
+@keyframes fade{
+from{opacity:0;transform:translateY(10px);}
+to{opacity:1;transform:translateY(0);}
 }
 
 .active{display:block;}
@@ -93,42 +168,49 @@ margin:30px auto;
 background:rgba(255,255,255,0.05);
 padding:20px;
 border-left:3px solid #00ffcc;
+margin-bottom:15px;
 }
 
 .rules{
 white-space:pre-wrap;
 line-height:1.6;
 }
+
 </style>
 </head>
 
 <body>
 
+<!-- LOADER -->
+<div id="loader">LOADING ONLY・FAMILY...</div>
+
 <!-- LOGIN -->
-<div id="loginScreen">
+<div id="login">
 <h2>ENTER ACCESS CODE</h2>
 <input type="password" id="code" placeholder="CODE">
-<button onclick="checkLogin()">ENTER</button>
+<button onclick="check()">ENTER</button>
 <p id="msg"></p>
 </div>
 
-<!-- MAIN -->
-<div class="bg"></div>
-
-<div class="title">ONLY・FAMILY ESPORTS</div>
-
-<div class="nav">
+<!-- SIDEBAR -->
+<div class="sidebar">
 <button onclick="show('home')">HOME</button>
 <button onclick="show('rules')">RULES</button>
 <button onclick="show('roster')">ROSTER</button>
 </div>
 
+<!-- CONTENT -->
+<div class="content">
+
+<div class="bg"></div>
+
+<div class="title">ONLY・FAMILY ESPORTS</div>
+
 <!-- HOME -->
 <div id="home" class="section active">
 <div class="card">
-<h2>🔥 ONLY・FAMILY CHAMPIONSHIP</h2>
+<h2>🔥 CHAMPIONSHIP</h2>
 <p>CODM Competitive Clan</p>
-<p>Mode: Pro League Standard</p>
 <p>Leader: Maru</p>
 <p>Motto: Skill decides everything</p>
 </div>
@@ -137,30 +219,28 @@ line-height:1.6;
 <!-- RULES -->
 <div id="rules" class="section">
 <div class="card">
-<h2>🌍 RULES</h2>
+<h2>RULES</h2>
 
 <div class="rules">
+
 🌍 ONLY・FAMILY CLAN WAR RULES LIST
 
-1. OFFICIAL OVERVIEW → Immediate disqualification for violations
+1. OFFICIAL OVERVIEW → instant DQ for violation
 
-2. MATCH STRUCTURE → Bo3 format
+2. BO3 FORMAT
 
-3. TIMING RULES → max 5 min delay
+3. 5 MIN DELAY MAX
 
-4. PLAYER ELIGIBILITY → official members only
+4. OFFICIAL MEMBERS ONLY
 
-5. COMMUNICATION → leader + vice only
+5. NO SPECTATORS
 
-6. STREAM RULES → no spectators
+6. WEAPON BAN ACTIVE
 
-7. WEAPON BAN → restricted list applies
-
-8. EQUIPMENT → grenades allowed
-
-9. PENALTY SYSTEM → 3 strikes = DQ
+7. PENALTY SYSTEM 3 STRIKES
 
 “Skill decides everything.”
+
 </div>
 
 </div>
@@ -169,45 +249,45 @@ line-height:1.6;
 <!-- ROSTER -->
 <div id="roster" class="section">
 <div class="card">
-<h2>TEAM ROSTER</h2>
+<h2>ROSTER</h2>
 
 <div class="rules">
-PLAYER 01 - Maru
-UID: 7098766198632349698
-
-PLAYER 02 - LUIGI
-UID: 7424150550676963329
-
-PLAYER 03 - fans
-UID: 7065612241814945793
-
-PLAYER 04 - gl0ry
-UID: 7304502075479228417
-
-PLAYER 05 - Demo
-UID: 7136200059792130049
+Maru - 7098766198632349698
+LUIGI - 7424150550676963329
+fans - 7065612241814945793
+gl0ry - 7304502075479228417
+Demo - 7136200059792130049
 </div>
 
 </div>
+</div>
+
 </div>
 
 <script>
+
+/* LOADER */
+setTimeout(()=>{
+document.getElementById("loader").style.display="none";
+},2500);
+
+/* LOGIN */
+function check(){
+let c=document.getElementById("code").value;
+if(c==="1234"){
+document.getElementById("login").style.display="none";
+document.body.style.overflow="auto";
+}else{
+document.getElementById("msg").innerText="Wrong Code";
+}
+}
+
+/* NAV */
 function show(id){
 document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
 document.getElementById(id).classList.add('active');
 }
 
-/* LOGIN SYSTEM */
-function checkLogin(){
-let code = document.getElementById("code").value;
-
-if(code === "1234"){
-document.getElementById("loginScreen").style.display="none";
-document.body.style.overflow="auto";
-}else{
-document.getElementById("msg").innerText="❌ Wrong Code";
-}
-}
 </script>
 
 </body>
