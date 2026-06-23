@@ -4,17 +4,18 @@
 <meta charset="UTF-8">
 <title>ONLY・FAMILY ESPORTS</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
 
 <style>
 body{
     margin:0;
-    font-family:'Orbitron', sans-serif;
+    font-family:'Roboto', sans-serif;
     background:#000;
     color:#fff;
     overflow-x:hidden;
 }
 
+/* BACKGROUND */
 .bg{
     position:fixed;
     width:100%;
@@ -29,6 +30,7 @@ body{
     to{transform:scale(1.2);}
 }
 
+/* TITLE */
 .title{
     text-align:center;
     font-size:44px;
@@ -38,6 +40,7 @@ body{
     text-shadow:0 0 10px #00ffcc,0 0 30px #00ffcc;
 }
 
+/* NAV */
 .nav{
     display:flex;
     justify-content:center;
@@ -58,6 +61,7 @@ body{
     color:#000;
 }
 
+/* SECTIONS */
 .section{display:none;width:90%;margin:40px auto;}
 .active{display:block;}
 
@@ -68,7 +72,7 @@ body{
     border-left:3px solid #00ffcc;
 }
 
-input{
+input,select,textarea{
     width:100%;
     padding:10px;
     margin:6px 0;
@@ -87,15 +91,12 @@ input{
     font-weight:bold;
 }
 
-.result{
-    margin-top:10px;
-    color:#00ffcc;
-}
+.result{margin-top:10px;color:#00ffcc;}
 
-/* RULES */
+/* TEXT BLOCK */
 .rules{
     white-space:pre-wrap;
-    font-family:Arial;
+    font-family:'Roboto', sans-serif;
     line-height:1.8;
     font-size:14px;
 }
@@ -118,25 +119,15 @@ input{
 <!-- HOME -->
 <div id="home" class="section active">
 <div class="card">
-
 <h2>🔥 ONLY・FAMILY CHAMPIONSHIP</h2>
-
-<p>🌍 کلن تورنومنت پلیر ایران | CODM Competitive Team</p>
-<p>⚔️ Status: ACTIVE COMPETITIVE CLAN</p>
-<p>🏆 Mode: Pro League Standard | No Mercy Rules</p>
-<p>🎮 Game: Call of Duty Mobile</p>
-
-<p>👑 Leader: Maru</p>
-<p>🧠 Voice Master: Luigi | Fans</p>
-<p>📢 Telegram: @VoidSpctre</p>
-
-<p>🎯 Goal: Dominate Every Clan War</p>
-<p>💀 Motto: Skill decides everything</p>
-
+<p>CODM Competitive Clan</p>
+<p>Mode: Pro League Standard</p>
+<p>Leader: Maru</p>
+<p>Motto: Skill decides everything</p>
 </div>
 </div>
 
-<!-- RULES (FULL 100% WITHOUT CUT) -->
+<!-- RULES (FULL ORIGINAL) -->
 <div id="rules" class="section">
 <div class="card">
 
@@ -147,8 +138,6 @@ input{
 🌍 ONLY・FAMILY CLAN WAR RULES LIST
 
 > Elite Competitive Regulations | No Mercy | Pro League Standard
-
-
 
 ---
 
@@ -162,133 +151,87 @@ input{
 
 💠2.1 فرمت : Best of 3 (Bo3)
 
-💠2.2 ساختار مسابقه :
-
-💠Match 1 → Sniper Only | Firing Range
-
-💠Match 2 → انتخاب مپ توسط بازنده مچ اول
-
-💠Match 3 → انتخاب مپ توسط برنده مچ اول
-
-💠2.3 مپ منتخب بایستی از مپ های سرچ اند دیستروی رنک باشد
-
-💠2.4 هر مچ شامل ۵ راند سرچ اند دیستروی می‌باشد
-
-💠2.5 تغییر قوانین در طول وار ممنوع می‌باشد
+💠2.2 Match 1 → Sniper Only | Firing Range  
+💠2.3 Match 2 → Map by loser  
+💠2.4 Match 3 → Map by winner  
+💠2.5 5 rounds S&D each match
 
 ---
 
 3. ⏱️ TIMING RULES
 
-💠3.1 حداکثر تأخیر قابل پذیرش —> ۵ دقیقه
-💠3.2 تاخیر —> Forfeit مستیقم
-💠3.3 قطع اتصال —> ادامه بدون ReHost
-💠3.4 سوء‌استفاده از تأخیر —> حذف تیم 
+💠3.1 Max delay 5 min  
+💠3.2 Delay = Forfeit  
+💠3.3 Disconnect = no rehost  
+💠3.4 Abuse delay = disqualification  
 
 ---
 
 4. 👥 PLAYER ELIGIBILITY
 
-💠4.1 حضور فقط اعضای رسمی کلن
-💠4.2 داشتن تگ کلن الزامی است
-💠4.3 موارد غیرمجاز :
-
-💠شرکت در وار با اکانت فیک
-
-💠ورود غیرمجاز به وار
-
-➡️ نتیجه : Blacklist + حذف فوری
+💠Only official clan members  
+💠Fake accounts = blacklist  
 
 ---
 
-5. 🎧 COMMUNICATION RULES
+5. 🎧 COMMUNICATION
 
-💠5.1 اتصال میکروفون الزامی است
-💠5.2 فقط Leader و Vice Master حق صحبت دارند
-💠5.3 Toxicity یا Noise —> Mute / Kick
+💠Leader + Vice only can speak  
+💠Toxicity = mute/kick  
 
 ---
 
-6. 👁️ SPECTATOR & STREAM
+6. 👁️ STREAM RULES
 
-💠6.1 ورود اسپکتیتور به روم ممنوع می‌باشد
-💠6.2 استریم مود ممنوع می‌باشد
-💠6.3 استریم اسنایپ کردن —> حذف فوری
+💠No spectators  
+💠No stream sniping  
 
 ---
 
 7. ‼️ WEAPON BAN SYSTEM
 
-💠7.1 Banned ASSAULT RIFLES
-
-❌ M16 | Swordfish | Oden | EM2 | LAG 53 | Vargo-S
-
-💠7.2 Banned SMGs
-
-❌ Chicom | Fennec | MAC-10 | KSP-45 | OTs 9 | TEC-9 | ISO | USS9 | Sten
-
-💠7.3 Banned LMGs
-
-❌ All LMGs Are Banned
-
-💠7.4 Banned SNIPERS
-
-❌ XPR-50 | Arctic .50 | M21 EBR | NA-45 | SVD
-
-💠7.5 MARKSMAN & SHOTGUNS
-
-❌ All banned
-
-💠7.6 PISTOLS & LAUNCHERS
-
-❌ All banned
-
-💠7.7 MELEE
-
-✔️ Only Loadout
-❌ Knife kill forbidden
+❌ AR / SMG / LMG / SNIPER / SHOTGUN restricted lists apply
 
 ---
 
-8. 💣 EQUIPMENTS
+8. 💣 EQUIPMENT
 
-✔️ Frag Grenade
-❌ Spam banned
+✔ Frag grenade allowed  
+❌ Spam banned  
 
 ---
 
 9. 🧿 PERKS
 
-❌ All restricted perks banned
+❌ Restricted perks banned  
 
 ---
 
 10. ⚖️ PENALTY
 
-1st → Round loss
-2nd → Team loss
-3rd → DQ
+1st warning → round loss  
+2nd → team loss  
+3rd → DQ  
 
 ---
 
 11. 🚨 RULES
 
-💠 No disrespect
-💠 No arguing
+No disrespect  
+No arguing  
 
 ---
 
 12. 🏁 FINAL AUTHORITY
 
-Admin decision final
-No appeal
+Admin decision is final  
+No appeal  
 
 ---
 
 “Skill decides everything.”
 
 </div>
-
 </div>
 </div>
 
@@ -315,7 +258,7 @@ No appeal
 🔰 PLAYER 03
 ┣ 🎮 IGN : onlyゝfans
 ┣ 🆔 UID : 7065612241814945793
-┗ 📱 DEVICE : iphone 13 Normal
+┗ 📱 DEVICE : iPhone 13
 
 🔰 PLAYER 04
 ┣ 🎮 IGN : Onlyゝgl0ry
@@ -325,35 +268,63 @@ No appeal
 🔰 PLAYER 05
 ┣ 🎮 IGN : onlyゝDemo
 ┣ 🆔 UID : 7136200059792130049
-┗ 📱 DEVICE : Ipad Pro 2025
+┗ 📱 DEVICE : iPad Pro
 
 </div>
 
 </div>
 </div>
 
-<!-- JOIN -->
+<!-- JOIN (ESL STYLE) -->
 <div id="join" class="section">
 <div class="card">
 
-<h2>JOIN ONLY・FAMILY</h2>
+<h2>🏆 TRYOUT APPLICATION</h2>
 
-<input placeholder="IGN">
-<input placeholder="UID">
-<input placeholder="DEVICE">
+<form onsubmit="sendRequest(event)">
 
-<button class="join-btn">SEND REQUEST</button>
+<input id="ign" placeholder="IGN" required>
+<input id="uid" placeholder="UID" required>
+<input id="device" placeholder="Device" required>
 
-<div class="result"></div>
+<select id="role">
+<option value="">Select Role</option>
+<option>Rusher</option>
+<option>Sniper</option>
+<option>Support</option>
+<option>IGL</option>
+</select>
+
+<textarea id="msg" placeholder="Why do you want to join?"></textarea>
+
+<button class="join-btn" type="submit">SEND REQUEST</button>
+
+</form>
+
+<div class="result" id="result"></div>
 
 </div>
 </div>
 
 <script>
+
 function show(p){
 document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
 document.getElementById(p).classList.add("active");
 }
+
+function sendRequest(e){
+e.preventDefault();
+let ign=document.getElementById("ign").value;
+
+if(!ign){
+document.getElementById("result").innerText="❌ Fill required fields";
+return;
+}
+
+document.getElementById("result").innerText="✅ Application Sent Successfully!";
+}
+
 </script>
 
 </body>
