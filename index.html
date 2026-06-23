@@ -1,326 +1,989 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>ONLY・FAMILY ESPORTS</title>
-
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Noto+Kufi+Arabic:wght@400;700&display=swap" rel="stylesheet">
 <style>
-body{
-margin:0;
-font-family:Arial;
-background:#000;
-color:#00ffcc;
-overflow:hidden;
-}
+  /* ===== RESET & BASE ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ========== LOADER ========== */
-#loader{
-position:fixed;
-inset:0;
-background:#000;
-display:flex;
-justify-content:center;
-align-items:center;
-z-index:9999;
-font-size:22px;
-letter-spacing:4px;
-color:#00ffcc;
-animation:fadeOut 1s ease 2.5s forwards;
-}
+  :root {
+    --neon:   #00ffcc;
+    --neon2:  #7b2fff;
+    --neon3:  #ff2d6b;
+    --bg:     #03040a;
+    --bg2:    #080b14;
+    --card:   rgba(0,255,204,0.04);
+    --border: rgba(0,255,204,0.18);
+    --text:   #c8ffe8;
+    --glow: 0 0 12px #00ffccaa, 0 0 40px #00ffcc44;
+  }
 
-@keyframes fadeOut{
-to{opacity:0;visibility:hidden;}
-}
+  html { font-size: 15px; }
 
-/* ========== LOGIN ========== */
-#login{
-position:fixed;
-inset:0;
-display:flex;
-flex-direction:column;
-justify-content:center;
-align-items:center;
-background:rgba(0,0,0,0.9);
-z-index:9998;
-animation:zoomIn 0.6s ease;
-}
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', 'Noto Kufi Arabic', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
-@keyframes zoomIn{
-from{transform:scale(1.2);opacity:0;}
-to{transform:scale(1);opacity:1;}
-}
+  /* ===== ANIMATED GRID BG ===== */
+  #grid-bg {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(0,255,204,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,204,0.04) 1px, transparent 1px);
+    background-size: 44px 44px;
+    animation: gridMove 18s linear infinite;
+  }
+  @keyframes gridMove {
+    from { background-position: 0 0; }
+    to   { background-position: 44px 44px; }
+  }
 
-#login input{
-padding:10px;
-margin:10px;
-background:#111;
-border:1px solid #00ffcc;
-color:#fff;
-text-align:center;
-}
+  /* scan line overlay */
+  #scanlines {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 3px,
+      rgba(0,0,0,0.08) 3px,
+      rgba(0,0,0,0.08) 4px
+    );
+  }
 
-#login button{
-padding:10px 20px;
-background:#00ffcc;
-border:none;
-cursor:pointer;
-}
+  /* corner glows */
+  #glow-tl, #glow-br {
+    position: fixed; width: 320px; height: 320px;
+    border-radius: 50%; filter: blur(100px);
+    z-index: 0; pointer-events: none; opacity: 0.18;
+  }
+  #glow-tl { top: -100px; left: -100px; background: var(--neon2); }
+  #glow-br { bottom: -100px; right: -100px; background: var(--neon); }
 
-.hide-login{
-opacity:0;
-pointer-events:none;
-transition:0.4s;
-}
+  /* ===== LOADER ===== */
+  #loader {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--bg);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 28px;
+  }
+  .loader-logo {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(1.3rem, 5vw, 2.2rem);
+    font-weight: 900;
+    color: var(--neon);
+    text-shadow: var(--glow);
+    letter-spacing: 4px;
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 
-/* ========== BLUR BACKGROUND WHEN LOGIN ACTIVE ========== */
-body.login-active .content,
-body.login-active .sidebar,
-body.login-active .bg{
-filter:blur(6px) brightness(0.4);
-}
+  .loader-bar-wrap {
+    width: min(320px, 80vw); height: 4px;
+    background: rgba(0,255,204,0.12);
+    border-radius: 2px; overflow: hidden;
+  }
+  .loader-bar {
+    height: 100%; width: 0%; background: var(--neon);
+    box-shadow: 0 0 10px var(--neon);
+    border-radius: 2px;
+    animation: loadBar 2.3s ease forwards;
+  }
+  @keyframes loadBar { to { width: 100%; } }
 
-/* ========== BACKGROUND CYBER ========== */
-.bg{
-position:fixed;
-width:200%;
-height:200%;
-background:radial-gradient(circle,#00ffcc22 2px,transparent 2px);
-background-size:50px 50px;
-animation:move 20s linear infinite;
-z-index:-1;
-}
+  .loader-status {
+    font-size: .78rem; letter-spacing: 3px;
+    color: rgba(0,255,204,0.6);
+    font-family: 'Orbitron', sans-serif;
+  }
 
-@keyframes move{
-from{transform:translate(0,0);}
-to{transform:translate(-50px,-50px);}
-}
+  /* ===== LOGIN ===== */
+  #login {
+    position: fixed; inset: 0; z-index: 9998;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(3,4,10,0.92);
+    backdrop-filter: blur(6px);
+  }
 
-/* ========== SIDEBAR ========== */
-.sidebar{
-position:fixed;
-left:0;
-top:0;
-width:200px;
-height:100%;
-background:#0a0a0a;
-padding-top:20px;
-border-right:1px solid #00ffcc33;
-}
+  .login-box {
+    background: rgba(0,255,204,0.03);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: clamp(24px, 5vw, 44px) clamp(20px, 6vw, 52px);
+    width: min(420px, 92vw);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    animation: loginIn .6s cubic-bezier(.22,1,.36,1);
+  }
+  @keyframes loginIn {
+    from { transform: scale(.88) translateY(30px); opacity: 0; }
+    to   { transform: scale(1)   translateY(0);    opacity: 1; }
+  }
 
-.sidebar button{
-width:100%;
-padding:12px;
-background:transparent;
-border:none;
-color:#00ffcc;
-cursor:pointer;
-}
+  .login-box::before {
+    content: '';
+    position: absolute; top: -2px; left: 10%; right: 10%; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--neon), var(--neon2), transparent);
+    border-radius: 1px;
+  }
 
-.sidebar button:hover{
-background:#00ffcc;
-color:#000;
-}
+  .login-emblem {
+    width: 64px; height: 64px; margin: 0 auto 16px;
+    border: 2px solid var(--neon);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem;
+    box-shadow: 0 0 24px rgba(0,255,204,0.4);
+    animation: spinGlow 6s linear infinite;
+  }
+  @keyframes spinGlow {
+    0%,100% { box-shadow: 0 0 20px rgba(0,255,204,0.4); }
+    50%      { box-shadow: 0 0 36px rgba(123,47,255,0.5); }
+  }
 
-/* ========== CONTENT ========== */
-.content{
-display:none;
-padding:20px;
-margin-left:200px;
-animation:fadeIn 0.6s ease;
-}
+  .login-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(.95rem, 3vw, 1.2rem);
+    color: var(--neon);
+    letter-spacing: 3px;
+    margin-bottom: 6px;
+  }
+  .login-sub {
+    font-size: .78rem; color: rgba(0,255,204,0.45);
+    letter-spacing: 2px; margin-bottom: 28px;
+  }
 
-@keyframes fadeIn{
-from{opacity:0;transform:translateY(10px);}
-to{opacity:1;transform:translateY(0);}
-}
+  .input-group {
+    position: relative; margin-bottom: 16px;
+  }
+  .input-group input {
+    width: 100%;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 13px 16px;
+    color: #fff;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 4px;
+    text-align: center;
+    outline: none;
+    transition: border .25s, box-shadow .25s;
+  }
+  .input-group input:focus {
+    border-color: var(--neon);
+    box-shadow: 0 0 0 2px rgba(0,255,204,0.15);
+  }
 
-/* ========== SECTIONS ========== */
-.section{display:none;}
-.section.active{display:block;}
+  .login-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--neon) 0%, var(--neon2) 100%);
+    border: none; border-radius: 8px;
+    padding: 13px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: .85rem; font-weight: 700;
+    letter-spacing: 3px;
+    color: #000; cursor: pointer;
+    transition: filter .2s, transform .15s;
+  }
+  .login-btn:hover  { filter: brightness(1.15); }
+  .login-btn:active { transform: scale(.97); }
 
-.card{
-background:rgba(255,255,255,0.05);
-padding:20px;
-border-left:3px solid #00ffcc;
-margin:10px 0;
-}
+  #login-msg {
+    margin-top: 14px; font-size: .8rem;
+    letter-spacing: 2px; height: 20px;
+    color: var(--neon3);
+  }
 
-/* ========== HACK TEXT ========== */
-#hackText{
-margin-left:200px;
-white-space:pre;
-padding:10px;
-color:#00ffcc;
-}
+  .login-particles {
+    position: absolute; inset: 0; pointer-events: none;
+    overflow: hidden; border-radius: 16px;
+  }
+  .lp {
+    position: absolute;
+    width: 2px; height: 2px;
+    background: var(--neon);
+    border-radius: 50%;
+    animation: floatUp linear infinite;
+    opacity: 0;
+  }
+  @keyframes floatUp {
+    0%   { transform: translateY(100%) scale(0); opacity: 0; }
+    20%  { opacity: 1; }
+    100% { transform: translateY(-20px) scale(1.5); opacity: 0; }
+  }
+
+  /* ===== SUCCESS FLASH ===== */
+  #success-flash {
+    position: fixed; inset: 0; z-index: 10000;
+    pointer-events: none; opacity: 0;
+    background: radial-gradient(circle, rgba(0,255,204,0.35) 0%, transparent 70%);
+    transition: opacity .1s;
+  }
+  #success-flash.flash { animation: flashAnim .6s ease forwards; }
+  @keyframes flashAnim {
+    0%   { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  /* ===== LAYOUT ===== */
+  #app { display: none; position: relative; z-index: 2; min-height: 100vh; }
+
+  /* SIDEBAR */
+  #sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0;
+    width: 70px;
+    background: rgba(8,11,20,0.95);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+    gap: 8px;
+    z-index: 100;
+    transition: width .3s cubic-bezier(.22,1,.36,1);
+  }
+  #sidebar.expanded { width: 200px; }
+
+  .sidebar-logo {
+    font-family: 'Orbitron', sans-serif;
+    font-size: .55rem; letter-spacing: 2px;
+    color: var(--neon); text-align: center;
+    margin-bottom: 16px;
+    opacity: .7;
+    white-space: nowrap; overflow: hidden;
+  }
+
+  .nav-btn {
+    width: 90%;
+    display: flex; align-items: center; gap: 12px;
+    background: none; border: none; border-radius: 10px;
+    padding: 11px 10px;
+    color: rgba(0,255,204,0.55);
+    cursor: pointer;
+    font-family: 'Rajdhani', sans-serif; font-size: .88rem; font-weight: 600;
+    letter-spacing: 1.5px;
+    transition: background .2s, color .2s, box-shadow .2s;
+    white-space: nowrap; overflow: hidden;
+    justify-content: center;
+  }
+  #sidebar.expanded .nav-btn { justify-content: flex-start; }
+  .nav-btn .icon { font-size: 1.1rem; flex-shrink: 0; }
+  .nav-btn .label { display: none; }
+  #sidebar.expanded .nav-btn .label { display: inline; }
+
+  .nav-btn:hover, .nav-btn.active {
+    background: rgba(0,255,204,0.1);
+    color: var(--neon);
+    box-shadow: inset 3px 0 0 var(--neon);
+  }
+
+  .sidebar-toggle {
+    margin-top: auto;
+    background: none; border: 1px solid var(--border);
+    border-radius: 8px; width: 36px; height: 36px;
+    color: var(--neon); cursor: pointer; font-size: .9rem;
+    transition: background .2s;
+  }
+  .sidebar-toggle:hover { background: rgba(0,255,204,0.1); }
+
+  /* MAIN */
+  #main {
+    margin-left: 70px;
+    padding: 20px 16px 40px;
+    min-height: 100vh;
+    transition: margin-left .3s cubic-bezier(.22,1,.36,1);
+  }
+  #sidebar.expanded ~ #main { margin-left: 200px; }
+
+  /* TOP BAR */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px; padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(.9rem, 3vw, 1.15rem);
+    font-weight: 900; color: var(--neon);
+    text-shadow: var(--glow);
+    letter-spacing: 2px;
+  }
+  .topbar-status {
+    display: flex; align-items: center; gap: 6px;
+    font-size: .72rem; letter-spacing: 2px; color: rgba(0,255,204,0.5);
+  }
+  .dot-live {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #00ff88;
+    box-shadow: 0 0 8px #00ff88;
+    animation: blink 1.5s ease infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+  /* SECTIONS */
+  .section { display: none; animation: fadeUp .4s ease; }
+  .section.active { display: block; }
+  @keyframes fadeUp {
+    from { opacity:0; transform: translateY(16px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: clamp(14px,4vw,24px);
+    margin-bottom: 16px;
+    position: relative; overflow: hidden;
+  }
+  .card::after {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--neon2), var(--neon), transparent);
+  }
+
+  .section-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(.85rem, 2.5vw, 1rem);
+    color: var(--neon); letter-spacing: 2px;
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-title::after {
+    content: ''; flex: 1; height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+
+  /* HOME - HERO */
+  .hero {
+    text-align: center; padding: clamp(20px,5vw,40px) 0;
+    margin-bottom: 16px;
+  }
+  .hero-badge {
+    display: inline-block;
+    border: 1px solid rgba(0,255,204,0.3);
+    border-radius: 20px;
+    padding: 4px 16px;
+    font-size: .72rem; letter-spacing: 3px;
+    color: rgba(0,255,204,0.6);
+    margin-bottom: 14px;
+  }
+  .hero-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(1.5rem, 6vw, 3rem);
+    font-weight: 900;
+    background: linear-gradient(135deg, #fff 0%, var(--neon) 50%, var(--neon2) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1; margin-bottom: 10px;
+  }
+  .hero-sub {
+    font-size: clamp(.72rem, 2vw, .85rem);
+    color: rgba(0,255,204,0.5); letter-spacing: 3px;
+    margin-bottom: 24px;
+  }
+
+  /* STATS ROW */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px; margin-bottom: 16px;
+  }
+  .stat-card {
+    background: rgba(0,255,204,0.04);
+    border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 10px; text-align: center;
+  }
+  .stat-num {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(1rem,3.5vw,1.5rem);
+    font-weight: 900; color: var(--neon);
+    text-shadow: var(--glow);
+  }
+  .stat-lbl {
+    font-size: .65rem; letter-spacing: 2px;
+    color: rgba(0,255,204,0.45); margin-top: 4px;
+  }
+
+  /* INFO GRID */
+  .info-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin-bottom: 16px;
+  }
+  .info-item {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px;
+  }
+  .info-label { font-size: .65rem; letter-spacing: 2px; color: rgba(0,255,204,0.4); margin-bottom: 4px; }
+  .info-val { font-size: .88rem; color: #fff; font-weight: 600; }
+
+  /* KILL FEED */
+  .killfeed-wrap {
+    background: rgba(0,0,0,0.5);
+    border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px; overflow: hidden; min-height: 120px;
+  }
+  .kf-line {
+    display: flex; align-items: center; gap: 8px;
+    padding: 5px 0; font-size: .82rem;
+    border-bottom: 1px solid rgba(0,255,204,0.06);
+    opacity: 0; transform: translateX(-20px);
+    transition: opacity .4s, transform .4s;
+  }
+  .kf-line.show { opacity: 1; transform: translateX(0); }
+  .kf-line:last-child { border-bottom: none; }
+  .kf-killer { color: var(--neon); font-weight: 700; }
+  .kf-weapon { color: var(--neon2); font-size: .72rem; padding: 1px 6px; background: rgba(123,47,255,.15); border-radius: 4px; }
+  .kf-victim { color: rgba(255,255,255,0.5); }
+  .kf-skull { color: var(--neon3); font-size: .9rem; }
+
+  /* ROSTER */
+  .player-card {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--border); border-radius: 12px;
+    padding: clamp(12px,3vw,20px);
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 14px;
+    transition: border-color .2s, background .2s;
+    cursor: default;
+  }
+  .player-card:hover {
+    border-color: var(--neon);
+    background: rgba(0,255,204,0.05);
+  }
+  .player-avatar {
+    width: clamp(44px,10vw,56px); height: clamp(44px,10vw,56px);
+    border-radius: 50%;
+    border: 2px solid var(--neon);
+    background: rgba(0,255,204,0.08);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; flex-shrink: 0;
+    box-shadow: 0 0 16px rgba(0,255,204,0.25);
+  }
+  .player-info { flex: 1; min-width: 0; }
+  .player-ign {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(.72rem, 2.5vw, .88rem);
+    color: #fff; font-weight: 700;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .player-role {
+    font-size: .7rem; letter-spacing: 2px;
+    color: var(--neon); margin: 2px 0;
+  }
+  .player-device {
+    font-size: .68rem; color: rgba(255,255,255,0.35);
+  }
+  .player-uid {
+    font-size: .6rem; font-family: monospace;
+    color: rgba(0,255,204,0.3); margin-top: 2px;
+  }
+  .role-badge {
+    font-size: 1.2rem; flex-shrink: 0;
+  }
+
+  /* RULES */
+  .rule-block {
+    background: rgba(0,0,0,0.35);
+    border-left: 3px solid var(--neon2);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    font-size: .85rem; line-height: 1.8;
+    direction: rtl; text-align: right;
+  }
+  .rule-block h3 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: .78rem; letter-spacing: 2px;
+    color: var(--neon); margin-bottom: 10px;
+    direction: ltr; text-align: left;
+  }
+  .rule-block p { color: rgba(200,255,232,0.7); margin: 3px 0; }
+  .banned { color: var(--neon3) !important; font-weight: 700; }
+  .allowed { color: #00ff88 !important; font-weight: 700; }
+
+  /* HACK TERMINAL */
+  #hackText {
+    position: fixed; bottom: 16px; right: 16px;
+    font-family: monospace; font-size: .7rem;
+    color: rgba(0,255,204,0.4);
+    text-align: right; pointer-events: none;
+    line-height: 1.7; z-index: 50;
+  }
+
+  /* MOBILE RESPONSIVE */
+  @media (max-width: 500px) {
+    .info-grid { grid-template-columns: 1fr; }
+    .stats-row { grid-template-columns: repeat(3,1fr); gap: 6px; }
+    .stat-num { font-size: .95rem; }
+    #hackText { display: none; }
+  }
 </style>
 </head>
+<body>
 
-<body class="login-active">
+<!-- GRID & FX -->
+<div id="grid-bg"></div>
+<div id="scanlines"></div>
+<div id="glow-tl"></div>
+<div id="glow-br"></div>
+<div id="success-flash"></div>
 
 <!-- LOADER -->
-<div id="loader">LOADING SYSTEM...</div>
+<div id="loader">
+  <div class="loader-logo">ONLY・FAMILY</div>
+  <div class="loader-bar-wrap"><div class="loader-bar"></div></div>
+  <div class="loader-status" id="loader-status">INITIALIZING...</div>
+</div>
 
 <!-- LOGIN -->
 <div id="login">
-<h2>ENTER CODE</h2>
-<input id="code" type="password">
-<button onclick="check()">ENTER</button>
-<p id="msg"></p>
+  <div class="login-box">
+    <div class="login-particles" id="lp-container"></div>
+    <div class="login-emblem">⚔️</div>
+    <div class="login-title">ONLY・FAMILY</div>
+    <div class="login-sub">ENTER ACCESS CODE</div>
+    <div class="input-group">
+      <input id="code" type="password" placeholder="••••••••••" autocomplete="off" autofocus onkeydown="if(event.key==='Enter')check()">
+    </div>
+    <button class="login-btn" onclick="check()">ACCESS SYSTEM</button>
+    <div id="login-msg"></div>
+  </div>
 </div>
 
-<!-- BACKGROUND -->
-<div class="bg"></div>
+<!-- MAIN APP -->
+<div id="app">
 
-<!-- SIDEBAR -->
-<div class="sidebar">
-<button onclick="show('home')">HOME</button>
-<button onclick="show('rules')">RULES</button>
-<button onclick="show('roster')">ROSTER</button>
-</div>
+  <!-- SIDEBAR -->
+  <nav id="sidebar">
+    <div class="sidebar-logo">OF</div>
+    <button class="nav-btn active" onclick="show('home',this)">
+      <span class="icon">🏠</span><span class="label">HOME</span>
+    </button>
+    <button class="nav-btn" onclick="show('roster',this)">
+      <span class="icon">⚔️</span><span class="label">ROSTER</span>
+    </button>
+    <button class="nav-btn" onclick="show('rules',this)">
+      <span class="icon">📋</span><span class="label">RULES</span>
+    </button>
+    <button class="sidebar-toggle" onclick="toggleSidebar()" id="toggle-btn">›</button>
+  </nav>
 
-<!-- CONTENT -->
-<div class="content">
+  <!-- CONTENT -->
+  <main id="main">
 
-<h1>ONLY FAMILY ESPORTS</h1>
+    <div class="topbar">
+      <div class="topbar-title">ONLY・FAMILY ESPORTS</div>
+      <div class="topbar-status"><div class="dot-live"></div>ONLINE</div>
+    </div>
 
-<div id="home" class="section active">
-<div id="home" class="section active">
-<div class="card">
+    <!-- HOME -->
+    <section id="home" class="section active">
 
-<h2>🔥 ONLY・FAMILY CHAMPIONSHIP</h2>
+      <div class="hero card">
+        <div class="hero-badge">CODM COMPETITIVE CLAN</div>
+        <div class="hero-name">ONLY<br>FAMILY</div>
+        <div class="hero-sub">PRO LEAGUE DIVISION • ELITE SCRIM TEAM</div>
+      </div>
 
-<p style="color:#00ffcc;font-weight:bold;letter-spacing:1px;">
-CODM Competitive Clan | Pro League Division | Elite Scrim Team
-</p>
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-num">5</div>
+          <div class="stat-lbl">MEMBERS</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">🟢</div>
+          <div class="stat-lbl">ACTIVE</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">Bo3</div>
+          <div class="stat-lbl">FORMAT</div>
+        </div>
+      </div>
 
-<hr>
+      <div class="card">
+        <div class="section-title">👑 LEADERSHIP</div>
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">LEADER / IGL</div>
+            <div class="info-val">𝙤𝙣𝙡𝙮ゝMaru</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">TELEGRAM</div>
+            <div class="info-val">@VoidSpctre</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">STATUS</div>
+            <div class="info-val" style="color:#00ff88">🟢 ACTIVE</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">RECRUITMENT</div>
+            <div class="info-val" style="color:#00ff88">🟢 OPEN</div>
+          </div>
+        </div>
+      </div>
 
-<h3>👑 LEADERSHIP</h3>
-<p>👑 Leader: Maru</p>
-<p>📱 Telegram: @VoidSpctre</p>
-<p>⚡ IGL Role: Tactical Control & Team Strategy</p>
+      <div class="card">
+        <div class="section-title">💀 LIVE KILL FEED</div>
+        <div class="killfeed-wrap" id="killfeed"></div>
+      </div>
 
-<hr>
+      <div class="card">
+        <div class="section-title">⚡ RULE CORE</div>
+        <div style="line-height:2; font-size:.88rem; color:rgba(200,255,232,0.7);">
+          <p>• Skill > Everything</p>
+          <p>• No toxicity — instant kick</p>
+          <p>• Full discipline required</p>
+          <p>• Team coordination is priority</p>
+          <p>• War readiness: MAXIMUM</p>
+        </div>
+      </div>
 
-<h3>🎯 MISSION</h3>
-<p>
-ONLY・FAMILY is a high-level competitive Call of Duty Mobile clan focused on professional scrims, tournament dominance, and disciplined teamwork.
-</p>
+    </section>
 
-<p>
-We don’t play casual — we build synergy, skill, and winning mentality.
-</p>
+    <!-- ROSTER -->
+    <section id="roster" class="section">
+      <div class="card">
+        <div class="section-title">⚔️ ELITE SQUAD LINEUP</div>
 
-<hr>
+        <div class="player-card">
+          <div class="player-avatar">👑</div>
+          <div class="player-info">
+            <div class="player-ign">𝙤𝙣𝙡𝙮ゝMaru</div>
+            <div class="player-role">LEADER / IGL</div>
+            <div class="player-device">📱 Poco X6 Pro</div>
+            <div class="player-uid">UID: 7098766198632349698</div>
+          </div>
+          <div class="role-badge">🎯</div>
+        </div>
 
-<h3>📊 CLAN STATUS</h3>
-<p>🟢 Status: ACTIVE</p>
-<p>🏆 Mode: SCRIMS • TOURNAMENT • COMPETITIVE LEAGUE</p>
-<p>👥 Members: ELITE CORE ROSTER</p>
+        <div class="player-card">
+          <div class="player-avatar">⚡</div>
+          <div class="player-info">
+            <div class="player-ign">𝙤𝙣𝙡𝙮ゝLUIGI</div>
+            <div class="player-role">ENTRY FRAGGER</div>
+            <div class="player-device">📱 Poco X7</div>
+            <div class="player-uid">UID: 7424150550676963329</div>
+          </div>
+          <div class="role-badge">💥</div>
+        </div>
 
-<hr>
+        <div class="player-card">
+          <div class="player-avatar">🛡</div>
+          <div class="player-info">
+            <div class="player-ign">𝙤𝙣𝙡𝙮ゝfans</div>
+            <div class="player-role">SUPPORT PLAYER</div>
+            <div class="player-device">📱 iPhone 13</div>
+            <div class="player-uid">UID: 7065612241814945793</div>
+          </div>
+          <div class="role-badge">🧱</div>
+        </div>
 
-<h3>⚡ RULE CORE</h3>
-<p>• Skill > Everything</p>
-<p>• No Toxicity</p>
-<p>• Full Discipline Required</p>
-<p>• Team Coordination Is Priority</p>
+        <div class="player-card">
+          <div class="player-avatar">🎯</div>
+          <div class="player-info">
+            <div class="player-ign">𝙤𝙣𝙡𝙮ゝgl0ry</div>
+            <div class="player-role">RIFLER</div>
+            <div class="player-device">📱 Poco X7 Pro</div>
+            <div class="player-uid">UID: 7304502075479228417</div>
+          </div>
+          <div class="role-badge">🔥</div>
+        </div>
 
-<hr>
+        <div class="player-card">
+          <div class="player-avatar">🧠</div>
+          <div class="player-info">
+            <div class="player-ign">𝙤𝙣𝙡𝙮ゝDemo</div>
+            <div class="player-role">FLEX / IGL SUPPORT</div>
+            <div class="player-device">📱 iPad Pro 2025</div>
+            <div class="player-uid">UID: 7136200059792130049</div>
+          </div>
+          <div class="role-badge">⚙️</div>
+        </div>
 
-<h3>📡 LIVE INFO</h3>
-<p>🟢 Recruitment: OPEN</p>
-<p>🟢 Scrim Time: ACTIVE</p>
-<p>🟢 War Readiness: MAXIMUM</p>
+      </div>
+    </section>
 
-</div>
-</div>
+    <!-- RULES -->
+    <section id="rules" class="section">
+      <div class="card">
+        <div class="section-title">📋 CLAN WAR RULES</div>
 
-<div id="rules" class="section">
-<div class="card">
-<h2>RULES</h2>
-<p>Put your rules here...</p>
-</div>
-</div>
+        <div class="rule-block">
+          <h3>1. OVERVIEW</h3>
+          <p>💠 هر‌گونه تخلف ← حذف مستقیم، بدون هشدار</p>
+        </div>
 
-<div id="roster" class="section">
-<div class="card">
-<h2>ROSTER</h2>
-<p>Put your roster here...</p>
-</div>
-</div>
+        <div class="rule-block">
+          <h3>2. MATCH STRUCTURE — Bo3</h3>
+          <p>💠 Match 1 → Sniper Only | Firing Range</p>
+          <p>💠 Match 2 → انتخاب مپ توسط بازنده مچ اول</p>
+          <p>💠 Match 3 → انتخاب مپ توسط برنده مچ اول</p>
+          <p>💠 هر مچ شامل ۵ راند سرچ اند دیستروی</p>
+          <p>💠 تغییر قوانین در طول وار ممنوع</p>
+        </div>
 
+        <div class="rule-block">
+          <h3>3. TIMING</h3>
+          <p>💠 حداکثر تأخیر مجاز → ۵ دقیقه</p>
+          <p>💠 تاخیر بیشتر → Forfeit مستقیم</p>
+          <p>💠 قطع اتصال → ادامه بدون ReHost</p>
+        </div>
+
+        <div class="rule-block">
+          <h3>4. PLAYER ELIGIBILITY</h3>
+          <p>💠 فقط اعضای رسمی کلن با تگ کلن</p>
+          <p class="banned">❌ اکانت فیک / ورود غیرمجاز → Blacklist فوری</p>
+        </div>
+
+        <div class="rule-block">
+          <h3>5. COMMUNICATION</h3>
+          <p>💠 میکروفون الزامی است</p>
+          <p>💠 فقط Leader و Vice Master حق صحبت دارند</p>
+          <p class="banned">❌ Toxicity / Noise → Mute / Kick</p>
+        </div>
+
+        <div class="rule-block">
+          <h3>6. SPECTATOR & STREAM</h3>
+          <p class="banned">❌ ورود اسپکتیتور به روم ممنوع</p>
+          <p class="banned">❌ Streamer Mode ممنوع</p>
+          <p class="banned">❌ Stream Snipe → حذف فوری</p>
+        </div>
+
+        <div class="rule-block">
+          <h3>7. WEAPON BANS — ASSAULT RIFLES</h3>
+          <p class="banned">❌ M16 | Swordfish | Oden | EM2 | LAG 53 | Vargo-S</p>
+          <p>💠 Man-O-War → Thermite Ammo banned</p>
+          <p>💠 AS VAL → 15 Round FMJ banned</p>
+          <p>💠 CR-56 AMAX → M67 Ammo banned</p>
+          <p>💠 Kilo 141 → 100 Round Reload banned</p>
+        </div>
+
+        <div class="rule-block">
+          <h3>7. WEAPON BANS — SMGs</h3>
+          <p class="banned">❌ Chicom | Fennec | MAC-10 | KSP-45 | OTs 9 | TEC-9 | ISO | USS9 | Sten</p>
+        </div>
+
+        <div class="rule-block">
+          <h3>7. WEAPON BANS — LMG / SNIPER / SHOTGUN</h3>
+          <p class="banned">❌ All LMGs Banned</p>
+          <p class="banned">❌ XPR-50 | Arctic .50 | M21 EBR | NA-45 | SVD</p>
+          <p class="banned">❌ All Marksman & Shotguns Banned</p>
+          <p class="banned">❌ All Pistols & Launchers Banned</p>
+        </div>
+
+        <div class="rule-block">
+          <h3>7. MELEE</h3>
+          <p class="allowed">✔️ فقط در Loadout مجاز است</p>
+          <p class="banned">❌ کیل با نایف ممنوع</p>
+        </div>
+
+        <div class="rule-block">
+          <h3>8. EQUIPMENT</h3>
+          <p class="allowed">✔️ Frag Grenade / Smoke / Trophy System</p>
+          <p class="banned">❌ Spam یا Abuse ممنوع</p>
+        </div>
+
+        <div class="rule-block">
+          <h3>9. BANNED PERKS</h3>
+          <p class="banned">❌ RED: Martyrdom | Restock | Tactician</p>
+          <p class="banned">❌ GREEN: Vulture | Tracker | Quick Fix | Recon</p>
+          <p class="banned">❌ BLUE: Alert | Shrapnel</p>
+        </div>
+
+        <div class="rule-block">
+          <h3>10. PENALTY SYSTEM</h3>
+          <p>تخلف اول → حذف راند</p>
+          <p>تخلف دوم → حذف تیمی</p>
+          <p>تخلف سوم → Forfeit</p>
+          <p class="banned">سوءاستفاده → Disqualification</p>
+        </div>
+
+        <div class="rule-block">
+          <h3>11-12. FINAL AUTHORITY</h3>
+          <p>💠 بی‌احترامی در روم ممنوع</p>
+          <p>💠 بحث در روم ممنوع</p>
+          <p>💠 تصمیم نهایی با ادمین — بدون اعتراض در طول وار</p>
+        </div>
+
+        <div style="text-align:center; margin-top:20px; font-family:'Orbitron',sans-serif; font-size:.8rem; color:var(--neon); letter-spacing:3px;">
+          🌍 ONLY・FAMILY — "Skill decides everything."
+        </div>
+
+      </div>
+    </section>
+
+  </main>
 </div>
 
 <!-- HACK TEXT -->
 <div id="hackText"></div>
 
+<!-- AUDIO (Web Audio API - no files needed) -->
 <script>
+/* ===== AUDIO ENGINE ===== */
+const AC = new (window.AudioContext || window.webkitAudioContext)();
 
-/* loader */
-setTimeout(()=>{
-document.getElementById("loader").style.display="none";
-},2500);
-
-/* section switch */
-function show(id){
-document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-document.getElementById(id).classList.add("active");
+function beep(freq, dur, type='square', vol=0.18) {
+  const osc = AC.createOscillator();
+  const gain = AC.createGain();
+  osc.connect(gain); gain.connect(AC.destination);
+  osc.type = type; osc.frequency.value = freq;
+  gain.gain.setValueAtTime(vol, AC.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.0001, AC.currentTime + dur);
+  osc.start(); osc.stop(AC.currentTime + dur);
 }
 
-/* hack animation */
-let hackLines = [
-"ACCESSING SYSTEM...",
-"CONNECTING SERVER...",
-"BYPASSING SECURITY...",
-"SCANNING DATA...",
-"ACCESS GRANTED ✔"
+function clickSound() {
+  beep(880, 0.06, 'square', 0.12);
+  setTimeout(() => beep(1200, 0.04, 'square', 0.08), 40);
+}
+
+function successSound() {
+  [440,550,660,880].forEach((f,i) => setTimeout(()=>beep(f,.18,'sine',.22), i*80));
+  setTimeout(()=>beep(1100,.3,'sine',.15), 400);
+}
+
+function errorSound() {
+  beep(220, 0.15, 'sawtooth', 0.2);
+  setTimeout(()=>beep(180,.2,'sawtooth',.15), 120);
+}
+
+function uiClick() {
+  beep(600, 0.05, 'triangle', 0.1);
+}
+
+/* ===== LOADER ===== */
+const loaderMsgs = ['INITIALIZING...','LOADING ASSETS...','CONNECTING SERVER...','DECRYPTING DATA...','ACCESS READY ✔'];
+let lmi = 0;
+const lstat = document.getElementById('loader-status');
+const lInterval = setInterval(()=>{
+  if(lmi < loaderMsgs.length) lstat.textContent = loaderMsgs[lmi++];
+}, 460);
+
+setTimeout(()=>{
+  clearInterval(lInterval);
+  document.getElementById('loader').style.opacity='0';
+  document.getElementById('loader').style.transition='opacity .5s';
+  setTimeout(()=>{ document.getElementById('loader').style.display='none'; }, 500);
+  // activate login particles
+  spawnParticles();
+}, 2400);
+
+/* ===== PARTICLES ===== */
+function spawnParticles() {
+  const c = document.getElementById('lp-container');
+  for(let i=0;i<18;i++){
+    const p = document.createElement('div');
+    p.className = 'lp';
+    p.style.cssText = `left:${Math.random()*100}%; bottom:0; animation-duration:${2+Math.random()*3}s; animation-delay:${Math.random()*3}s;`;
+    c.appendChild(p);
+  }
+}
+
+/* ===== SIDEBAR ===== */
+let sidebarOpen = false;
+function toggleSidebar() {
+  uiClick();
+  sidebarOpen = !sidebarOpen;
+  const sb = document.getElementById('sidebar');
+  const btn = document.getElementById('toggle-btn');
+  sb.classList.toggle('expanded', sidebarOpen);
+  btn.textContent = sidebarOpen ? '‹' : '›';
+}
+
+/* ===== NAV ===== */
+function show(id, btn) {
+  uiClick();
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+
+/* ===== LOGIN ===== */
+function check() {
+  AC.resume();
+  const code = document.getElementById('code').value;
+  if(code === 'OnlyFamily') {
+    successSound();
+    document.getElementById('success-flash').classList.add('flash');
+    document.getElementById('login').style.transition = 'opacity .6s, transform .6s';
+    document.getElementById('login').style.opacity = '0';
+    document.getElementById('login').style.transform = 'scale(1.05)';
+    setTimeout(()=>{
+      document.getElementById('login').style.display='none';
+      document.getElementById('app').style.display='block';
+      document.body.style.overflow='auto';
+      startHackText();
+      startKillFeed();
+    }, 600);
+  } else {
+    errorSound();
+    document.getElementById('login-msg').textContent = '❌  WRONG ACCESS CODE';
+    const box = document.querySelector('.login-box');
+    box.style.animation = 'none';
+    box.style.borderColor = '#ff2d6b';
+    box.style.boxShadow = '0 0 20px rgba(255,45,107,.3)';
+    setTimeout(()=>{ box.style.borderColor=''; box.style.boxShadow=''; }, 700);
+    document.getElementById('code').value='';
+  }
+}
+
+/* ===== HACK TEXT ===== */
+const hackLines = ['ACCESSING SYSTEM...','CONNECTING SERVER...','BYPASSING SECURITY...','SCANNING DATA...','ACCESS GRANTED ✔'];
+let hl=0,hc=0;
+function startHackText(){
+  const box=document.getElementById('hackText');
+  function type(){
+    if(hl>=hackLines.length)return;
+    const text=hackLines[hl];
+    if(hc<text.length){ box.innerHTML+=text[hc++]; setTimeout(type,45); }
+    else{ box.innerHTML+='<br>'; hl++; hc=0; setTimeout(type,250); }
+  }
+  type();
+}
+
+/* ===== KILL FEED ===== */
+const kills=[
+  {k:'𝙤𝙣𝙡𝙮ゝMaru',w:'DL Q33',v:'[ENEMY]'},
+  {k:'𝙤𝙣𝙡𝙮ゝLUIGI',w:'AK117',v:'[ENEMY]'},
+  {k:'𝙤𝙣𝙡𝙮ゝgl0ry',w:'M4',v:'[ENEMY]'},
+  {k:'𝙤𝙣𝙡𝙮ゝDemo',w:'QQ9',v:'[ENEMY]'},
+  {k:'𝙤𝙣𝙡𝙮ゝfans',w:'Frag',v:'[ENEMY]'},
+  {k:'𝙤𝙣𝙡𝙮ゝMaru',w:'Knife',v:'[RISKY]'},
+  {k:'𝙤𝙣𝙡𝙮ゝLUIGI',w:'CBR4',v:'[ENEMY]'},
 ];
-
-let line = 0;
-let char = 0;
-
-function typeHack(){
-let box = document.getElementById("hackText");
-if(!box || line >= hackLines.length) return;
-
-let text = hackLines[line];
-
-if(char < text.length){
-box.innerHTML += text[char];
-char++;
-setTimeout(typeHack, 50);
-}else{
-box.innerHTML += "<br>";
-line++;
-char = 0;
-setTimeout(typeHack, 300);
-}
+let ki=0;
+function startKillFeed(){
+  const box=document.getElementById('killfeed');
+  function addKill(){
+    const k=kills[ki%kills.length]; ki++;
+    const line=document.createElement('div');
+    line.className='kf-line';
+    line.innerHTML=`<span class="kf-killer">${k.k}</span><span class="kf-skull">💀</span><span class="kf-weapon">${k.w}</span><span class="kf-victim">${k.v}</span>`;
+    box.appendChild(line);
+    if(box.children.length>6) box.removeChild(box.firstChild);
+    setTimeout(()=>line.classList.add('show'),30);
+    beep(900,0.04,'triangle',0.07);
+    setTimeout(addKill, 2200+Math.random()*2000);
+  }
+  addKill();
 }
 
-/* login check */
-function check(){
-let c=document.getElementById("code");
-let msg=document.getElementById("msg");
-
-if(c.value.trim()==="OnlyFamily"){
-
-document.getElementById("login").classList.add("hide-login");
-
-setTimeout(()=>{
-document.getElementById("login").style.display="none";
-document.querySelector(".content").style.display="block";
-document.body.classList.remove("login-active");
-typeHack();
-},500);
-
-}else{
-msg.innerText="❌ Wrong Code";
-}
-}
-
+/* ===== NAV CLICK SOUNDS ===== */
+document.querySelectorAll('.nav-btn').forEach(b=>{
+  b.addEventListener('mousedown',()=>uiClick());
+});
 </script>
-
 </body>
 </html>
