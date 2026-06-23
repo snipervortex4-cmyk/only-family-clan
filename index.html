@@ -88,12 +88,6 @@ height:100%;
 background:#0a0a0a;
 border-right:1px solid #00ffcc33;
 padding-top:20px;
-animation:slideLeft 1s ease;
-}
-
-@keyframes slideLeft{
-from{transform:translateX(-100%);opacity:0;}
-to{transform:translateX(0);opacity:1;}
 }
 
 .sidebar button{
@@ -111,22 +105,14 @@ transition:0.3s;
 .sidebar button:hover{
 background:#00ffcc;
 color:#000;
-transform:translateX(5px);
 }
 
 /* MAIN */
 .content{
 margin-left:230px;
 padding:20px;
-animation:fadeIn 1s ease;
 }
 
-@keyframes fadeIn{
-from{opacity:0;}
-to{opacity:1;}
-}
-
-/* BACKGROUND */
 .bg{
 position:fixed;
 width:100%;
@@ -186,12 +172,7 @@ animation:gl2 0.3s infinite;
 
 /* SECTIONS */
 .section{display:none;}
-.active{display:block;animation:pop 0.4s ease;}
-
-@keyframes pop{
-from{transform:translateY(10px);opacity:0;}
-to{transform:translateY(0);opacity:1;}
-}
+.active{display:block;}
 
 .card{
 background:rgba(255,255,255,0.05);
@@ -200,7 +181,6 @@ border-left:3px solid #00ffcc;
 margin-bottom:15px;
 }
 
-/* RULES TEXT */
 .rules{
 white-space:pre-wrap;
 line-height:1.6;
@@ -221,6 +201,9 @@ line-height:1.6;
 <button onclick="check()">ENTER</button>
 <p id="msg"></p>
 </div>
+
+<!-- SOUND (NEW 🔊) -->
+<audio id="enterSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8b1b1c8b0.mp3?filename=game-ui-6-143726.mp3"></audio>
 
 <!-- SIDEBAR -->
 <div class="sidebar">
@@ -248,48 +231,60 @@ CODM Competitive Clan | Pro League Division
 
 <hr style="border:0;border-top:1px solid #00ffcc33;margin:15px 0;">
 
-<h3>👑 LEADER INFO</h3>
-<p>👤 Name: Maru</p>
+<p>👑 Leader: Maru</p>
+<p>🎯 Motto: Skill decides everything</p>
+
+<p>📢 Clan Status: ACTIVE • ELITE ROSTER ONLINE</p>
+
+<hr style="border:0;border-top:1px solid #00ffcc33;margin:15px 0;">
+
+<h3>🧿 PLAYER INFO</h3>
+
+<p>👤 Owner: Maru</p>
 <p>📱 Telegram: @VoidSpctre</p>
-<p>🏆 Role: Founder / IGL</p>
+<p>🏷 Clan Tag: ONLY・FAMILY</p>
+<p>🌍 Region: International / Competitive Global</p>
 
 <hr style="border:0;border-top:1px solid #00ffcc33;margin:15px 0;">
 
-<h3>⚔️ CLAN STATUS</h3>
-<p>🟢 Status: ACTIVE</p>
-<p>🔥 Mode: PRO LEAGUE SCRIMS</p>
-<p>🎯 Focus: Competitive / Tournament / Ranked Scrims</p>
+<h3>⚔️ CLAN DESCRIPTION</h3>
 
-<hr style="border:0;border-top:1px solid #00ffcc33;margin:15px 0;">
-
-<h3>🧿 CLAN DESCRIPTION</h3>
 <p>
-ONLY・FAMILY is a high-level CODM competitive clan built for serious players only.
-We focus on discipline, teamwork, and tournament performance.
+ONLY・FAMILY is a competitive Call of Duty Mobile clan focused on
+high-level scrims, tournament participation, and pro-league discipline.
 </p>
 
 <p>
-Casual gameplay is not allowed. Only skilled and active players remain in roster.
+We operate under strict rules, teamwork structure, and tactical gameplay
+with zero tolerance for disrespect or non-serious players.
 </p>
 
 <hr style="border:0;border-top:1px solid #00ffcc33;margin:15px 0;">
 
 <h3>🏆 ACHIEVEMENTS</h3>
+
 <p>🥇 Ranked Scrims: ACTIVE</p>
 <p>🥈 Tournament Wins: 3+ (UNOFFICIAL)</p>
-<p>🥉 Core Players: 5 ACTIVE MEMBERS</p>
+<p>🥉 Active Members: 5 CORE PLAYERS</p>
 
 <hr style="border:0;border-top:1px solid #00ffcc33;margin:15px 0;">
 
-<h3>📡 LIVE SYSTEM</h3>
-<p>🟢 Server: ONLINE</p>
+<h3>📡 LIVE STATUS</h3>
+
+<p>🟢 Server Status: ONLINE</p>
+<p>🟢 Scrim Mode: ENABLED</p>
 <p>🟢 Recruitment: OPEN</p>
-<p>🟢 Training Mode: ENABLED</p>
 
 <hr style="border:0;border-top:1px solid #00ffcc33;margin:15px 0;">
 
-<h3>⚡ MOTTO</h3>
-<p style="color:#00ffcc;font-weight:bold;">
+<h3>⚡ SYSTEM NOTICE</h3>
+
+<p>
+This clan is built for competitive players only.
+Casual behavior = instant removal.
+</p>
+
+<p>
 “Skill decides everything.”
 </p>
 
@@ -297,14 +292,6 @@ Casual gameplay is not allowed. Only skilled and active players remain in roster
 </div>
 
 <!-- RULES -->
-<div id="rules" class="section">
-<div class="card">
-<h2>RULES</h2>
-<div class="rules">
-🌍 ONLY・FAMILY CLAN WAR RULES LIST
-
-> Elite Competitive Regulations | No Mercy | Pro League Standard
-
 <div id="rules" class="section">
 <div class="card">
 
@@ -435,122 +422,163 @@ Rytec AMR —> All Ammunitions
 
 ❌ All MARKSMAN’s & SHOTGUNS Are Banned
 
-🌍 ONLY・FAMILY CLAN WAR RULES LIST
+---
 
-> Elite Competitive Regulations | No Mercy | Pro League Standard
+💠7.6 Banned PISTOLS & LAUNCHERS 
 
-
+❌ All PISTOLS & LAUNCHERS Are Banned 
 
 ---
 
-1. 🎮 OFFICIAL OVERVIEW
+💠7.7 MELEE
 
-💠1.1 هر‌گونه تخلف —> حذف مستقیم ، بدون هشدار
-
----
-
-2. 🧩 MATCH STRUCTURE (STANDARD FORMAT)
-
-💠2.1 فرمت : Best of 3 (Bo3)
-
-💠2.2 ساختار مسابقه :
-
-💠Match 1 → Sniper Only | Firing Range
-
-💠Match 2 → انتخاب مپ توسط بازنده مچ اول
-
-💠Match 3 → انتخاب مپ توسط برنده مچ اول
-
-💠2.3 مپ منتخب بایستی از مپ های سرچ اند دیستروی رنک باشد
-
-💠2.4 هر مچ شامل ۵ راند سرچ اند دیستروی می‌باشد
-
-💠2.5 تغییر قوانین در طول وار ممنوع می‌باشد
+✔️ Only In LOADOUT
+❌ کیل گرفتن با نایف ممنوع می‌باشد
 
 ---
 
-3. ⏱️ TIMING RULES
+8. 💣 EQUIPMENTS 
 
-💠3.1 حداکثر تأخیر قابل پذیرش —> ۵ دقیقه
-💠3.2 تاخیر —> Forfeit مستیقم
-💠3.3 قطع اتصال —> ادامه بدون ReHost
-💠3.4 سوء‌استفاده از تأخیر —> حذف تیم 
+✔️ Frag Grenade / Smok / Slim Shot / Trophy System 
+❌ اسپم یا Abuse ممنوع می‌باشد
 
 ---
 
-4. 👥 PLAYER ELIGIBILITY
+9. 🧿 Banned PERKS 
 
-💠4.1 حضور فقط اعضای رسمی کلن
-💠4.2 داشتن تگ کلن الزامی است
-💠4.3 موارد غیرمجاز :
-
-💠شرکت در وار با اکانت فیک
-
-💠ورود غیرمجاز به وار
-
-➡️ نتیجه : Blacklist + حذف فوری
+❌  Red PERKS : Martyrdom | Restock | Tactician
+Green PERKS : Vulture | Tracker | Quick Fix | Recon
+Blue PERKS : Alert | Shrapnel
 
 ---
 
-5. 🎧 COMMUNICATION RULES
+10. ⚖️ PENALTY SYSTEM
 
-💠5.1 اتصال میکروفون الزامی است (در صورت مشکل با خاموش و روشن کردن اینترنت متصل به آن رفع شود)
-💠5.2 فقط Leader و Vice Master حق استفاده از میکروفون و صحبت دارند
-💠5.3 Toxicity یا Noise —> Mute / Kick
+تخلف اول → حذف راند
 
----
+تخلف دوم → حذف تیمی
 
-6. 👁️ SPECTATOR & STREAM
+تخلف سوم → Forfeit
 
-💠6.1‌ ورود اسپکتیتور به روم ممنوع می‌باشد
-💠6.2 حضور با حالت استریمر مود ممنوع می‌باشد
-💠6.3 استریم اسنایپ کردن —> حذف فوری
+سوءاستفاده → Disqualification
 
 ---
 
-7. ‼️WEAPON BAN SYSTEM
+11. 🚨 COMPETITIVE RULES
 
-💠7.1 Banned ASSAULT RIFLES 
+💠11.1 بی‌احترامی در روم ممنوع می‌باشد
 
-❌ M16 | Swordfish | Oden | EM2 | LAG 53 | Vargo-S
-
-💠Banned Attachemnts : 
-
-Man-O-War —> Ammunition : Thermite Ammo
-AS VAL —> Ammunition : 15 Round FMJ
-CR-56 AMAX —> Ammunition: M67 Ammo
-Kilo 141 —> Ammunition: 100 Round Reload
-Maddox —> Barrel : Echo Fire Mod
-Type 19 —> Ammunition: Hi-Accuracy Sniper Ammo
+💠11.2 بحث در روم ممنوع می‌باشد  
 
 ---
 
-💠7.2 Banned SMGs
+12. 🏁 FINAL AUTHORITY
 
-❌ Chicom | Fennec | MAC-10 | KSP-45 | OTs 9 | TEC-9 | ISO | USS9 | Sten
-
-💠Banned Attachemnts : 
-
-Pharo —> Underbarrel : Underbarrel Stun Gun
-Striker 45 —> Ammunition : .45 Hollow Point 12-R Mags
-CX-9 —> Ammunition : 9mm Hollow Point 12-R Mags
+12.1 تصمیم نهایی با ادمین می‌باشد
+12.2 هیچ‌گونه اعتراض در طول وار قابل پذیرش نیست
 
 ---
 
-💠7.3 Banned LMGs
+🌍 ONLY・FAMILY
 
-❌ All LMGs Are Banned
+> “Skill decides everything.”
 
----
+</div>
+</div>
+</div>
+  <!-- ROSTER -->
+<div id="roster" class="section">
 
-💠7.4 Banned SNIPERS
+<div class="card">
+<h2>🏆 ELITE WAR ROSTER</h2>
 
-❌ XPR-50 | Arctic .50 | M21 EBR | NA-45 | SVD | 
+<div class="rules">
 
-💠Banned Attachemnts :  
+╭━━━〔 ⚔️ ONLY・FAMILY ELITE SQUAD ⚔️ 〕━━━╮
+┃        CODM COMPETITIVE LINEUP
+╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
 
-DL Q33 —> Ammunition : Maevwat Omega-1
-Rytec AMR —> All Ammunitions
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+👑 LEADER / IGL
+┃ 🎮 IGN : 𝙤𝙣𝙡𝙮ゝMaru
+┃ 🆔 UID : 7098766198632349698
+┗ 📱 DEVICE : Poco X 6 Pro
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚡ ENTRY FRAGGER
+┃ 🎮 IGN : 𝙤𝙣𝙡𝙮ゝLUIGI
+┃ 🆔 UID : 7424150550676963329
+┗ 📱 DEVICE : Poco X 7
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🛡 SUPPORT PLAYER
+┃ 🎮 IGN : 𝙤𝙣𝙡𝙮ゝfans
+┃ 🆔 UID : 7065612241814945793
+┗ 📱 DEVICE : iPhone 13 Normal
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 RIFLER
+┃ 🎮 IGN : 𝙤𝙣𝙡𝙮ゝgl0ry
+┃ 🆔 UID : 7304502075479228417
+┗ 📱 DEVICE : Poco X 7 Pro
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🧠 FLEX / IGL SUPPORT
+┃ 🎮 IGN : 𝙤𝙣𝙡𝙮ゝDemo
+┃ 🆔 UID : 7136200059792130049
+┗ 📱 DEVICE : iPad Pro 2025
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔥 STATUS : ACTIVE COMPETITIVE ROSTER
+🏆 MODE : SCRIMS • TOURNAMENT • PRO LEAGUE READY
+
+“Skill decides everything.”
+
+</div>
+</div>
+
+</div>
+<script>
+
+/* LOADER */
+setTimeout(()=>{
+document.getElementById("loader").style.display="none";
+},2500);
+
+/* LOGIN + SOUND */
+function check(){
+let c=document.getElementById("code").value;
+
+if(c==="OnlyFamily"){
+document.getElementById("login").style.display="none";
+document.body.style.overflow="auto";
+
+/* 🔊 PLAY SOUND */
+let audio=document.getElementById("enterSound");
+audio.volume=0.6;
+audio.play();
+
+}else{
+document.getElementById("msg").innerText="Wrong Code";
+}
+}
+
+/* NAV */
+function show(id){
+document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+}
+
+</script>
+
+</body>
+</html>ns
 
 ---
 
