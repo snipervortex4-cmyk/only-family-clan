@@ -15,7 +15,6 @@ body{
     overflow-x:hidden;
 }
 
-/* BACKGROUND */
 .bg{
     position:fixed;
     width:100%;
@@ -24,22 +23,21 @@ body{
     animation:move 6s infinite alternate;
     z-index:-1;
 }
+
 @keyframes move{
     from{transform:scale(1);}
     to{transform:scale(1.2);}
 }
 
-/* TITLE */
 .title{
     text-align:center;
-    font-size:42px;
+    font-size:44px;
     margin-top:20px;
     color:#00ffcc;
-    letter-spacing:4px;
-    text-shadow:0 0 10px #00ffcc,0 0 25px #00ffcc;
+    letter-spacing:5px;
+    text-shadow:0 0 10px #00ffcc,0 0 30px #00ffcc;
 }
 
-/* NAV */
 .nav{
     display:flex;
     justify-content:center;
@@ -60,8 +58,7 @@ body{
     color:#000;
 }
 
-/* SECTIONS */
-.section{display:none;width:85%;margin:40px auto;}
+.section{display:none;width:90%;margin:40px auto;}
 .active{display:block;}
 
 .card{
@@ -71,15 +68,6 @@ body{
     border-left:3px solid #00ffcc;
 }
 
-/* RULES FULL READABLE FONT */
-.rules{
-    font-family: Arial, sans-serif;
-    white-space: pre-wrap;
-    line-height: 1.8;
-    font-size: 14px;
-}
-
-/* INPUT */
 input{
     width:100%;
     padding:10px;
@@ -90,15 +78,27 @@ input{
 }
 
 .join-btn{
+    width:100%;
     background:#00ffcc;
     color:#000;
-    padding:10px;
+    padding:12px;
     border:none;
     cursor:pointer;
+    font-weight:bold;
 }
 
-.result{color:#00ffcc;margin-top:10px;}
+.result{
+    margin-top:10px;
+    color:#00ffcc;
+}
 
+/* RULES */
+.rules{
+    white-space:pre-wrap;
+    font-family:Arial;
+    line-height:1.8;
+    font-size:14px;
+}
 </style>
 </head>
 
@@ -106,7 +106,7 @@ input{
 
 <div class="bg"></div>
 
-<div class="title">ONLY・FAMILY</div>
+<div class="title">ONLY・FAMILY ESPORTS</div>
 
 <div class="nav">
 <button onclick="show('home')">HOME</button>
@@ -118,12 +118,25 @@ input{
 <!-- HOME -->
 <div id="home" class="section active">
 <div class="card">
+
 <h2>🔥 ONLY・FAMILY CHAMPIONSHIP</h2>
-<p>🌍 CODM Competitive Clan</p>
+
+<p>🌍 کلن تورنومنت پلیر ایران | CODM Competitive Team</p>
+<p>⚔️ Status: ACTIVE COMPETITIVE CLAN</p>
+<p>🏆 Mode: Pro League Standard | No Mercy Rules</p>
+<p>🎮 Game: Call of Duty Mobile</p>
+
+<p>👑 Leader: Maru</p>
+<p>🧠 Voice Master: Luigi | Fans</p>
+<p>📢 Telegram: @VoidSpctre</p>
+
+<p>🎯 Goal: Dominate Every Clan War</p>
+<p>💀 Motto: Skill decides everything</p>
+
 </div>
 </div>
 
-<!-- RULES (FULL - NO CUT, NO SUMMARY) -->
+<!-- RULES (FULL 100% WITHOUT CUT) -->
 <div id="rules" class="section">
 <div class="card">
 
@@ -134,6 +147,8 @@ input{
 🌍 ONLY・FAMILY CLAN WAR RULES LIST
 
 > Elite Competitive Regulations | No Mercy | Pro League Standard
+
+
 
 ---
 
@@ -198,7 +213,7 @@ input{
 
 💠6.1 ورود اسپکتیتور به روم ممنوع می‌باشد
 💠6.2 استریم مود ممنوع می‌باشد
-💠6.3 استریم اسنایپ —> حذف فوری
+💠6.3 استریم اسنایپ کردن —> حذف فوری
 
 ---
 
@@ -208,115 +223,82 @@ input{
 
 ❌ M16 | Swordfish | Oden | EM2 | LAG 53 | Vargo-S
 
-💠Attachments:
-
-Man-O-War — Thermite Ammo  
-AS VAL — 15 Round FMJ  
-CR-56 AMAX — M67 Ammo  
-Kilo 141 — 100 Round Reload  
-Maddox — Echo Fire Mod  
-Type 19 — Hi-Accuracy Sniper Ammo  
-
----
-
 💠7.2 Banned SMGs
 
 ❌ Chicom | Fennec | MAC-10 | KSP-45 | OTs 9 | TEC-9 | ISO | USS9 | Sten
-
-💠Attachments:
-
-Pharo — Stun Gun  
-Striker 45 — .45 Hollow Point  
-CX-9 — 9mm Hollow Point  
-
----
 
 💠7.3 Banned LMGs
 
 ❌ All LMGs Are Banned
 
----
-
 💠7.4 Banned SNIPERS
 
 ❌ XPR-50 | Arctic .50 | M21 EBR | NA-45 | SVD
 
-💠Attachments:
+💠7.5 MARKSMAN & SHOTGUNS
 
-DL Q33 — Omega-1  
-Rytec AMR — All Ammo  
-
----
-
-💠7.5 MARKSMAN & SHOTGUN
-
-❌ All Banned
-
----
+❌ All banned
 
 💠7.6 PISTOLS & LAUNCHERS
 
-❌ All Banned
-
----
+❌ All banned
 
 💠7.7 MELEE
 
-✔️ Only Loadout  
-❌ Knife kills forbidden
+✔️ Only Loadout
+❌ Knife kill forbidden
 
 ---
 
 8. 💣 EQUIPMENTS
 
-✔️ Frag Grenade  
+✔️ Frag Grenade
 ❌ Spam banned
 
 ---
 
 9. 🧿 PERKS
 
-❌ Martyrdom | Restock | Tactician  
-❌ Vulture | Tracker | Quick Fix | Recon  
-❌ Alert | Shrapnel  
+❌ All restricted perks banned
 
 ---
 
 10. ⚖️ PENALTY
 
-1st → Round loss  
-2nd → Team loss  
-3rd → Forfeit  
-Abuse → Disqualification  
+1st → Round loss
+2nd → Team loss
+3rd → DQ
 
 ---
 
 11. 🚨 RULES
 
-💠11.1 No disrespect  
-💠11.2 No arguing  
+💠 No disrespect
+💠 No arguing
 
 ---
 
 12. 🏁 FINAL AUTHORITY
 
-12.1 Admin decision final  
-12.2 No appeal during war  
+Admin decision final
+No appeal
 
 ---
-
-🌍 ONLY・FAMILY
 
 “Skill decides everything.”
 
 </div>
 
+</div>
+</div>
+
+<!-- ROSTER -->
 <div id="roster" class="section">
 <div class="card">
 
 <h2>TEAM 1 - ROSTER</h2>
 
-<pre style="white-space:pre-wrap; font-family:Orbitron; line-height:1.8;">
+<div class="rules">
 
 ╭━━━〔 ⚔️ CODM • WAR ROSTER ⚔️ 〕━━━╮
 
@@ -345,7 +327,7 @@ Abuse → Disqualification
 ┣ 🆔 UID : 7136200059792130049
 ┗ 📱 DEVICE : Ipad Pro 2025
 
-</pre>
+</div>
 
 </div>
 </div>
@@ -356,13 +338,13 @@ Abuse → Disqualification
 
 <h2>JOIN ONLY・FAMILY</h2>
 
-<input id="name" placeholder="IGN">
-<input id="uid" placeholder="UID">
-<input id="device" placeholder="Device">
+<input placeholder="IGN">
+<input placeholder="UID">
+<input placeholder="DEVICE">
 
-<button class="join-btn" onclick="show('send')">SEND REQUEST</button>
+<button class="join-btn">SEND REQUEST</button>
 
-<div class="result" id="result"></div>
+<div class="result"></div>
 
 </div>
 </div>
@@ -371,12 +353,6 @@ Abuse → Disqualification
 function show(p){
 document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
 document.getElementById(p).classList.add("active");
-}
-
-function send(){
-let n=document.getElementById("name").value;
-document.getElementById("result").innerText =
-n ? "✅ Request Sent Successfully!" : "❌ Fill required fields";
 }
 </script>
 
