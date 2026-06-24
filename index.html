@@ -3,667 +3,741 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>ONLY・FAMILY ESPORTS</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&family=Noto+Kufi+Arabic:wght@400;700&display=swap" rel="stylesheet">
+<title>OF-OS // ONLY·FAMILY OPERATING SYSTEM</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&family=Noto+Kufi+Arabic:wght@400;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --neon:#00ffcc;--neon2:#7b2fff;--neon3:#ff2d6b;--neon4:#ffcc00;--neon5:#00aaff;
-  --bg:#02030a;--bg2:#060910;--bg3:#0a0d1a;
-  --card:rgba(0,255,204,0.03);--border:rgba(0,255,204,0.14);
-  --text:#c8ffe8;--glow:0 0 16px #00ffccaa,0 0 50px #00ffcc33;
-  --glow2:0 0 16px #7b2fffaa,0 0 50px #7b2fff33;
-  --glow3:0 0 16px #ff2d6baa;
+  --n:#00ffcc;--n2:#7b2fff;--n3:#ff2d6b;--n4:#ffcc00;--n5:#00aaff;
+  --bg:#01020a;--bg2:#060910;--bg3:#0a0d1a;
+  --card:rgba(0,255,204,0.03);--border:rgba(0,255,204,0.12);
+  --text:#c8ffe8;
+  --glow:0 0 20px #00ffccaa,0 0 60px #00ffcc22;
+  --glow2:0 0 20px #7b2fffaa;
 }
-html{font-size:15px;scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:'Rajdhani','Noto Kufi Arabic',sans-serif;min-height:100vh;overflow-x:hidden}
+html{font-size:15px}
+body{background:var(--bg);color:var(--text);font-family:'Share Tech Mono',monospace;min-height:100vh;overflow-x:hidden;cursor:default}
 
-/* ===== CANVAS BG ===== */
+/* ===== CANVAS LAYERS ===== */
 #bgCanvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+#particleCanvas{position:fixed;inset:0;z-index:1;pointer-events:none}
+#scanlines{position:fixed;inset:0;z-index:2;pointer-events:none;
+  background:repeating-linear-gradient(to bottom,transparent 0,transparent 2px,rgba(0,0,0,.06) 2px,rgba(0,0,0,.06) 3px)}
+#vignette{position:fixed;inset:0;z-index:2;pointer-events:none;
+  background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,.8) 100%)}
 
-/* ===== SCANLINES ===== */
-#scanlines{position:fixed;inset:0;z-index:1;pointer-events:none;
-  background:repeating-linear-gradient(to bottom,transparent 0px,transparent 3px,rgba(0,0,0,0.07) 3px,rgba(0,0,0,0.07) 4px)}
+/* CRT flicker */
+@keyframes crtFlicker{0%,100%{opacity:1}92%{opacity:.98}94%{opacity:.93}96%{opacity:.99}}
+body{animation:crtFlicker 8s ease infinite}
 
-/* ===== CORNER GLOWS ===== */
-.corner-glow{position:fixed;width:400px;height:400px;border-radius:50%;filter:blur(120px);z-index:0;pointer-events:none;opacity:.15}
-#cg1{top:-150px;left:-150px;background:var(--neon2)}
-#cg2{bottom:-150px;right:-150px;background:var(--neon)}
-#cg3{top:50%;left:50%;transform:translate(-50%,-50%);background:var(--neon5);opacity:.05;width:600px;height:600px}
-
-/* ===== VIGNETTE ===== */
-#vignette{position:fixed;inset:0;z-index:1;pointer-events:none;
-  background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,.7) 100%)}
-
-/* ===== LOADER ===== */
-#loader{position:fixed;inset:0;z-index:9999;background:var(--bg);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px}
-.ld-logo{font-family:'Orbitron',sans-serif;font-size:clamp(1.2rem,5vw,2rem);font-weight:900;
-  color:var(--neon);text-shadow:var(--glow);letter-spacing:6px}
-.ld-hex{display:flex;gap:8px;margin:8px 0}
-.ld-hex span{width:10px;height:10px;background:var(--neon);border-radius:2px;
-  animation:hexPop .6s ease infinite}
-.ld-hex span:nth-child(1){animation-delay:0s}
-.ld-hex span:nth-child(2){animation-delay:.1s}
-.ld-hex span:nth-child(3){animation-delay:.2s}
-.ld-hex span:nth-child(4){animation-delay:.3s}
-.ld-hex span:nth-child(5){animation-delay:.4s}
-@keyframes hexPop{0%,100%{transform:scaleY(1);opacity:.4}50%{transform:scaleY(2.2);opacity:1}}
-.ld-bar-wrap{width:min(300px,75vw);height:3px;background:rgba(0,255,204,.1);border-radius:2px;overflow:hidden}
-.ld-bar{height:100%;width:0;background:linear-gradient(90deg,var(--neon2),var(--neon));
-  box-shadow:0 0 12px var(--neon);animation:ldFill 2.6s ease forwards}
-@keyframes ldFill{to{width:100%}}
-.ld-txt{font-family:'Share Tech Mono',monospace;font-size:.7rem;letter-spacing:3px;color:rgba(0,255,204,.5)}
+/* ===== BOOT SEQUENCE ===== */
+#boot{position:fixed;inset:0;z-index:9999;background:#000;
+  display:flex;flex-direction:column;justify-content:center;padding:clamp(20px,5vw,60px);
+  font-family:'Share Tech Mono',monospace}
+.boot-line{font-size:clamp(.7rem,2vw,.88rem);line-height:2;color:rgba(0,255,204,.8);
+  opacity:0;transform:translateX(-10px);transition:all .3s}
+.boot-line.show{opacity:1;transform:translateX(0)}
+.boot-line.ok::after{content:' [OK]';color:#00ff88}
+.boot-line.warn::after{content:' [WARN]';color:var(--n4)}
+.boot-line.err::after{content:' [ERR]';color:var(--n3)}
+.boot-cursor{display:inline-block;width:10px;height:1.2em;background:var(--n);animation:cur .6s step-end infinite;vertical-align:middle}
+@keyframes cur{0%,100%{opacity:1}50%{opacity:0}}
+#boot-progress{margin-top:20px;width:100%;max-width:600px}
+.bp-label{font-size:.65rem;letter-spacing:3px;color:rgba(0,255,204,.4);margin-bottom:6px}
+.bp-bar{height:2px;background:rgba(0,255,204,.1);border-radius:1px;overflow:hidden}
+.bp-fill{height:100%;width:0;background:var(--n);box-shadow:0 0 10px var(--n);transition:width .1s linear}
+#boot-pct{font-size:1.5rem;font-weight:900;color:var(--n);text-shadow:var(--glow);margin-top:8px;font-family:'Orbitron',sans-serif}
 
 /* ===== LOGIN ===== */
-#login{position:fixed;inset:0;z-index:9998;display:flex;align-items:center;justify-content:center;
-  background:rgba(2,3,10,.95);backdrop-filter:blur(10px)}
-.login-box{background:rgba(0,255,204,.02);border:1px solid rgba(0,255,204,.2);border-radius:20px;
-  padding:clamp(28px,5vw,50px) clamp(22px,6vw,56px);width:min(440px,94vw);
-  text-align:center;position:relative;overflow:hidden;
-  animation:loginIn .7s cubic-bezier(.22,1,.36,1)}
-@keyframes loginIn{from{transform:scale(.85) translateY(40px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
-.login-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,transparent,var(--neon),var(--neon2),transparent)}
-.login-box::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent,var(--neon2),var(--neon),transparent)}
+#login{position:fixed;inset:0;z-index:9998;display:none;align-items:center;justify-content:center;
+  background:rgba(1,2,10,.97);backdrop-filter:blur(12px)}
+.login-terminal{width:min(480px,94vw);position:relative}
+.lt-header{font-size:.65rem;letter-spacing:4px;color:rgba(0,255,204,.3);margin-bottom:4px}
+.lt-box{border:1px solid rgba(0,255,204,.25);border-radius:4px;padding:clamp(24px,5vw,44px);
+  background:rgba(0,0,0,.7);position:relative;overflow:hidden}
+.lt-box::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--n),var(--n2),transparent)}
+.lt-scanline{position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(180deg,rgba(0,255,204,.15),transparent);
+  animation:scanDown 3s linear infinite}
+@keyframes scanDown{0%{top:-3px}100%{top:100%}}
+.lt-logo{font-family:'Orbitron',sans-serif;font-size:clamp(1rem,4vw,1.6rem);font-weight:900;
+  color:var(--n);text-shadow:var(--glow);letter-spacing:6px;text-align:center;margin-bottom:4px}
+.lt-sub{text-align:center;font-size:.62rem;letter-spacing:4px;color:rgba(0,255,204,.3);margin-bottom:28px}
+.lt-prompt{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.5);
+  border:1px solid var(--border);border-radius:3px;padding:12px 14px;margin-bottom:14px}
+.lt-prompt-sym{color:var(--n);font-size:.9rem;flex-shrink:0}
+.lt-prompt input{flex:1;background:none;border:none;outline:none;color:#fff;
+  font-family:'Share Tech Mono',monospace;font-size:.9rem;letter-spacing:4px}
+.lt-prompt input::placeholder{color:rgba(255,255,255,.15);letter-spacing:2px}
+.lt-btn{width:100%;background:none;border:1px solid rgba(0,255,204,.3);border-radius:3px;
+  padding:13px;font-family:'Share Tech Mono',monospace;font-size:.8rem;letter-spacing:4px;
+  color:var(--n);cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.lt-btn::before{content:'';position:absolute;inset:0;background:rgba(0,255,204,.06);
+  transform:translateX(-100%);transition:transform .3s}
+.lt-btn:hover::before{transform:translateX(0)}
+.lt-btn:hover{border-color:var(--n);box-shadow:0 0 20px rgba(0,255,204,.2)}
+#lt-msg{margin-top:12px;text-align:center;font-size:.72rem;letter-spacing:2px;
+  min-height:18px;color:var(--n3)}
+.lt-hint{text-align:center;font-size:.58rem;color:rgba(0,255,204,.15);margin-top:16px;letter-spacing:3px}
 
-.login-hologram{position:relative;width:80px;height:80px;margin:0 auto 20px;
-  display:flex;align-items:center;justify-content:center}
-.login-hologram .ring{position:absolute;border-radius:50%;border:2px solid;animation:ringPulse 2s ease infinite}
-.login-hologram .ring:nth-child(1){width:80px;height:80px;border-color:rgba(0,255,204,.6);animation-delay:0s}
-.login-hologram .ring:nth-child(2){width:60px;height:60px;border-color:rgba(123,47,255,.5);animation-delay:.3s}
-.login-hologram .ring:nth-child(3){width:40px;height:40px;border-color:rgba(0,255,204,.4);animation-delay:.6s}
-@keyframes ringPulse{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.08);opacity:1}}
-.login-hologram .icon-center{position:relative;z-index:1;font-size:2rem}
+/* AI ASSISTANT FLOAT */
+#ai-assist{position:fixed;bottom:20px;right:20px;z-index:200;
+  width:260px;background:rgba(0,0,0,.9);border:1px solid rgba(0,255,204,.2);
+  border-radius:12px;padding:14px;pointer-events:auto;
+  transform:translateY(100px);opacity:0;transition:all .5s cubic-bezier(.22,1,.36,1)}
+#ai-assist.visible{transform:translateY(0);opacity:1}
+.ai-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.ai-avatar{width:32px;height:32px;border-radius:50%;border:1px solid var(--n);
+  display:flex;align-items:center;justify-content:center;font-size:.9rem;
+  background:rgba(0,255,204,.06);flex-shrink:0;animation:aiPulse 2s ease infinite}
+@keyframes aiPulse{0%,100%{box-shadow:0 0 6px rgba(0,255,204,.3)}50%{box-shadow:0 0 18px rgba(0,255,204,.6)}}
+.ai-name{font-size:.6rem;letter-spacing:2px;color:var(--n)}
+.ai-status{font-size:.5rem;color:rgba(0,255,204,.4);letter-spacing:1px}
+.ai-msg{font-size:.68rem;color:rgba(200,255,232,.7);line-height:1.7;min-height:40px}
+.ai-typing{display:flex;gap:3px;margin-top:6px}
+.ai-typing span{width:4px;height:4px;border-radius:50%;background:rgba(0,255,204,.4);
+  animation:aiType .8s ease infinite}
+.ai-typing span:nth-child(2){animation-delay:.15s}
+.ai-typing span:nth-child(3){animation-delay:.3s}
+@keyframes aiType{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px);background:var(--n)}}
 
-.login-title{font-family:'Orbitron',sans-serif;font-size:clamp(1rem,3.5vw,1.3rem);
-  color:var(--neon);letter-spacing:4px;margin-bottom:4px}
-.login-sub{font-size:.72rem;color:rgba(0,255,204,.35);letter-spacing:3px;margin-bottom:28px}
-
-.input-wrap{position:relative;margin-bottom:14px}
-.input-wrap input{width:100%;background:rgba(0,0,0,.6);border:1px solid rgba(0,255,204,.2);
-  border-radius:10px;padding:14px 18px;color:#fff;font-family:'Share Tech Mono',monospace;
-  font-size:1rem;letter-spacing:5px;text-align:center;outline:none;
-  transition:border .25s,box-shadow .25s}
-.input-wrap input:focus{border-color:var(--neon);box-shadow:0 0 0 2px rgba(0,255,204,.12)}
-.input-wrap input::placeholder{letter-spacing:2px}
-
-.login-btn{width:100%;background:linear-gradient(135deg,var(--neon),var(--neon2));
-  border:none;border-radius:10px;padding:14px;font-family:'Orbitron',sans-serif;
-  font-size:.82rem;font-weight:700;letter-spacing:3px;color:#000;cursor:pointer;
-  transition:filter .2s,transform .15s;position:relative;overflow:hidden}
-.login-btn::before{content:'';position:absolute;top:-50%;left:-60%;width:40%;height:200%;
-  background:rgba(255,255,255,.2);transform:skewX(-20deg);animation:btnShine 3s ease infinite}
-@keyframes btnShine{0%{left:-60%}100%{left:160%}}
-.login-btn:hover{filter:brightness(1.2)}
-.login-btn:active{transform:scale(.97)}
-#login-msg{margin-top:12px;font-size:.78rem;letter-spacing:2px;height:20px;color:var(--neon3);font-family:'Share Tech Mono',monospace}
-
-/* ===== SUCCESS FLASH ===== */
-#success-flash{position:fixed;inset:0;z-index:10000;pointer-events:none;opacity:0;
-  background:radial-gradient(circle,rgba(0,255,204,.4) 0%,transparent 70%)}
-#success-flash.flash{animation:flashAnim .8s ease forwards}
-@keyframes flashAnim{0%{opacity:1}100%{opacity:0}}
+/* CURSOR TRAIL */
+.cursor-dot{position:fixed;pointer-events:none;z-index:9990;border-radius:50%;
+  mix-blend-mode:screen;transition:transform .1s}
 
 /* ===== APP ===== */
-#app{display:none;position:relative;z-index:2;min-height:100vh}
+#app{display:none;position:relative;z-index:3;min-height:100vh}
 
-/* ===== SIDEBAR ===== */
-#sidebar{position:fixed;left:0;top:0;bottom:0;width:72px;
-  background:rgba(6,9,16,.97);border-right:1px solid var(--border);
-  display:flex;flex-direction:column;align-items:center;padding:18px 0 16px;gap:4px;
-  z-index:100;transition:width .35s cubic-bezier(.22,1,.36,1)}
-#sidebar.exp{width:210px}
-
-.sb-logo{font-family:'Orbitron',sans-serif;font-size:.5rem;letter-spacing:2px;
-  color:var(--neon);margin-bottom:14px;white-space:nowrap;overflow:hidden;opacity:.6}
-
-.nav-btn{width:90%;display:flex;align-items:center;gap:10px;
-  background:none;border:none;border-radius:10px;padding:11px 12px;
-  color:rgba(0,255,204,.45);cursor:pointer;font-family:'Rajdhani',sans-serif;
-  font-size:.85rem;font-weight:600;letter-spacing:1.5px;
-  transition:all .2s;white-space:nowrap;overflow:hidden;justify-content:center;
-  position:relative}
-#sidebar.exp .nav-btn{justify-content:flex-start}
-.nav-btn .lbl{display:none}
-#sidebar.exp .nav-btn .lbl{display:inline}
-.nav-btn .ico{font-size:1rem;flex-shrink:0}
-.nav-btn:hover,.nav-btn.active{background:rgba(0,255,204,.08);color:var(--neon)}
-.nav-btn.active::before{content:'';position:absolute;left:0;top:20%;bottom:20%;
-  width:3px;background:var(--neon);border-radius:0 2px 2px 0;box-shadow:0 0 8px var(--neon)}
-
-.nav-divider{width:80%;height:1px;background:var(--border);margin:6px 0}
-
-.sb-toggle{margin-top:auto;background:none;border:1px solid var(--border);
-  border-radius:8px;width:34px;height:34px;color:var(--neon);cursor:pointer;
-  font-size:.9rem;transition:all .2s;flex-shrink:0}
-.sb-toggle:hover{background:rgba(0,255,204,.1);border-color:var(--neon)}
-
-/* NOTIFICATION BADGE */
-.notif-badge{position:absolute;top:6px;right:6px;width:7px;height:7px;
-  background:var(--neon3);border-radius:50%;box-shadow:0 0 6px var(--neon3)}
-
-/* ===== MAIN ===== */
-#main{margin-left:72px;padding:18px 16px 50px;min-height:100vh;
-  transition:margin-left .35s cubic-bezier(.22,1,.36,1)}
-#sidebar.exp~#main{margin-left:210px}
-
-/* ===== TOPBAR ===== */
-.topbar{display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:22px;padding-bottom:14px;border-bottom:1px solid var(--border);
-  position:sticky;top:0;background:rgba(2,3,10,.9);backdrop-filter:blur(8px);
-  z-index:50;padding-top:4px}
-.topbar-title{font-family:'Orbitron',sans-serif;font-size:clamp(.85rem,3vw,1.1rem);
-  font-weight:900;color:var(--neon);text-shadow:var(--glow);letter-spacing:3px}
-.topbar-right{display:flex;align-items:center;gap:12px}
-.topbar-status{display:flex;align-items:center;gap:6px;font-size:.68rem;letter-spacing:2px;
-  color:rgba(0,255,204,.45);font-family:'Share Tech Mono',monospace}
-.dot-live{width:7px;height:7px;border-radius:50%;background:#00ff88;
-  box-shadow:0 0 10px #00ff88;animation:blink 1.5s ease infinite}
+/* OS TOP BAR */
+#os-bar{position:fixed;top:0;left:0;right:0;height:36px;z-index:100;
+  background:rgba(1,2,10,.95);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 14px;gap:0;backdrop-filter:blur(8px)}
+.osb-logo{font-family:'Orbitron',sans-serif;font-size:.65rem;font-weight:900;
+  color:var(--n);letter-spacing:3px;margin-right:20px;text-shadow:var(--glow)}
+.osb-menu{display:flex;gap:0;flex:1}
+.osb-item{padding:0 12px;height:36px;display:flex;align-items:center;
+  font-size:.62rem;letter-spacing:2px;color:rgba(0,255,204,.45);
+  cursor:pointer;transition:all .2s;border-bottom:2px solid transparent;white-space:nowrap}
+.osb-item:hover,.osb-item.active{color:var(--n);border-bottom-color:var(--n);background:rgba(0,255,204,.04)}
+.osb-right{display:flex;align-items:center;gap:14px;margin-left:auto}
+.osb-clock{font-size:.62rem;color:rgba(0,255,204,.4);letter-spacing:1px}
+.osb-ping{font-size:.58rem;color:#00ff88;letter-spacing:1px}
+.osb-status{display:flex;align-items:center;gap:5px;font-size:.58rem;color:rgba(0,255,204,.35)}
+.live-dot{width:5px;height:5px;border-radius:50%;background:#00ff88;box-shadow:0 0 8px #00ff88;animation:blink 1.5s ease infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-.server-time{font-family:'Share Tech Mono',monospace;font-size:.68rem;
-  color:rgba(0,255,204,.35);letter-spacing:1px}
 
-/* ===== SECTIONS ===== */
-.section{display:none;animation:fadeUp .4s ease}
+/* MAIN CONTENT */
+#main{padding-top:56px;padding-bottom:40px;padding-left:16px;padding-right:16px;min-height:100vh}
+
+/* SECTIONS */
+.section{display:none;animation:fadeUp .35s ease}
 .section.active{display:block}
-@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 
-/* ===== CARD ===== */
-.card{background:var(--card);border:1px solid var(--border);border-radius:14px;
-  padding:clamp(14px,4vw,24px);margin-bottom:16px;position:relative;overflow:hidden}
-.card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,transparent,var(--neon2),var(--neon),transparent)}
-.card-glow{position:absolute;top:0;right:0;width:100px;height:100px;
-  background:radial-gradient(circle,rgba(0,255,204,.06) 0%,transparent 70%);pointer-events:none}
-
-.section-title{font-family:'Orbitron',sans-serif;font-size:clamp(.8rem,2.5vw,.95rem);
-  color:var(--neon);letter-spacing:2px;margin-bottom:16px;
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:8px;
+  padding:clamp(14px,3.5vw,22px);margin-bottom:14px;position:relative;overflow:hidden}
+.card::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,255,204,.3),rgba(123,47,255,.3),transparent)}
+.sec-title{font-family:'Orbitron',sans-serif;font-size:clamp(.72rem,2vw,.88rem);
+  color:var(--n);letter-spacing:3px;margin-bottom:16px;
   display:flex;align-items:center;gap:10px}
-.section-title::after{content:'';flex:1;height:1px;
-  background:linear-gradient(90deg,var(--border),transparent)}
+.sec-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent)}
 
-/* ===== HOME HERO ===== */
-.hero{text-align:center;padding:clamp(24px,5vw,48px) 20px;position:relative;overflow:hidden}
-.hero-particles{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-.hero-p{position:absolute;width:2px;height:2px;background:var(--neon);border-radius:50%;
-  opacity:0;animation:hpFloat linear infinite}
-@keyframes hpFloat{0%{transform:translateY(100%) scale(0);opacity:0}20%{opacity:.8}100%{transform:translateY(-100px) scale(1);opacity:0}}
+/* ===== HQ DASHBOARD ===== */
+.hq-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+@media(max-width:600px){.hq-grid{grid-template-columns:1fr 1fr}}
 
-.hero-badge{display:inline-flex;align-items:center;gap:8px;
-  border:1px solid rgba(0,255,204,.25);border-radius:20px;
-  padding:5px 18px;font-size:.68rem;letter-spacing:3px;
-  color:rgba(0,255,204,.55);margin-bottom:18px;
-  background:rgba(0,255,204,.03)}
-.badge-dot{width:5px;height:5px;border-radius:50%;background:var(--neon);animation:blink 1.5s ease infinite}
+.hq-cell{background:rgba(0,0,0,.5);border:1px solid var(--border);border-radius:8px;
+  padding:14px;text-align:center;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+.hq-cell:hover{border-color:var(--n);background:rgba(0,255,204,.05);transform:translateY(-3px)}
+.hq-cell::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(0,255,204,.08),transparent 70%);opacity:0;transition:opacity .3s}
+.hq-cell:hover::before{opacity:1}
+.hq-cell-icon{font-size:1.6rem;margin-bottom:6px}
+.hq-cell-label{font-size:.58rem;letter-spacing:3px;color:rgba(0,255,204,.4);margin-bottom:4px}
+.hq-cell-val{font-family:'Orbitron',sans-serif;font-size:clamp(.8rem,2.5vw,1rem);font-weight:700;color:#fff}
+.hq-cell-sub{font-size:.52rem;color:rgba(0,255,204,.25);margin-top:2px;letter-spacing:1px}
 
-.hero-name{font-family:'Orbitron',sans-serif;
-  font-size:clamp(2rem,8vw,4.5rem);font-weight:900;line-height:1;
-  background:linear-gradient(135deg,#fff 0%,var(--neon) 40%,var(--neon2) 80%,var(--neon3) 100%);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  margin-bottom:8px;position:relative}
-.hero-name-sub{font-family:'Orbitron',sans-serif;font-size:clamp(.8rem,2.5vw,1rem);
-  letter-spacing:8px;color:rgba(0,255,204,.4);margin-bottom:20px}
+/* THREAT METER */
+.threat-wrap{position:relative;padding:16px;background:rgba(0,0,0,.5);border:1px solid var(--border);border-radius:8px;margin-bottom:14px}
+.threat-label{font-size:.58rem;letter-spacing:3px;color:rgba(0,255,204,.35);margin-bottom:8px}
+.threat-bar{height:8px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden;position:relative}
+.threat-fill{height:100%;border-radius:4px;transition:width 2s ease;
+  background:linear-gradient(90deg,#00ff88,var(--n4),var(--n3))}
+.threat-markers{display:flex;justify-content:space-between;margin-top:4px}
+.threat-m{font-size:.5rem;letter-spacing:1px}
+.threat-level{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:900;
+  position:absolute;right:16px;top:50%;transform:translateY(-50%);text-shadow:var(--glow3)}
 
-.hero-divider{display:flex;align-items:center;gap:12px;margin:16px auto;max-width:300px}
-.hero-divider::before,.hero-divider::after{content:'';flex:1;height:1px;
-  background:linear-gradient(90deg,transparent,rgba(0,255,204,.3))}
-.hero-divider span{font-size:.6rem;letter-spacing:4px;color:rgba(0,255,204,.3)}
+/* WIN PROBABILITY */
+.win-prob{display:flex;align-items:center;gap:16px;padding:14px;
+  background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:8px;margin-bottom:14px}
+.wp-ring{position:relative;width:70px;height:70px;flex-shrink:0}
+.wp-ring svg{transform:rotate(-90deg)}
+.wp-ring .track{fill:none;stroke:rgba(0,255,204,.1);stroke-width:6}
+.wp-ring .fill{fill:none;stroke:var(--n);stroke-width:6;stroke-linecap:round;
+  stroke-dasharray:188;stroke-dashoffset:188;transition:stroke-dashoffset 2s ease}
+.wp-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:'Orbitron',sans-serif;font-size:.9rem;font-weight:900;color:var(--n)}
+.wp-info{flex:1}
+.wp-title{font-family:'Orbitron',sans-serif;font-size:.7rem;letter-spacing:2px;color:#fff;margin-bottom:6px}
+.wp-detail{font-size:.62rem;color:rgba(0,255,204,.4);line-height:1.8}
 
-/* ANIMATED RANK BADGE */
-.rank-display{display:inline-block;position:relative;margin:16px auto}
-.rank-hex{width:90px;height:90px;background:linear-gradient(135deg,rgba(0,255,204,.1),rgba(123,47,255,.1));
-  border:2px solid rgba(0,255,204,.3);border-radius:16px;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  position:relative;overflow:hidden;margin:0 auto 16px}
-.rank-hex::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;
-  background:conic-gradient(transparent,rgba(0,255,204,.3),transparent 30%);
-  animation:rankSpin 3s linear infinite}
-.rank-hex-inner{position:relative;z-index:1;text-align:center}
-.rank-hex-inner .rank-icon{font-size:2rem}
-.rank-hex-inner .rank-label{font-family:'Orbitron',sans-serif;font-size:.45rem;letter-spacing:2px;color:var(--neon)}
-@keyframes rankSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+/* RADAR */
+#radar-wrap{position:relative;width:min(220px,50vw);height:min(220px,50vw);margin:0 auto}
+#radarCanvas{border-radius:50%;border:1px solid rgba(0,255,204,.2)}
+.radar-label{text-align:center;font-size:.55rem;letter-spacing:3px;color:rgba(0,255,204,.3);margin-top:8px}
 
-/* ===== STATS ROW ===== */
-.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
-.stat-card{background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:12px;
-  padding:14px 8px;text-align:center;position:relative;overflow:hidden;transition:all .3s}
-.stat-card:hover{border-color:rgba(0,255,204,.4);transform:translateY(-2px)}
-.stat-card::before{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent,var(--neon2),transparent);opacity:.5}
-.stat-num{font-family:'Orbitron',sans-serif;font-size:clamp(.9rem,3vw,1.4rem);
-  font-weight:900;color:var(--neon);text-shadow:var(--glow)}
-.stat-lbl{font-size:.58rem;letter-spacing:2px;color:rgba(0,255,204,.4);margin-top:4px}
-.stat-change{font-size:.55rem;color:#00ff88;margin-top:2px}
+/* ENERGY REACTOR */
+#reactor{display:flex;flex-direction:column;align-items:center;padding:20px 10px;margin-bottom:14px}
+.reactor-ring-wrap{position:relative;width:140px;height:140px;margin-bottom:10px}
+.reactor-ring{position:absolute;border-radius:50%;border:2px solid;animation:reactorSpin linear infinite}
+.reactor-ring:nth-child(1){inset:0;border-color:rgba(0,255,204,.6);animation-duration:4s}
+.reactor-ring:nth-child(2){inset:12px;border-color:rgba(123,47,255,.4);animation-duration:3s;animation-direction:reverse}
+.reactor-ring:nth-child(3){inset:24px;border-color:rgba(0,255,204,.3);animation-duration:2s}
+@keyframes reactorSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.reactor-core{position:absolute;inset:36px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,255,204,.4),rgba(123,47,255,.2),transparent);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Orbitron',sans-serif;font-size:.5rem;letter-spacing:2px;color:var(--n);
+  text-align:center;animation:coreBreath 2s ease infinite}
+@keyframes coreBreath{0%,100%{box-shadow:inset 0 0 20px rgba(0,255,204,.2),0 0 20px rgba(0,255,204,.1)}50%{box-shadow:inset 0 0 40px rgba(0,255,204,.4),0 0 40px rgba(0,255,204,.2)}}
+.reactor-status{font-size:.6rem;letter-spacing:3px;color:rgba(0,255,204,.4)}
+.reactor-power{font-family:'Orbitron',sans-serif;font-size:1.2rem;font-weight:900;color:var(--n);text-shadow:var(--glow)}
 
-/* ===== INFO GRID ===== */
-.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
-.info-item{background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:10px;
-  padding:12px;transition:border-color .2s}
-.info-item:hover{border-color:rgba(0,255,204,.3)}
-.info-label{font-size:.6rem;letter-spacing:2px;color:rgba(0,255,204,.35);margin-bottom:4px;font-family:'Share Tech Mono',monospace}
-.info-val{font-size:.88rem;color:#fff;font-weight:600}
+/* TICKER */
+.ticker{background:rgba(0,0,0,.6);border:1px solid var(--border);border-radius:6px;
+  padding:7px 14px;overflow:hidden;white-space:nowrap;margin-bottom:14px}
+.ticker-inner{display:inline-flex;gap:40px;animation:tick 28s linear infinite;font-size:.68rem;letter-spacing:1.5px}
+@keyframes tick{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.ti{display:flex;align-items:center;gap:6px;color:rgba(0,255,204,.5)}
+.ti b{color:var(--n4)}
 
-/* ===== KILL FEED ===== */
-.killfeed-wrap{background:rgba(0,0,0,.5);border:1px solid var(--border);border-radius:10px;
-  padding:14px;overflow:hidden;min-height:130px;position:relative}
-.kf-line{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:.8rem;
-  border-bottom:1px solid rgba(0,255,204,.05);opacity:0;transform:translateX(-20px);
-  transition:all .4s}
-.kf-line.show{opacity:1;transform:translateX(0)}
-.kf-line:last-child{border-bottom:none}
-.kf-killer{color:var(--neon);font-weight:700}
-.kf-weapon{color:var(--neon2);font-size:.68rem;padding:1px 7px;background:rgba(123,47,255,.15);border-radius:4px}
-.kf-victim{color:rgba(255,255,255,.4)}
-.kf-skull{color:var(--neon3)}
+/* HERO */
+.hero{text-align:center;padding:clamp(20px,4vw,40px) 10px;position:relative;overflow:hidden}
+#heroCanvas{position:absolute;inset:0;pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(0,255,204,.2);
+  border-radius:20px;padding:4px 16px;font-size:.6rem;letter-spacing:3px;
+  color:rgba(0,255,204,.5);margin-bottom:14px;background:rgba(0,255,204,.03)}
+.hero-name{font-family:'Orbitron',sans-serif;font-size:clamp(1.8rem,7vw,4rem);font-weight:900;
+  line-height:1;position:relative;z-index:1;
+  background:linear-gradient(135deg,#fff 0%,var(--n) 35%,var(--n2) 70%,var(--n3) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:clamp(.6rem,2vw,.75rem);letter-spacing:6px;color:rgba(0,255,204,.3);
+  margin:8px 0 16px;position:relative;z-index:1}
+.hero-divider{display:flex;align-items:center;gap:10px;margin:12px auto;max-width:260px}
+.hero-divider::before,.hero-divider::after{content:'';flex:1;height:1px;background:rgba(0,255,204,.2)}
+.hero-divider span{font-size:.55rem;letter-spacing:3px;color:rgba(0,255,204,.25)}
 
-/* ===== ACHIEVEMENT TICKER ===== */
-.ticker-wrap{background:rgba(0,0,0,.5);border:1px solid var(--border);border-radius:8px;
-  padding:8px 14px;overflow:hidden;white-space:nowrap;margin-bottom:16px}
-.ticker-inner{display:inline-flex;gap:40px;animation:tickerScroll 25s linear infinite;font-size:.75rem;letter-spacing:1.5px}
-@keyframes tickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.tick-item{display:flex;align-items:center;gap:6px;color:rgba(0,255,204,.6)}
-.tick-highlight{color:var(--neon4);font-weight:700}
+/* COUNTDOWN */
+.countdown{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0}
+.cd{background:rgba(0,0,0,.5);border:1px solid var(--border);border-radius:6px;padding:12px 6px;text-align:center}
+.cd-n{font-family:'Orbitron',sans-serif;font-size:clamp(1rem,3.5vw,1.6rem);font-weight:900;color:var(--n);text-shadow:var(--glow)}
+.cd-l{font-size:.5rem;letter-spacing:2px;color:rgba(0,255,204,.3);margin-top:3px}
 
-/* ===== ACTIVITY LOG ===== */
-.activity-log{background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:10px;padding:12px;max-height:180px;overflow-y:auto}
-.activity-log::-webkit-scrollbar{width:3px}
-.activity-log::-webkit-scrollbar-track{background:transparent}
-.activity-log::-webkit-scrollbar-thumb{background:rgba(0,255,204,.3);border-radius:2px}
-.act-item{display:flex;align-items:flex-start;gap:10px;padding:6px 0;border-bottom:1px solid rgba(0,255,204,.05);font-size:.78rem}
-.act-item:last-child{border-bottom:none}
-.act-time{font-family:'Share Tech Mono',monospace;font-size:.6rem;color:rgba(0,255,204,.3);white-space:nowrap;flex-shrink:0;margin-top:2px}
-.act-text{color:rgba(200,255,232,.6);line-height:1.5}
-.act-text b{color:var(--neon)}
+/* KILL FEED */
+.kfeed{background:rgba(0,0,0,.5);border:1px solid var(--border);border-radius:8px;
+  padding:12px;overflow:hidden;min-height:110px}
+.kf{display:flex;align-items:center;gap:7px;padding:4px 0;font-size:.75rem;
+  border-bottom:1px solid rgba(0,255,204,.05);opacity:0;transform:translateX(-16px);transition:all .4s}
+.kf.show{opacity:1;transform:translateX(0)}
+.kf:last-child{border-bottom:none}
+.kfk{color:var(--n);font-weight:700}.kfw{color:var(--n2);font-size:.65rem;padding:1px 6px;background:rgba(123,47,255,.12);border-radius:3px}.kfv{color:rgba(255,255,255,.35)}.kfs{color:var(--n3)}
 
-/* ===== MAP SELECTOR ===== */
-.map-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
-.map-card{border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;
-  cursor:pointer;transition:all .25s;background:rgba(0,0,0,.3);position:relative;overflow:hidden}
-.map-card:hover{border-color:var(--neon);background:rgba(0,255,204,.06)}
-.map-card.banned{border-color:var(--neon3);background:rgba(255,45,107,.05)}
-.map-card.banned::before{content:'BANNED';position:absolute;top:50%;left:50%;
-  transform:translate(-50%,-50%) rotate(-20deg);
-  font-family:'Orbitron',sans-serif;font-size:.6rem;color:var(--neon3);
-  letter-spacing:2px;opacity:.7}
-.map-card.banned .map-icon,.map-card.banned .map-name{opacity:.3}
-.map-icon{font-size:1.5rem;margin-bottom:4px}
-.map-name{font-size:.65rem;letter-spacing:2px;color:rgba(0,255,204,.5)}
+/* CHART */
+.bars{display:flex;align-items:flex-end;gap:5px;height:70px;padding:0 2px}
+.bw{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.b{width:100%;border-radius:2px 2px 0 0;background:linear-gradient(180deg,var(--n),var(--n2));
+  transition:height .8s cubic-bezier(.22,1,.36,1);box-shadow:0 0 6px rgba(0,255,204,.25);min-height:2px}
+.bl{font-size:.5rem;color:rgba(0,255,204,.35);letter-spacing:.5px}
 
-/* ===== WEAPON META ===== */
-.meta-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(0,255,204,.05)}
-.meta-row:last-child{border-bottom:none}
-.meta-rank{font-family:'Orbitron',sans-serif;font-size:.75rem;color:rgba(0,255,204,.3);width:20px;flex-shrink:0}
-.meta-weapon-name{flex:1;font-size:.82rem;color:#fff;font-weight:600}
-.meta-tier{font-size:.62rem;padding:2px 8px;border-radius:4px;letter-spacing:1.5px;font-family:'Orbitron',sans-serif}
-.tier-s{background:rgba(255,204,0,.15);color:var(--neon4);border:1px solid rgba(255,204,0,.3)}
-.tier-a{background:rgba(0,255,204,.1);color:var(--neon);border:1px solid rgba(0,255,204,.2)}
-.tier-b{background:rgba(0,170,255,.1);color:var(--neon5);border:1px solid rgba(0,170,255,.2)}
-.meta-bar-wrap{width:60px;height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
-.meta-bar{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--neon2),var(--neon))}
+/* ACTIVITY */
+.actlog{background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:8px;
+  padding:10px;max-height:160px;overflow-y:auto}
+.actlog::-webkit-scrollbar{width:2px}
+.actlog::-webkit-scrollbar-thumb{background:rgba(0,255,204,.2);border-radius:1px}
+.act{display:flex;gap:8px;padding:5px 0;border-bottom:1px solid rgba(0,255,204,.04);font-size:.72rem}
+.act:last-child{border-bottom:none}
+.act-t{font-size:.55rem;color:rgba(0,255,204,.25);white-space:nowrap;flex-shrink:0;margin-top:2px;font-family:'Share Tech Mono',monospace}
+.act-txt{color:rgba(200,255,232,.55);line-height:1.5;font-family:'Rajdhani','Noto Kufi Arabic',sans-serif}
+.act-txt b{color:var(--n)}
+
+/* INFO GRID */
+.igrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.ii{background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:7px;padding:10px;transition:border-color .2s}
+.ii:hover{border-color:rgba(0,255,204,.25)}
+.ii-l{font-size:.55rem;letter-spacing:2px;color:rgba(0,255,204,.3);margin-bottom:3px;font-family:'Share Tech Mono',monospace}
+.ii-v{font-size:.82rem;color:#fff;font-weight:600;font-family:'Rajdhani',sans-serif}
 
 /* ===== ROSTER ===== */
-.team-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;margin-top:8px}
-.team-badge{font-family:'Orbitron',sans-serif;font-size:.7rem;letter-spacing:2px;
-  padding:4px 14px;border-radius:6px;font-weight:700}
-.team-1{background:rgba(0,255,204,.12);color:var(--neon);border:1px solid rgba(0,255,204,.3)}
-.team-2{background:rgba(123,47,255,.12);color:var(--neon2);border:1px solid rgba(123,47,255,.3)}
-.team-3{background:rgba(255,45,107,.12);color:var(--neon3);border:1px solid rgba(255,45,107,.3)}
-.team-line{flex:1;height:1px;background:var(--border)}
+.team-hdr{display:flex;align-items:center;gap:10px;margin:16px 0 12px}
+.tbadge{font-family:'Orbitron',sans-serif;font-size:.62rem;letter-spacing:2px;
+  padding:4px 12px;border-radius:4px;font-weight:700}
+.t1{background:rgba(0,255,204,.1);color:var(--n);border:1px solid rgba(0,255,204,.25)}
+.t2{background:rgba(123,47,255,.1);color:var(--n2);border:1px solid rgba(123,47,255,.25)}
+.t3{background:rgba(255,45,107,.1);color:var(--n3);border:1px solid rgba(255,45,107,.25)}
+.tline{flex:1;height:1px;background:var(--border)}
 
-.player-card{background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:14px;
-  padding:clamp(12px,3vw,18px);margin-bottom:10px;display:flex;align-items:center;gap:14px;
-  transition:all .25s;cursor:default;position:relative;overflow:hidden}
-.player-card:hover{border-color:rgba(0,255,204,.35);background:rgba(0,255,204,.04);transform:translateX(4px)}
-.player-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
-  background:linear-gradient(180deg,var(--neon),var(--neon2));opacity:0;transition:opacity .25s}
-.player-card:hover::before{opacity:1}
+.pc{background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:10px;
+  padding:clamp(10px,3vw,16px);margin-bottom:8px;display:flex;align-items:center;gap:12px;
+  transition:all .25s;cursor:pointer;position:relative;overflow:hidden}
+.pc:hover{border-color:rgba(0,255,204,.3);background:rgba(0,255,204,.04);transform:translateX(3px)}
+.pc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:linear-gradient(180deg,var(--n),var(--n2));opacity:0;transition:.25s}
+.pc:hover::before{opacity:1}
+.pav{width:clamp(42px,9vw,52px);height:clamp(42px,9vw,52px);border-radius:50%;
+  border:2px solid rgba(0,255,204,.3);background:rgba(0,255,204,.05);
+  display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;
+  box-shadow:0 0 14px rgba(0,255,204,.15)}
+.pi{flex:1;min-width:0}
+.pign{font-family:'Orbitron',sans-serif;font-size:clamp(.65rem,2.2vw,.8rem);color:#fff;font-weight:700;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prole{font-size:.6rem;letter-spacing:2px;color:var(--n);margin:2px 0}
+.pdev{font-size:.58rem;color:rgba(255,255,255,.25)}
+.puid{font-family:'Share Tech Mono',monospace;font-size:.52rem;color:rgba(0,255,204,.2);margin-top:1px}
 
-.p-avatar{width:clamp(46px,10vw,58px);height:clamp(46px,10vw,58px);border-radius:50%;
-  border:2px solid rgba(0,255,204,.4);background:rgba(0,255,204,.06);
-  display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;
+/* GENOME BARS */
+.genome{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px}
+.gen-row{display:flex;align-items:center;gap:6px}
+.gen-label{font-size:.5rem;letter-spacing:1px;color:rgba(0,255,204,.3);width:55px;flex-shrink:0}
+.gen-bar-w{flex:1;height:3px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
+.gen-bar{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--n2),var(--n))}
+
+/* PLAYER MODAL */
+#player-modal{position:fixed;inset:0;z-index:500;display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.85);backdrop-filter:blur(8px)}
+#player-modal.open{display:flex}
+.pm-box{background:rgba(6,9,16,.97);border:1px solid rgba(0,255,204,.25);border-radius:12px;
+  width:min(400px,92vw);padding:24px;position:relative;animation:loginIn .4s cubic-bezier(.22,1,.36,1)}
+@keyframes loginIn{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+.pm-close{position:absolute;top:12px;right:14px;background:none;border:none;
+  color:rgba(0,255,204,.4);cursor:pointer;font-size:1rem;transition:color .2s}
+.pm-close:hover{color:var(--n3)}
+.pm-header{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.pm-avatar{width:60px;height:60px;border-radius:50%;border:2px solid var(--n);
+  background:rgba(0,255,204,.08);display:flex;align-items:center;justify-content:center;font-size:1.8rem;
   box-shadow:0 0 20px rgba(0,255,204,.2)}
-.p-info{flex:1;min-width:0}
-.p-ign{font-family:'Orbitron',sans-serif;font-size:clamp(.7rem,2.5vw,.85rem);
-  color:#fff;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.p-role{font-size:.65rem;letter-spacing:2px;color:var(--neon);margin:2px 0}
-.p-device{font-size:.63rem;color:rgba(255,255,255,.3)}
-.p-uid{font-family:'Share Tech Mono',monospace;font-size:.58rem;color:rgba(0,255,204,.25);margin-top:2px}
-.p-status{flex-shrink:0;text-align:center}
-.p-status-dot{width:8px;height:8px;border-radius:50%;margin:0 auto 4px}
+.pm-name{font-family:'Orbitron',sans-serif;font-size:.9rem;color:#fff;font-weight:700;margin-bottom:3px}
+.pm-role{font-size:.65rem;letter-spacing:2px;color:var(--n)}
+.pm-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.pm-stat{text-align:center;background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:6px;padding:10px 6px}
+.pm-stat-n{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:900;color:var(--n)}
+.pm-stat-l{font-size:.5rem;letter-spacing:2px;color:rgba(0,255,204,.3);margin-top:2px}
+.pm-genome-full{display:grid;gap:6px}
+.pgr{display:flex;align-items:center;gap:8px}
+.pgr-l{font-size:.58rem;letter-spacing:1px;color:rgba(0,255,204,.4);width:80px;flex-shrink:0}
+.pgr-bw{flex:1;height:5px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden}
+.pgr-b{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--n2),var(--n));transition:width 1s ease}
+.pgr-v{font-size:.58rem;color:rgba(0,255,204,.5);width:30px;text-align:right;flex-shrink:0}
+
+/* STATUS ONLINE/OFFLINE */
+.pst{flex-shrink:0;text-align:center}
+.psd{width:7px;height:7px;border-radius:50%;margin:0 auto 3px}
 .online{background:#00ff88;box-shadow:0 0 8px #00ff88;animation:blink 2s ease infinite}
-.offline{background:rgba(255,255,255,.2)}
-.p-status-txt{font-size:.55rem;letter-spacing:1px;color:rgba(0,255,204,.3)}
+.offline{background:rgba(255,255,255,.15)}
+.psl{font-size:.5rem;letter-spacing:1px;color:rgba(0,255,204,.25)}
 
 /* ===== RULES ===== */
-.rule-block{background:rgba(0,0,0,.35);border-left:3px solid var(--neon2);
-  border-radius:0 10px 10px 0;padding:14px 16px;margin-bottom:12px;
-  font-size:.83rem;line-height:1.9;direction:rtl;text-align:right}
-.rule-block h3{font-family:'Orbitron',sans-serif;font-size:.72rem;letter-spacing:2px;
-  color:var(--neon);margin-bottom:10px;direction:ltr;text-align:left}
-.rule-block p{color:rgba(200,255,232,.65);margin:2px 0}
-.banned-txt{color:var(--neon3)!important;font-weight:700}
-.allowed-txt{color:#00ff88!important;font-weight:700}
+.rule-block{background:rgba(0,0,0,.35);border-left:2px solid var(--n2);
+  border-radius:0 8px 8px 0;padding:12px 14px;margin-bottom:10px;
+  font-size:.8rem;line-height:1.9;direction:rtl;text-align:right}
+.rule-block h3{font-family:'Orbitron',sans-serif;font-size:.68rem;letter-spacing:2px;
+  color:var(--n);margin-bottom:8px;direction:ltr;text-align:left}
+.rule-block p{color:rgba(200,255,232,.6);margin:2px 0;font-family:'Rajdhani','Noto Kufi Arabic',sans-serif}
+.banned-t{color:var(--n3)!important;font-weight:700}
+.ok-t{color:#00ff88!important;font-weight:700}
 
-/* ===== RECRUIT FORM ===== */
-.form-grid{display:grid;gap:12px}
-.form-field{display:flex;flex-direction:column;gap:6px}
-.form-label{font-size:.65rem;letter-spacing:2px;color:rgba(0,255,204,.45);font-family:'Share Tech Mono',monospace}
-.form-input{background:rgba(0,0,0,.5);border:1px solid var(--border);border-radius:8px;
-  padding:12px 14px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:.9rem;
-  outline:none;transition:all .25s;direction:ltr}
-.form-input:focus{border-color:var(--neon);box-shadow:0 0 0 2px rgba(0,255,204,.1)}
-.form-input::placeholder{color:rgba(255,255,255,.2)}
-textarea.form-input{resize:vertical;min-height:90px;font-family:'Rajdhani',sans-serif}
-select.form-input option{background:#0a0d1a}
-
-.submit-btn{width:100%;background:linear-gradient(135deg,var(--neon2),var(--neon));
-  border:none;border-radius:10px;padding:14px;font-family:'Orbitron',sans-serif;
-  font-size:.8rem;font-weight:700;letter-spacing:3px;color:#000;cursor:pointer;
-  transition:all .2s;margin-top:8px;position:relative;overflow:hidden}
-.submit-btn::before{content:'';position:absolute;top:-50%;left:-60%;width:40%;height:200%;
-  background:rgba(255,255,255,.2);transform:skewX(-20deg);animation:btnShine 3s ease infinite}
-.submit-btn:hover{filter:brightness(1.15);transform:translateY(-1px)}
-.submit-btn:active{transform:scale(.98)}
-.submit-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
-
-.form-status{margin-top:12px;padding:12px;border-radius:8px;font-size:.8rem;
+/* ===== RECRUIT ===== */
+.fgrid{display:grid;gap:10px}
+.ff{display:flex;flex-direction:column;gap:5px}
+.fl{font-size:.58rem;letter-spacing:2px;color:rgba(0,255,204,.35);font-family:'Share Tech Mono',monospace}
+.fi{background:rgba(0,0,0,.5);border:1px solid var(--border);border-radius:6px;
+  padding:11px 13px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:.88rem;
+  outline:none;transition:all .25s;direction:ltr;width:100%}
+.fi:focus{border-color:var(--n);box-shadow:0 0 0 2px rgba(0,255,204,.08)}
+.fi::placeholder{color:rgba(255,255,255,.15)}
+textarea.fi{resize:vertical;min-height:80px}
+select.fi option{background:#0a0d1a}
+.sbtn{width:100%;background:none;border:1px solid rgba(0,255,204,.3);border-radius:6px;
+  padding:13px;font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:4px;
+  color:var(--n);cursor:pointer;transition:all .2s;margin-top:8px;position:relative;overflow:hidden}
+.sbtn::before{content:'';position:absolute;inset:0;background:rgba(0,255,204,.06);transform:translateX(-100%);transition:transform .3s}
+.sbtn:hover::before{transform:translateX(0)}
+.sbtn:hover{border-color:var(--n);box-shadow:0 0 20px rgba(0,255,204,.15)}
+.sbtn:disabled{opacity:.4;cursor:not-allowed}
+.fstat{margin-top:10px;padding:10px 14px;border-radius:6px;font-size:.7rem;
   text-align:center;letter-spacing:2px;display:none;font-family:'Share Tech Mono',monospace}
-.form-status.success{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.3);color:#00ff88;display:block}
-.form-status.error{background:rgba(255,45,107,.1);border:1px solid rgba(255,45,107,.3);color:var(--neon3);display:block}
-.form-status.sending{background:rgba(0,255,204,.08);border:1px solid var(--border);color:var(--neon);display:block}
+.fstat.ok{background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.25);color:#00ff88;display:block}
+.fstat.err{background:rgba(255,45,107,.08);border:1px solid rgba(255,45,107,.25);color:var(--n3);display:block}
+.fstat.loading{background:rgba(0,255,204,.05);border:1px solid var(--border);color:var(--n);display:block}
 
-/* ===== WAR COORDINATION ===== */
-.war-card{background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:12px;
-  padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;
-  transition:all .2s;cursor:pointer}
-.war-card:hover{border-color:rgba(255,204,0,.3);background:rgba(255,204,0,.03)}
-.war-icon{font-size:1.8rem;flex-shrink:0}
-.war-info{flex:1}
-.war-title{font-family:'Orbitron',sans-serif;font-size:.78rem;letter-spacing:1.5px;color:#fff;margin-bottom:4px}
-.war-detail{font-size:.72rem;color:rgba(0,255,204,.4)}
-.war-tg{font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--neon5);
-  margin-top:3px;display:flex;align-items:center;gap:4px}
-.war-status-badge{font-size:.58rem;padding:3px 8px;border-radius:4px;letter-spacing:1px;
-  font-family:'Orbitron',sans-serif;flex-shrink:0}
-.ws-active{background:rgba(0,255,136,.1);color:#00ff88;border:1px solid rgba(0,255,136,.3)}
-.ws-soon{background:rgba(255,204,0,.1);color:var(--neon4);border:1px solid rgba(255,204,0,.3)}
-.ws-done{background:rgba(255,255,255,.05);color:rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.1)}
+/* ===== WAR COORD ===== */
+.wcard{background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:10px;
+  padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;transition:all .2s}
+.wcard:hover{border-color:rgba(255,204,0,.25);background:rgba(255,204,0,.02)}
+.wicon{font-size:1.6rem;flex-shrink:0}
+.winfo{flex:1}
+.wtitle{font-family:'Orbitron',sans-serif;font-size:.72rem;letter-spacing:1.5px;color:#fff;margin-bottom:3px}
+.wdetail{font-size:.65rem;color:rgba(0,255,204,.35)}
+.wtg{font-size:.65rem;color:var(--n5);margin-top:2px}
+.wbadge{font-size:.55rem;padding:3px 8px;border-radius:4px;letter-spacing:1px;font-family:'Orbitron',sans-serif;flex-shrink:0}
+.ws-s{background:rgba(0,255,136,.1);color:#00ff88;border:1px solid rgba(0,255,136,.25)}
+.ws-u{background:rgba(255,204,0,.1);color:var(--n4);border:1px solid rgba(255,204,0,.25)}
+.ws-d{background:rgba(255,255,255,.04);color:rgba(255,255,255,.25);border:1px solid rgba(255,255,255,.08)}
 
-.war-add-form{margin-top:16px}
-.war-add-form .form-grid{grid-template-columns:1fr 1fr}
-.war-tg-note{font-size:.72rem;color:rgba(0,255,204,.4);margin-top:12px;text-align:center;line-height:1.8}
+/* ===== META ===== */
+.meta-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(0,255,204,.05)}
+.meta-row:last-child{border-bottom:none}
+.mr-rank{font-size:.68rem;color:rgba(0,255,204,.25);width:18px;flex-shrink:0;font-family:'Share Tech Mono',monospace}
+.mr-name{flex:1;font-size:.8rem;color:#fff;font-weight:600;font-family:'Rajdhani',sans-serif}
+.mr-tier{font-size:.55rem;padding:2px 7px;border-radius:3px;letter-spacing:1.5px;font-family:'Orbitron',sans-serif;flex-shrink:0}
+.ts{background:rgba(255,204,0,.12);color:var(--n4);border:1px solid rgba(255,204,0,.25)}
+.ta{background:rgba(0,255,204,.08);color:var(--n);border:1px solid rgba(0,255,204,.18)}
+.tb{background:rgba(0,170,255,.08);color:var(--n5);border:1px solid rgba(0,170,255,.18)}
+.mr-bar-w{width:55px;height:3px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;flex-shrink:0}
+.mr-bar{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--n2),var(--n))}
+
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:14px}
+.mc{border:1px solid var(--border);border-radius:8px;padding:9px;text-align:center;
+  cursor:pointer;transition:all .25s;background:rgba(0,0,0,.3);position:relative;overflow:hidden}
+.mc:hover{border-color:var(--n);background:rgba(0,255,204,.05)}
+.mc.banned{border-color:var(--n3);background:rgba(255,45,107,.04);opacity:.5}
+.mc.banned::after{content:'BAN';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-15deg);
+  font-family:'Orbitron',sans-serif;font-size:.55rem;color:var(--n3);letter-spacing:2px}
+.mi{font-size:1.3rem;margin-bottom:3px}
+.mn{font-size:.58rem;letter-spacing:2px;color:rgba(0,255,204,.4)}
+
+/* ===== HALL OF LEGENDS ===== */
+.legend-card{background:linear-gradient(135deg,rgba(0,0,0,.6),rgba(123,47,255,.05));
+  border:1px solid rgba(123,47,255,.25);border-radius:10px;padding:16px;
+  margin-bottom:10px;display:flex;align-items:center;gap:14px;
+  position:relative;overflow:hidden;transition:all .3s}
+.legend-card:hover{border-color:rgba(123,47,255,.5);transform:translateX(4px)}
+.legend-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--n2),transparent)}
+.legend-num{font-family:'Orbitron',sans-serif;font-size:2rem;font-weight:900;
+  color:rgba(123,47,255,.2);flex-shrink:0;width:40px;text-align:center;line-height:1}
+.legend-av{width:52px;height:52px;border-radius:50%;border:2px solid var(--n2);
+  background:rgba(123,47,255,.1);display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;flex-shrink:0;box-shadow:0 0 16px rgba(123,47,255,.3)}
+.legend-info{flex:1}
+.legend-name{font-family:'Orbitron',sans-serif;font-size:.8rem;color:#fff;font-weight:700;margin-bottom:3px}
+.legend-title{font-size:.62rem;letter-spacing:2px;color:var(--n2);margin-bottom:4px}
+.legend-achievements{display:flex;gap:5px;flex-wrap:wrap}
+.la{font-size:.52rem;padding:2px 6px;background:rgba(123,47,255,.12);
+  border:1px solid rgba(123,47,255,.2);border-radius:3px;color:rgba(200,255,232,.5);letter-spacing:1px}
+.legacy-empty{text-align:center;padding:30px;color:rgba(0,255,204,.2);font-size:.72rem;letter-spacing:3px}
 
 /* ===== ADMIN ===== */
-.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-.admin-stat{background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:10px;
-  padding:14px;text-align:center}
-.admin-num{font-family:'Orbitron',sans-serif;font-size:1.4rem;font-weight:900;color:var(--neon);text-shadow:var(--glow)}
-.admin-lbl{font-size:.6rem;letter-spacing:2px;color:rgba(0,255,204,.4);margin-top:4px}
+.adm-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
+.adm-s{background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center}
+.adm-n{font-family:'Orbitron',sans-serif;font-size:1.3rem;font-weight:900;color:var(--n);text-shadow:var(--glow)}
+.adm-l{font-size:.55rem;letter-spacing:2px;color:rgba(0,255,204,.3);margin-top:3px}
 
-.req-card{background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:10px;
-  padding:14px;margin-bottom:10px}
-.req-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.req-ign{font-family:'Orbitron',sans-serif;font-size:.8rem;color:#fff;letter-spacing:1px}
-.req-time{font-family:'Share Tech Mono',monospace;font-size:.6rem;color:rgba(0,255,204,.3)}
-.req-info{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
-.req-field{background:rgba(0,255,204,.03);border:1px solid rgba(0,255,204,.08);border-radius:6px;padding:8px}
-.req-field-label{font-size:.55rem;letter-spacing:2px;color:rgba(0,255,204,.35);margin-bottom:2px}
-.req-field-val{font-size:.78rem;color:#fff;font-family:'Share Tech Mono',monospace}
-.req-note{background:rgba(0,0,0,.3);border-radius:6px;padding:8px;font-size:.76rem;
-  color:rgba(200,255,232,.5);line-height:1.6;margin-bottom:10px}
-.req-actions{display:flex;gap:8px}
-.req-btn{flex:1;padding:9px;border:none;border-radius:7px;font-family:'Orbitron',sans-serif;
-  font-size:.65rem;letter-spacing:1.5px;font-weight:700;cursor:pointer;transition:all .2s}
-.req-accept{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid rgba(0,255,136,.3)}
-.req-accept:hover{background:rgba(0,255,136,.25)}
-.req-reject{background:rgba(255,45,107,.12);color:var(--neon3);border:1px solid rgba(255,45,107,.3)}
-.req-reject:hover{background:rgba(255,45,107,.22)}
+.rcard{background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:8px;padding:13px;margin-bottom:8px}
+.rc-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.rc-ign{font-family:'Orbitron',sans-serif;font-size:.75rem;color:#fff;letter-spacing:1px}
+.rc-time{font-size:.55rem;color:rgba(0,255,204,.25);font-family:'Share Tech Mono',monospace}
+.rc-info{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px}
+.rf{background:rgba(0,255,204,.02);border:1px solid rgba(0,255,204,.07);border-radius:5px;padding:7px}
+.rf-l{font-size:.5rem;letter-spacing:2px;color:rgba(0,255,204,.3);margin-bottom:2px}
+.rf-v{font-size:.72rem;color:#fff;font-family:'Share Tech Mono',monospace}
+.rc-note{background:rgba(0,0,0,.3);border-radius:5px;padding:7px;font-size:.7rem;
+  color:rgba(200,255,232,.45);line-height:1.6;margin-bottom:8px;font-family:'Rajdhani',sans-serif}
+.rc-actions{display:flex;gap:7px}
+.rc-btn{flex:1;padding:8px;border:none;border-radius:5px;font-family:'Share Tech Mono',monospace;
+  font-size:.6rem;letter-spacing:1.5px;cursor:pointer;transition:all .2s}
+.rc-ok{background:rgba(0,255,136,.1);color:#00ff88;border:1px solid rgba(0,255,136,.25)}
+.rc-ok:hover{background:rgba(0,255,136,.2)}
+.rc-no{background:rgba(255,45,107,.08);color:var(--n3);border:1px solid rgba(255,45,107,.25)}
+.rc-no:hover{background:rgba(255,45,107,.18)}
 
-.admin-lock{text-align:center;padding:30px}
-.admin-lock-icon{font-size:3rem;margin-bottom:16px}
-.admin-lock-txt{font-family:'Orbitron',sans-serif;font-size:.8rem;letter-spacing:2px;
-  color:rgba(0,255,204,.5);margin-bottom:20px}
+.adm-lock{text-align:center;padding:30px}
+.adm-lock-icon{font-size:2.5rem;margin-bottom:14px;display:block}
+.adm-lock-txt{font-family:'Orbitron',sans-serif;font-size:.72rem;letter-spacing:2px;color:rgba(0,255,204,.4);margin-bottom:18px}
 
-/* ===== TERMINAL HACK ===== */
-#hackText{position:fixed;bottom:14px;right:14px;font-family:'Share Tech Mono',monospace;
-  font-size:.62rem;color:rgba(0,255,204,.3);text-align:right;pointer-events:none;
-  line-height:1.8;z-index:50}
+/* BROADCAST */
+.broadcast-log{max-height:120px;overflow-y:auto;background:rgba(0,0,0,.3);
+  border:1px solid var(--border);border-radius:6px;padding:8px;margin-top:10px}
+.broadcast-log::-webkit-scrollbar{width:2px}
+.broadcast-log::-webkit-scrollbar-thumb{background:rgba(0,255,204,.2)}
+.bl-item{font-size:.65rem;color:rgba(0,255,204,.45);padding:3px 0;border-bottom:1px solid rgba(0,255,204,.04);font-family:'Share Tech Mono',monospace}
+.bl-item:last-child{border-bottom:none}
 
-/* ===== MINI MAP ===== */
-.minimap{position:fixed;bottom:16px;left:86px;width:100px;height:70px;
-  background:rgba(0,0,0,.7);border:1px solid var(--border);border-radius:8px;
-  z-index:50;pointer-events:none;overflow:hidden;display:none}
-#sidebar.exp~* .minimap{left:220px}
+/* SATELLITE SCAN OVERLAY */
+#sat-scan{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:300px;height:300px;pointer-events:none;z-index:10;display:none}
+.sat-ring{position:absolute;border-radius:50%;border:1px solid rgba(0,255,204,.2);
+  inset:0;animation:satPulse 2s ease-out forwards}
+@keyframes satPulse{0%{transform:scale(0);opacity:.8}100%{transform:scale(2);opacity:0}}
 
-/* ===== COUNTDOWN ===== */
-.countdown-wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;margin:16px 0}
-.cd-unit{background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:10px;padding:12px 6px}
-.cd-num{font-family:'Orbitron',sans-serif;font-size:clamp(1.2rem,4vw,1.8rem);font-weight:900;color:var(--neon);text-shadow:var(--glow)}
-.cd-lbl{font-size:.55rem;letter-spacing:2px;color:rgba(0,255,204,.35);margin-top:3px}
-
-/* ===== CHART ===== */
-.chart-bars{display:flex;align-items:flex-end;gap:6px;height:80px;padding:0 4px}
-.chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
-.chart-bar{width:100%;border-radius:3px 3px 0 0;background:linear-gradient(180deg,var(--neon),var(--neon2));
-  transition:height .8s cubic-bezier(.22,1,.36,1);box-shadow:0 0 8px rgba(0,255,204,.3)}
-.chart-bar-lbl{font-size:.55rem;color:rgba(0,255,204,.4);letter-spacing:1px}
+/* NOTIFICATION POPUP */
+#notif{position:fixed;top:46px;right:14px;z-index:300;
+  background:rgba(0,0,0,.9);border:1px solid rgba(0,255,204,.2);border-radius:8px;
+  padding:12px 16px;width:260px;opacity:0;pointer-events:none;
+  transition:all .3s;transform:translateY(-8px)}
+#notif.show{opacity:1;transform:translateY(0);pointer-events:auto}
+.notif-title{font-size:.62rem;letter-spacing:2px;color:var(--n);margin-bottom:4px;font-family:'Orbitron',sans-serif}
+.notif-body{font-size:.7rem;color:rgba(200,255,232,.6);line-height:1.6;font-family:'Rajdhani',sans-serif}
 
 /* ===== RESPONSIVE ===== */
-@media(max-width:600px){
-  .stats-row{grid-template-columns:repeat(2,1fr)}
-  .info-grid{grid-template-columns:1fr}
-  .map-grid{grid-template-columns:repeat(3,1fr)}
-  .admin-grid{grid-template-columns:1fr}
-  .war-add-form .form-grid{grid-template-columns:1fr}
-  #hackText{display:none}
-  .countdown-wrap{grid-template-columns:repeat(4,1fr)}
+@media(max-width:500px){
+  .igrid{grid-template-columns:1fr}
+  .hq-grid{grid-template-columns:1fr 1fr}
+  .rc-info{grid-template-columns:1fr}
+  #ai-assist{width:220px}
+  .osb-item{padding:0 7px;font-size:.55rem}
 }
-@media(max-width:380px){
-  .stats-row{grid-template-columns:repeat(2,1fr)}
-  .req-info{grid-template-columns:1fr}
-}
-
-/* ===== PARTICLES CANVAS OVERRIDE ===== */
-.glow-pulse{animation:glowP 2s ease infinite}
-@keyframes glowP{0%,100%{text-shadow:0 0 10px var(--neon)}50%{text-shadow:0 0 30px var(--neon),0 0 60px var(--neon2)}}
-
-/* ===== TOOLTIP ===== */
-.tooltip{position:relative}
-.tooltip::after{content:attr(data-tip);position:absolute;bottom:120%;left:50%;transform:translateX(-50%);
-  background:rgba(0,0,0,.9);border:1px solid var(--border);border-radius:6px;
-  padding:4px 10px;font-size:.62rem;letter-spacing:1px;color:var(--neon);
-  white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s;z-index:200}
-.tooltip:hover::after{opacity:1}
-
-/* PING INDICATOR */
-.ping{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:#00ff88}
-.ping-high{color:var(--neon3)}
-.ping-med{color:var(--neon4)}
 </style>
 </head>
 <body>
 
-<!-- BG -->
 <canvas id="bgCanvas"></canvas>
+<canvas id="particleCanvas"></canvas>
 <div id="scanlines"></div>
-<div class="corner-glow" id="cg1"></div>
-<div class="corner-glow" id="cg2"></div>
-<div class="corner-glow" id="cg3"></div>
 <div id="vignette"></div>
-<div id="success-flash"></div>
+<div id="sat-scan"><div class="sat-ring"></div></div>
+<div id="notif"><div class="notif-title" id="notif-title">SYSTEM</div><div class="notif-body" id="notif-body">...</div></div>
 
-<!-- LOADER -->
-<div id="loader">
-  <div class="ld-logo">ONLY・FAMILY</div>
-  <div class="ld-hex">
-    <span></span><span></span><span></span><span></span><span></span>
+<!-- ===== BOOT ===== -->
+<div id="boot">
+  <div class="boot-line" id="bl0">[ OF-OS v3.0 ] ONLY·FAMILY OPERATING SYSTEM</div>
+  <div class="boot-line" id="bl1">Initializing kernel modules...</div>
+  <div class="boot-line ok" id="bl2">Network interface OF-NET connected</div>
+  <div class="boot-line ok" id="bl3">Clan database loaded — 5 members</div>
+  <div class="boot-line ok" id="bl4">AI Commander module online</div>
+  <div class="boot-line warn" id="bl5">2 enemy clans detected in proximity</div>
+  <div class="boot-line ok" id="bl6">Encryption layer active — AES-256</div>
+  <div class="boot-line ok" id="bl7">War simulation engine ready</div>
+  <div class="boot-line" id="bl8">Authenticating commander... <span class="boot-cursor"></span></div>
+  <div id="boot-progress">
+    <div class="bp-label">SYSTEM LOAD</div>
+    <div class="bp-bar"><div class="bp-fill" id="bp-fill"></div></div>
+    <div id="boot-pct">0%</div>
   </div>
-  <div class="ld-bar-wrap"><div class="ld-bar"></div></div>
-  <div class="ld-txt" id="ld-txt">BOOTING SYSTEM...</div>
 </div>
 
-<!-- LOGIN -->
+<!-- ===== LOGIN ===== -->
 <div id="login">
-  <div class="login-box">
-    <div class="login-hologram">
-      <div class="ring"></div>
-      <div class="ring"></div>
-      <div class="ring"></div>
-      <div class="icon-center">⚔️</div>
+  <div class="login-terminal">
+    <div class="lt-header">// OF-OS AUTHENTICATION TERMINAL v3.0</div>
+    <div class="lt-box">
+      <div class="lt-scanline"></div>
+      <div class="lt-logo">ONLY・FAMILY</div>
+      <div class="lt-sub">OPERATING SYSTEM // COMMANDER LOGIN</div>
+      <div class="lt-prompt">
+        <span class="lt-prompt-sym">root@of-os:~$</span>
+        <input id="code" type="password" placeholder="enter access code" autocomplete="off" autofocus onkeydown="if(event.key==='Enter')checkCode()">
+      </div>
+      <button class="lt-btn" onclick="checkCode()">[ AUTHENTICATE ]</button>
+      <div id="lt-msg"></div>
+      <div class="lt-hint">AUTHORIZED PERSONNEL ONLY</div>
     </div>
-    <div class="login-title">ONLY・FAMILY</div>
-    <div class="login-sub">ESPORTS CLAN PORTAL v3.0</div>
-    <div class="input-wrap">
-      <input id="code" type="password" placeholder="ENTER ACCESS CODE" autocomplete="off" autofocus onkeydown="if(event.key==='Enter')checkCode()">
-    </div>
-    <button class="login-btn" onclick="checkCode()">◈ ACCESS SYSTEM ◈</button>
-    <div id="login-msg"></div>
   </div>
 </div>
 
-<!-- APP -->
+<!-- ===== AI ASSISTANT ===== -->
+<div id="ai-assist">
+  <div class="ai-header">
+    <div class="ai-avatar">🤖</div>
+    <div>
+      <div class="ai-name">OF-AI COMMANDER</div>
+      <div class="ai-status">● ONLINE — MONITORING</div>
+    </div>
+  </div>
+  <div class="ai-msg" id="ai-msg">Good evening, Commander. All systems nominal.</div>
+  <div class="ai-typing" id="ai-typing" style="display:none">
+    <span></span><span></span><span></span>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
 <div id="app">
 
-  <nav id="sidebar" id="sb">
-    <div class="sb-logo">OF</div>
-    <button class="nav-btn active" onclick="show('home',this)"><span class="ico">🏠</span><span class="lbl">HOME</span></button>
-    <button class="nav-btn" onclick="show('roster',this)"><span class="ico">⚔️</span><span class="lbl">ROSTER</span></button>
-    <button class="nav-btn" onclick="show('rules',this)"><span class="ico">📋</span><span class="lbl">RULES</span></button>
-    <button class="nav-btn" onclick="show('recruit',this)"><span class="ico">📨</span><span class="lbl">RECRUIT</span></button>
-    <button class="nav-btn" onclick="show('war',this)"><span class="ico">🗡️</span><span class="lbl">WAR COORD</span></button>
-    <button class="nav-btn" onclick="show('meta',this)"><span class="ico">🔫</span><span class="lbl">META</span></button>
-    <button class="nav-btn" onclick="show('admin',this)"><span class="ico">🔐</span><span class="lbl">ADMIN</span></button>
-    <div class="nav-divider"></div>
-    <button class="sb-toggle" onclick="toggleSB()" id="sb-toggle-btn">›</button>
-  </nav>
-
-  <main id="main">
-
-    <div class="topbar">
-      <div class="topbar-title">ONLY・FAMILY ESPORTS</div>
-      <div class="topbar-right">
-        <div class="server-time" id="server-time">--:--:--</div>
-        <div class="topbar-status"><div class="dot-live"></div>ONLINE</div>
-      </div>
+  <!-- OS BAR -->
+  <div id="os-bar">
+    <div class="osb-logo">OF-OS</div>
+    <div class="osb-menu">
+      <div class="osb-item active" onclick="show('home',this)">HQ</div>
+      <div class="osb-item" onclick="show('roster',this)">ROSTER</div>
+      <div class="osb-item" onclick="show('rules',this)">RULES</div>
+      <div class="osb-item" onclick="show('recruit',this)">RECRUIT</div>
+      <div class="osb-item" onclick="show('war',this)">WAR ROOM</div>
+      <div class="osb-item" onclick="show('meta',this)">ARMORY</div>
+      <div class="osb-item" onclick="show('legends',this)">LEGENDS</div>
+      <div class="osb-item" onclick="show('admin',this)">ADMIN</div>
     </div>
+    <div class="osb-right">
+      <div class="osb-ping" id="ping-disp">18ms</div>
+      <div class="osb-clock" id="os-clock">--:--:--</div>
+      <div class="osb-status"><div class="live-dot"></div>ONLINE</div>
+    </div>
+  </div>
 
-    <!-- ===== HOME ===== -->
+  <div id="main">
+
+    <!-- ===== HOME / HQ ===== -->
     <section id="home" class="section active">
 
       <!-- Ticker -->
-      <div class="ticker-wrap">
+      <div class="ticker">
         <div class="ticker-inner">
-          <span class="tick-item">🏆 <span class="tick-highlight">ONLY FAMILY</span> — CODM Competitive Clan</span>
-          <span class="tick-item">⚡ Scrim Record: <span class="tick-highlight">W/L TRACKING LIVE</span></span>
-          <span class="tick-item">🎯 Recruitment: <span class="tick-highlight">OPEN — Apply Now</span></span>
-          <span class="tick-item">🗡️ Next Clan War: <span class="tick-highlight">FRIDAY 21:00 IR</span></span>
-          <span class="tick-item">👑 IGL: <span class="tick-highlight">𝙤𝙣𝙡𝙮ゝMaru</span></span>
-          <span class="tick-item">🏆 <span class="tick-highlight">ONLY FAMILY</span> — CODM Competitive Clan</span>
-          <span class="tick-item">⚡ Scrim Record: <span class="tick-highlight">W/L TRACKING LIVE</span></span>
-          <span class="tick-item">🎯 Recruitment: <span class="tick-highlight">OPEN — Apply Now</span></span>
-          <span class="tick-item">🗡️ Next Clan War: <span class="tick-highlight">FRIDAY 21:00 IR</span></span>
-          <span class="tick-item">👑 IGL: <span class="tick-highlight">𝙤𝙣𝙡𝙮ゝMaru</span></span>
+          <span class="ti">🏆 <b>ONLY FAMILY ESPORTS</b> — CODM Competitive</span>
+          <span class="ti">⚔️ Next War: <b>FRIDAY 21:00</b></span>
+          <span class="ti">🎯 Recruiting: <b>OPEN</b></span>
+          <span class="ti">👑 IGL: <b>𝙤𝙣𝙡𝙮ゝMaru</b></span>
+          <span class="ti">📡 Server Status: <b>NOMINAL</b></span>
+          <span class="ti">🔥 Team Power: <b>9,250</b></span>
+          <span class="ti">🏆 <b>ONLY FAMILY ESPORTS</b> — CODM Competitive</span>
+          <span class="ti">⚔️ Next War: <b>FRIDAY 21:00</b></span>
+          <span class="ti">🎯 Recruiting: <b>OPEN</b></span>
+          <span class="ti">👑 IGL: <b>𝙤𝙣𝙡𝙮ゝMaru</b></span>
+          <span class="ti">📡 Server Status: <b>NOMINAL</b></span>
+          <span class="ti">🔥 Team Power: <b>9,250</b></span>
         </div>
       </div>
 
       <!-- Hero -->
       <div class="hero card">
-        <div class="hero-particles" id="heroP"></div>
-        <div class="card-glow"></div>
-        <div class="hero-badge"><div class="badge-dot"></div>CODM COMPETITIVE • PRO LEAGUE DIVISION</div>
-        <div class="hero-name glow-pulse">ONLY<br>FAMILY</div>
-        <div class="hero-name-sub">ESPORTS CLAN</div>
-        <div class="hero-divider"><span>◈ ◈ ◈</span></div>
-        <div class="rank-display">
-          <div class="rank-hex">
-            <div class="rank-hex-inner">
-              <div class="rank-icon">🏆</div>
-              <div class="rank-label">ELITE</div>
+        <canvas id="heroCanvas"></canvas>
+        <div class="hero-badge"><span style="color:var(--n);animation:blink 1s ease infinite;display:inline-block">●</span>&nbsp;CODM PRO LEAGUE — ELITE DIVISION</div>
+        <div class="hero-name">ONLY<br>FAMILY</div>
+        <div class="hero-sub">OPERATING SYSTEM // HEADQUARTERS</div>
+        <div class="hero-divider"><span>◈ SYSTEM ACTIVE ◈</span></div>
+      </div>
+
+      <!-- HQ Grid -->
+      <div class="hq-grid">
+        <div class="hq-cell" onclick="show('roster',document.querySelectorAll('.osb-item')[1])">
+          <div class="hq-cell-icon">⚔️</div>
+          <div class="hq-cell-label">ROSTER</div>
+          <div class="hq-cell-val">15</div>
+          <div class="hq-cell-sub">ACROSS 3 TEAMS</div>
+        </div>
+        <div class="hq-cell" onclick="show('war',document.querySelectorAll('.osb-item')[4])">
+          <div class="hq-cell-icon">🗡️</div>
+          <div class="hq-cell-label">WAR ROOM</div>
+          <div class="hq-cell-val" style="color:var(--n4)">FRIDAY</div>
+          <div class="hq-cell-sub">NEXT CLAN WAR</div>
+        </div>
+        <div class="hq-cell" onclick="show('recruit',document.querySelectorAll('.osb-item')[3])">
+          <div class="hq-cell-icon">📨</div>
+          <div class="hq-cell-label">RECRUIT</div>
+          <div class="hq-cell-val" style="color:#00ff88">OPEN</div>
+          <div class="hq-cell-sub">APPLY NOW</div>
+        </div>
+        <div class="hq-cell" onclick="show('meta',document.querySelectorAll('.osb-item')[5])">
+          <div class="hq-cell-icon">🔫</div>
+          <div class="hq-cell-label">ARMORY</div>
+          <div class="hq-cell-val">META</div>
+          <div class="hq-cell-sub">UPDATED</div>
+        </div>
+        <div class="hq-cell" onclick="show('legends',document.querySelectorAll('.osb-item')[6])">
+          <div class="hq-cell-icon">👑</div>
+          <div class="hq-cell-label">LEGENDS</div>
+          <div class="hq-cell-val">HALL</div>
+          <div class="hq-cell-sub">OF FAME</div>
+        </div>
+        <div class="hq-cell" onclick="show('rules',document.querySelectorAll('.osb-item')[2])">
+          <div class="hq-cell-icon">📋</div>
+          <div class="hq-cell-label">RULES</div>
+          <div class="hq-cell-val">CODE</div>
+          <div class="hq-cell-sub">READ BEFORE JOINING</div>
+        </div>
+      </div>
+
+      <!-- Threat + Win Prob -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div class="threat-wrap">
+          <div class="threat-label">THREAT LEVEL</div>
+          <div class="threat-bar"><div class="threat-fill" id="threat-fill" style="width:72%"></div></div>
+          <div class="threat-markers">
+            <span class="threat-m" style="color:#00ff88">LOW</span>
+            <span class="threat-m" style="color:var(--n4)">MED</span>
+            <span class="threat-m" style="color:var(--n3)">HIGH</span>
+          </div>
+          <div class="threat-level" style="color:var(--n4);font-family:'Orbitron',sans-serif;font-size:.8rem;font-weight:900;position:static;margin-top:4px;text-align:center">HIGH</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="win-prob" style="flex:1;margin-bottom:0;padding:10px">
+            <div class="wp-ring">
+              <svg width="70" height="70" viewBox="0 0 70 70">
+                <circle class="track" cx="35" cy="35" r="28"/>
+                <circle class="fill" cx="35" cy="35" r="28" id="wp-circle"/>
+              </svg>
+              <div class="wp-pct" id="wp-pct">84%</div>
+            </div>
+            <div class="wp-info">
+              <div class="wp-title">WIN PROBABILITY</div>
+              <div class="wp-detail">vs TBD<br>Team Power: 9,250<br>Enemy: ~8,100</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Stats -->
-      <div class="stats-row">
-        <div class="stat-card tooltip" data-tip="Active Members">
-          <div class="stat-num">5</div>
-          <div class="stat-lbl">MEMBERS</div>
-          <div class="stat-change">↑ +2 this month</div>
+      <!-- Countdown -->
+      <div class="card">
+        <div class="sec-title">⏱ NEXT CLAN WAR</div>
+        <div class="countdown">
+          <div class="cd"><div class="cd-n" id="cd-d">00</div><div class="cd-l">DAYS</div></div>
+          <div class="cd"><div class="cd-n" id="cd-h">00</div><div class="cd-l">HRS</div></div>
+          <div class="cd"><div class="cd-n" id="cd-m">00</div><div class="cd-l">MIN</div></div>
+          <div class="cd"><div class="cd-n" id="cd-s">00</div><div class="cd-l">SEC</div></div>
         </div>
-        <div class="stat-card tooltip" data-tip="Win Rate">
-          <div class="stat-num">--</div>
-          <div class="stat-lbl">WIN RATE</div>
-          <div class="stat-change">UPDATING...</div>
-        </div>
-        <div class="stat-card tooltip" data-tip="Scrims Played">
-          <div class="stat-num">Bo3</div>
-          <div class="stat-lbl">FORMAT</div>
-          <div class="stat-change">STANDARD</div>
-        </div>
-        <div class="stat-card tooltip" data-tip="Server Ping">
-          <div class="stat-num ping" id="ping-display">18ms</div>
-          <div class="stat-lbl">PING</div>
-          <div class="stat-change">LOW LATENCY</div>
-        </div>
+        <div style="text-align:center;font-size:.6rem;letter-spacing:2px;color:rgba(0,255,204,.25);font-family:'Share Tech Mono',monospace">FRIDAY 21:00 — CLAN WAR vs TBD</div>
       </div>
 
-      <!-- Next War Countdown -->
-      <div class="card">
-        <div class="section-title">⏱ NEXT CLAN WAR COUNTDOWN</div>
-        <div class="countdown-wrap" id="countdown">
-          <div class="cd-unit"><div class="cd-num" id="cd-d">00</div><div class="cd-lbl">DAYS</div></div>
-          <div class="cd-unit"><div class="cd-num" id="cd-h">00</div><div class="cd-lbl">HOURS</div></div>
-          <div class="cd-unit"><div class="cd-num" id="cd-m">00</div><div class="cd-lbl">MINS</div></div>
-          <div class="cd-unit"><div class="cd-num" id="cd-s">00</div><div class="cd-lbl">SECS</div></div>
+      <!-- Reactor + Radar -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div class="card" style="margin-bottom:0">
+          <div class="sec-title" style="margin-bottom:8px">⚡ ENERGY CORE</div>
+          <div id="reactor">
+            <div class="reactor-ring-wrap">
+              <div class="reactor-ring"></div>
+              <div class="reactor-ring"></div>
+              <div class="reactor-ring"></div>
+              <div class="reactor-core">OF<br>CORE</div>
+            </div>
+            <div class="reactor-power">9,250</div>
+            <div class="reactor-status">TEAM POWER</div>
+          </div>
         </div>
-        <div style="text-align:center;font-size:.68rem;letter-spacing:2px;color:rgba(0,255,204,.3);font-family:'Share Tech Mono',monospace">FRIDAY 21:00 — CLAN WAR vs TBD</div>
-      </div>
-
-      <!-- Leadership -->
-      <div class="card">
-        <div class="section-title">👑 LEADERSHIP</div>
-        <div class="info-grid">
-          <div class="info-item"><div class="info-label">LEADER / IGL</div><div class="info-val">𝙤𝙣𝙡𝙮ゝMaru</div></div>
-          <div class="info-item"><div class="info-label">TELEGRAM</div><div class="info-val" style="color:var(--neon5)">@VoidSpctre</div></div>
-          <div class="info-item"><div class="info-label">STATUS</div><div class="info-val" style="color:#00ff88">🟢 ACTIVE</div></div>
-          <div class="info-item"><div class="info-label">RECRUITMENT</div><div class="info-val" style="color:#00ff88">🟢 OPEN</div></div>
-          <div class="info-item"><div class="info-label">REGION</div><div class="info-val">🇮🇷 IRAN / MENA</div></div>
-          <div class="info-item"><div class="info-label">GAME</div><div class="info-val">CALL OF DUTY MOBILE</div></div>
+        <div class="card" style="margin-bottom:0">
+          <div class="sec-title" style="margin-bottom:8px">📡 RADAR</div>
+          <div id="radar-wrap"><canvas id="radarCanvas"></canvas></div>
+          <div class="radar-label">SKILL ANALYSIS</div>
         </div>
       </div>
 
       <!-- Kill Feed -->
       <div class="card">
-        <div class="section-title">💀 LIVE KILL FEED</div>
-        <div class="killfeed-wrap" id="killfeed"></div>
+        <div class="sec-title">💀 LIVE KILL FEED</div>
+        <div class="kfeed" id="killfeed"></div>
       </div>
 
-      <!-- Win Chart -->
-      <div class="card">
-        <div class="section-title">📊 SCRIM PERFORMANCE (LAST 7)</div>
-        <div class="chart-bars" id="chart-bars"></div>
-        <div style="text-align:center;font-size:.65rem;color:rgba(0,255,204,.3);margin-top:8px;letter-spacing:1px;font-family:'Share Tech Mono',monospace">WINS PER SCRIM SESSION</div>
+      <!-- Chart + Activity -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div class="card" style="margin-bottom:0">
+          <div class="sec-title" style="margin-bottom:8px">📊 SCRIM W/L</div>
+          <div class="bars" id="chart-bars"></div>
+        </div>
+        <div class="card" style="margin-bottom:0">
+          <div class="sec-title" style="margin-bottom:8px">📡 ACTIVITY</div>
+          <div class="actlog" id="actlog"></div>
+        </div>
       </div>
 
-      <!-- Activity -->
+      <!-- Leadership -->
       <div class="card">
-        <div class="section-title">📡 ACTIVITY LOG</div>
-        <div class="activity-log" id="activity-log"></div>
-      </div>
-
-      <!-- Core Rules -->
-      <div class="card">
-        <div class="section-title">⚡ CLAN CORE</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:.82rem;line-height:1.8">
-          <div style="display:flex;align-items:center;gap:8px;color:rgba(200,255,232,.65)"><span style="color:var(--neon)">◈</span> Skill > Everything</div>
-          <div style="display:flex;align-items:center;gap:8px;color:rgba(200,255,232,.65)"><span style="color:var(--neon)">◈</span> No toxicity</div>
-          <div style="display:flex;align-items:center;gap:8px;color:rgba(200,255,232,.65)"><span style="color:var(--neon)">◈</span> Full discipline</div>
-          <div style="display:flex;align-items:center;gap:8px;color:rgba(200,255,232,.65)"><span style="color:var(--neon)">◈</span> Team coordination</div>
-          <div style="display:flex;align-items:center;gap:8px;color:rgba(200,255,232,.65)"><span style="color:var(--neon)">◈</span> War readiness: MAX</div>
-          <div style="display:flex;align-items:center;gap:8px;color:rgba(200,255,232,.65)"><span style="color:var(--neon)">◈</span> Daily practice</div>
+        <div class="sec-title">👑 COMMAND STRUCTURE</div>
+        <div class="igrid">
+          <div class="ii"><div class="ii-l">LEADER / IGL</div><div class="ii-v">𝙤𝙣𝙡𝙮ゝMaru</div></div>
+          <div class="ii"><div class="ii-l">TELEGRAM</div><div class="ii-v" style="color:var(--n5)">@VoidSpctre</div></div>
+          <div class="ii"><div class="ii-l">STATUS</div><div class="ii-v" style="color:#00ff88">🟢 ACTIVE</div></div>
+          <div class="ii"><div class="ii-l">REGION</div><div class="ii-v">🇮🇷 IRAN / MENA</div></div>
+          <div class="ii"><div class="ii-l">FORMAT</div><div class="ii-v">Bo3 HARDPOINT</div></div>
+          <div class="ii"><div class="ii-l">RECRUIT</div><div class="ii-v" style="color:#00ff88">🟢 OPEN</div></div>
         </div>
       </div>
 
@@ -672,213 +746,139 @@ select.form-input option{background:#0a0d1a}
     <!-- ===== ROSTER ===== -->
     <section id="roster" class="section">
       <div class="card">
-        <div class="section-title">⚔️ ELITE SQUAD LINEUP</div>
+        <div class="sec-title">⚔️ SQUAD LINEUP</div>
 
-        <!-- Team 1 -->
-        <div class="team-header"><div class="team-badge team-1">◈ TEAM 1 — ALPHA</div><div class="team-line"></div></div>
-        <div class="player-card">
-          <div class="p-avatar">👑</div>
-          <div class="p-info">
-            <div class="p-ign">𝙤𝙣𝙡𝙮ゝMaru</div>
-            <div class="p-role">IGL / LEADER</div>
-            <div class="p-device">iPhone 14 Pro</div>
-            <div class="p-uid">UID: XXXXXXXXX</div>
+        <div class="team-hdr"><div class="tbadge t1">◈ ALPHA — TEAM 1</div><div class="tline"></div></div>
+        <div class="pc" onclick="openPlayer('𝙤𝙣𝙡𝙮ゝMaru','IGL / LEADER','👑','iPhone 14 Pro','XXXXXXXXX','95','90','98','85','92','88')">
+          <div class="pav">👑</div>
+          <div class="pi">
+            <div class="pign">𝙤𝙣𝙡𝙮ゝMaru</div>
+            <div class="prole">IGL / LEADER</div>
+            <div class="pdev">iPhone 14 Pro</div>
+            <div class="puid">UID: XXXXXXXXX</div>
+            <div class="genome">
+              <div class="gen-row"><span class="gen-label">AIM</span><div class="gen-bar-w"><div class="gen-bar" style="width:90%"></div></div></div>
+              <div class="gen-row"><span class="gen-label">LEADERSHIP</span><div class="gen-bar-w"><div class="gen-bar" style="width:98%"></div></div></div>
+            </div>
           </div>
-          <div class="p-status"><div class="p-status-dot online"></div><div class="p-status-txt">ONLINE</div></div>
+          <div class="pst"><div class="psd online"></div><div class="psl">ONLINE</div></div>
         </div>
-        <div class="player-card">
-          <div class="p-avatar">🎯</div>
-          <div class="p-info">
-            <div class="p-ign">𝙤𝙣𝙡𝙮ゝSniper</div>
-            <div class="p-role">SNIPER / MARKSMAN</div>
-            <div class="p-device">Samsung S23</div>
-            <div class="p-uid">UID: XXXXXXXXX</div>
+        <div class="pc" onclick="openPlayer('𝙤𝙣𝙡𝙮ゝSniper','SNIPER / MARKSMAN','🎯','Samsung S23','XXXXXXXXX','98','95','70','75','80','72')">
+          <div class="pav">🎯</div>
+          <div class="pi">
+            <div class="pign">𝙤𝙣𝙡𝙮ゝSniper</div>
+            <div class="prole">SNIPER / MARKSMAN</div>
+            <div class="pdev">Samsung S23</div>
+            <div class="puid">UID: XXXXXXXXX</div>
+            <div class="genome">
+              <div class="gen-row"><span class="gen-label">ACCURACY</span><div class="gen-bar-w"><div class="gen-bar" style="width:98%"></div></div></div>
+              <div class="gen-row"><span class="gen-label">REFLEX</span><div class="gen-bar-w"><div class="gen-bar" style="width:95%"></div></div></div>
+            </div>
           </div>
-          <div class="p-status"><div class="p-status-dot online"></div><div class="p-status-txt">ONLINE</div></div>
+          <div class="pst"><div class="psd online"></div><div class="psl">ONLINE</div></div>
         </div>
-        <div class="player-card">
-          <div class="p-avatar">⚡</div>
-          <div class="p-info">
-            <div class="p-ign">𝙤𝙣𝙡𝙮ゝFlash</div>
-            <div class="p-role">RUSHER / ENTRY FRAGGER</div>
-            <div class="p-device">iPhone 13</div>
-            <div class="p-uid">UID: XXXXXXXXX</div>
+        <div class="pc" onclick="openPlayer('𝙤𝙣𝙡𝙮ゝFlash','RUSHER / ENTRY','⚡','iPhone 13','XXXXXXXXX','88','96','82','78','70','85')">
+          <div class="pav">⚡</div>
+          <div class="pi">
+            <div class="pign">𝙤𝙣𝙡𝙮ゝFlash</div>
+            <div class="prole">RUSHER / ENTRY FRAGGER</div>
+            <div class="pdev">iPhone 13</div>
+            <div class="puid">UID: XXXXXXXXX</div>
+            <div class="genome">
+              <div class="gen-row"><span class="gen-label">AGGRESSION</span><div class="gen-bar-w"><div class="gen-bar" style="width:96%"></div></div></div>
+              <div class="gen-row"><span class="gen-label">SPEED</span><div class="gen-bar-w"><div class="gen-bar" style="width:92%"></div></div></div>
+            </div>
           </div>
-          <div class="p-status"><div class="p-status-dot offline"></div><div class="p-status-txt">OFFLINE</div></div>
+          <div class="pst"><div class="psd offline"></div><div class="psl">OFFLINE</div></div>
         </div>
-        <div class="player-card">
-          <div class="p-avatar">🛡️</div>
-          <div class="p-info">
-            <div class="p-ign">𝙤𝙣𝙡𝙮ゝShield</div>
-            <div class="p-role">SUPPORT / ANCHOR</div>
-            <div class="p-device">POCO X5 Pro</div>
-            <div class="p-uid">UID: XXXXXXXXX</div>
+        <div class="pc" onclick="openPlayer('𝙤𝙣𝙡𝙮ゝShield','SUPPORT / ANCHOR','🛡️','POCO X5 Pro','XXXXXXXXX','82','78','88','92','75','90')">
+          <div class="pav">🛡️</div>
+          <div class="pi">
+            <div class="pign">𝙤𝙣𝙡𝙮ゝShield</div>
+            <div class="prole">SUPPORT / ANCHOR</div>
+            <div class="pdev">POCO X5 Pro</div>
+            <div class="puid">UID: XXXXXXXXX</div>
+            <div class="genome">
+              <div class="gen-row"><span class="gen-label">DEFENSE</span><div class="gen-bar-w"><div class="gen-bar" style="width:92%"></div></div></div>
+              <div class="gen-row"><span class="gen-label">TEAMWORK</span><div class="gen-bar-w"><div class="gen-bar" style="width:90%"></div></div></div>
+            </div>
           </div>
-          <div class="p-status"><div class="p-status-dot online"></div><div class="p-status-txt">ONLINE</div></div>
+          <div class="pst"><div class="psd online"></div><div class="psl">ONLINE</div></div>
         </div>
-        <div class="player-card">
-          <div class="p-avatar">🔥</div>
-          <div class="p-info">
-            <div class="p-ign">𝙤𝙣𝙡𝙮ゝBlaze</div>
-            <div class="p-role">FLEX / ROAMER</div>
-            <div class="p-device">Redmi Note 12</div>
-            <div class="p-uid">UID: XXXXXXXXX</div>
+        <div class="pc" onclick="openPlayer('𝙤𝙣𝙡𝙮ゝBlaze','FLEX / ROAMER','🔥','Redmi Note 12','XXXXXXXXX','85','86','84','80','88','82')">
+          <div class="pav">🔥</div>
+          <div class="pi">
+            <div class="pign">𝙤𝙣𝙡𝙮ゝBlaze</div>
+            <div class="prole">FLEX / ROAMER</div>
+            <div class="pdev">Redmi Note 12</div>
+            <div class="puid">UID: XXXXXXXXX</div>
+            <div class="genome">
+              <div class="gen-row"><span class="gen-label">VERSATILITY</span><div class="gen-bar-w"><div class="gen-bar" style="width:88%"></div></div></div>
+              <div class="gen-row"><span class="gen-label">AWARENESS</span><div class="gen-bar-w"><div class="gen-bar" style="width:84%"></div></div></div>
+            </div>
           </div>
-          <div class="p-status"><div class="p-status-dot offline"></div><div class="p-status-txt">OFFLINE</div></div>
-        </div>
-
-        <!-- Team 2 -->
-        <div class="team-header" style="margin-top:20px"><div class="team-badge team-2">◈ TEAM 2 — BETA</div><div class="team-line"></div></div>
-        <div class="player-card">
-          <div class="p-avatar">🌀</div>
-          <div class="p-info">
-            <div class="p-ign">𝙤𝙣𝙡𝙮ゝ_______</div>
-            <div class="p-role">—</div>
-            <div class="p-device">—</div>
-            <div class="p-uid">UID: —</div>
-          </div>
-          <div class="p-status"><div class="p-status-dot offline"></div><div class="p-status-txt">—</div></div>
-        </div>
-        <div class="player-card">
-          <div class="p-avatar">🌀</div>
-          <div class="p-info">
-            <div class="p-ign">𝙤𝙣𝙡𝙮ゝ_______</div>
-            <div class="p-role">—</div>
-            <div class="p-device">—</div>
-            <div class="p-uid">UID: —</div>
-          </div>
-          <div class="p-status"><div class="p-status-dot offline"></div><div class="p-status-txt">—</div></div>
-        </div>
-        <div class="player-card">
-          <div class="p-avatar">🌀</div>
-          <div class="p-info">
-            <div class="p-ign">𝙤𝙣𝙡𝙮ゝ_______</div>
-            <div class="p-role">—</div>
-            <div class="p-device">—</div>
-            <div class="p-uid">UID: —</div>
-          </div>
-          <div class="p-status"><div class="p-status-dot offline"></div><div class="p-status-txt">—</div></div>
-        </div>
-        <div class="player-card">
-          <div class="p-avatar">🌀</div>
-          <div class="p-info">
-            <div class="p-ign">𝙤𝙣𝙡𝙮ゝ_______</div>
-            <div class="p-role">—</div>
-            <div class="p-device">—</div>
-            <div class="p-uid">UID: —</div>
-          </div>
-          <div class="p-status"><div class="p-status-dot offline"></div><div class="p-status-txt">—</div></div>
-        </div>
-        <div class="player-card">
-          <div class="p-avatar">🌀</div>
-          <div class="p-info">
-            <div class="p-ign">𝙤𝙣𝙡𝙮ゝ_______</div>
-            <div class="p-role">—</div>
-            <div class="p-device">—</div>
-            <div class="p-uid">UID: —</div>
-          </div>
-          <div class="p-status"><div class="p-status-dot offline"></div><div class="p-status-txt">—</div></div>
+          <div class="pst"><div class="psd offline"></div><div class="psl">OFFLINE</div></div>
         </div>
 
-        <!-- Team 3 -->
-        <div class="team-header" style="margin-top:20px"><div class="team-badge team-3">◈ TEAM 3 — GAMMA</div><div class="team-line"></div></div>
-        <div class="player-card">
-          <div class="p-avatar">🔴</div>
-          <div class="p-info">
-            <div class="p-ign">𝙤𝙣𝙡𝙮ゝ_______</div>
-            <div class="p-role">—</div>
-            <div class="p-device">—</div>
-            <div class="p-uid">UID: —</div>
-          </div>
-          <div class="p-status"><div class="p-status-dot offline"></div><div class="p-status-txt">—</div></div>
-        </div>
-        <div class="player-card">
-          <div class="p-avatar">🔴</div>
-          <div class="p-info">
-            <div class="p-ign">𝙤𝙣𝙡𝙮ゝ_______</div>
-            <div class="p-role">—</div>
-            <div class="p-device">—</div>
-            <div class="p-uid">UID: —</div>
-          </div>
-          <div class="p-status"><div class="p-status-dot offline"></div><div class="p-status-txt">—</div></div>
-        </div>
-        <div class="player-card">
-          <div class="p-avatar">🔴</div>
-          <div class="p-info">
-            <div class="p-ign">𝙤𝙣𝙡𝙮ゝ_______</div>
-            <div class="p-role">—</div>
-            <div class="p-device">—</div>
-            <div class="p-uid">UID: —</div>
-          </div>
-          <div class="p-status"><div class="p-status-dot offline"></div><div class="p-status-txt">—</div></div>
-        </div>
-        <div class="player-card">
-          <div class="p-avatar">🔴</div>
-          <div class="p-info">
-            <div class="p-ign">𝙤𝙣𝙡𝙮ゝ_______</div>
-            <div class="p-role">—</div>
-            <div class="p-device">—</div>
-            <div class="p-uid">UID: —</div>
-          </div>
-          <div class="p-status"><div class="p-status-dot offline"></div><div class="p-status-txt">—</div></div>
-        </div>
-        <div class="player-card">
-          <div class="p-avatar">🔴</div>
-          <div class="p-info">
-            <div class="p-ign">𝙤𝙣𝙡𝙮ゝ_______</div>
-            <div class="p-role">—</div>
-            <div class="p-device">—</div>
-            <div class="p-uid">UID: —</div>
-          </div>
-          <div class="p-status"><div class="p-status-dot offline"></div><div class="p-status-txt">—</div></div>
-        </div>
+        <div class="team-hdr" style="margin-top:20px"><div class="tbadge t2">◈ BETA — TEAM 2</div><div class="tline"></div></div>
+        <div class="pc"><div class="pav" style="opacity:.4">🌀</div><div class="pi"><div class="pign" style="color:rgba(255,255,255,.3)">— SLOT EMPTY —</div><div class="prole" style="color:rgba(0,255,204,.2)">AWAITING ASSIGNMENT</div><div class="pdev">—</div><div class="puid">UID: —</div></div><div class="pst"><div class="psd offline"></div><div class="psl">—</div></div></div>
+        <div class="pc"><div class="pav" style="opacity:.4">🌀</div><div class="pi"><div class="pign" style="color:rgba(255,255,255,.3)">— SLOT EMPTY —</div><div class="prole" style="color:rgba(0,255,204,.2)">AWAITING ASSIGNMENT</div><div class="pdev">—</div><div class="puid">UID: —</div></div><div class="pst"><div class="psd offline"></div><div class="psl">—</div></div></div>
+        <div class="pc"><div class="pav" style="opacity:.4">🌀</div><div class="pi"><div class="pign" style="color:rgba(255,255,255,.3)">— SLOT EMPTY —</div><div class="prole" style="color:rgba(0,255,204,.2)">AWAITING ASSIGNMENT</div><div class="pdev">—</div><div class="puid">UID: —</div></div><div class="pst"><div class="psd offline"></div><div class="psl">—</div></div></div>
+        <div class="pc"><div class="pav" style="opacity:.4">🌀</div><div class="pi"><div class="pign" style="color:rgba(255,255,255,.3)">— SLOT EMPTY —</div><div class="prole" style="color:rgba(0,255,204,.2)">AWAITING ASSIGNMENT</div><div class="pdev">—</div><div class="puid">UID: —</div></div><div class="pst"><div class="psd offline"></div><div class="psl">—</div></div></div>
+        <div class="pc"><div class="pav" style="opacity:.4">🌀</div><div class="pi"><div class="pign" style="color:rgba(255,255,255,.3)">— SLOT EMPTY —</div><div class="prole" style="color:rgba(0,255,204,.2)">AWAITING ASSIGNMENT</div><div class="pdev">—</div><div class="puid">UID: —</div></div><div class="pst"><div class="psd offline"></div><div class="psl">—</div></div></div>
 
+        <div class="team-hdr" style="margin-top:20px"><div class="tbadge t3">◈ GAMMA — TEAM 3</div><div class="tline"></div></div>
+        <div class="pc"><div class="pav" style="opacity:.4">🔴</div><div class="pi"><div class="pign" style="color:rgba(255,255,255,.3)">— SLOT EMPTY —</div><div class="prole" style="color:rgba(255,45,107,.3)">AWAITING ASSIGNMENT</div><div class="pdev">—</div><div class="puid">UID: —</div></div><div class="pst"><div class="psd offline"></div><div class="psl">—</div></div></div>
+        <div class="pc"><div class="pav" style="opacity:.4">🔴</div><div class="pi"><div class="pign" style="color:rgba(255,255,255,.3)">— SLOT EMPTY —</div><div class="prole" style="color:rgba(255,45,107,.3)">AWAITING ASSIGNMENT</div><div class="pdev">—</div><div class="puid">UID: —</div></div><div class="pst"><div class="psd offline"></div><div class="psl">—</div></div></div>
+        <div class="pc"><div class="pav" style="opacity:.4">🔴</div><div class="pi"><div class="pign" style="color:rgba(255,255,255,.3)">— SLOT EMPTY —</div><div class="prole" style="color:rgba(255,45,107,.3)">AWAITING ASSIGNMENT</div><div class="pdev">—</div><div class="puid">UID: —</div></div><div class="pst"><div class="psd offline"></div><div class="psl">—</div></div></div>
+        <div class="pc"><div class="pav" style="opacity:.4">🔴</div><div class="pi"><div class="pign" style="color:rgba(255,255,255,.3)">— SLOT EMPTY —</div><div class="prole" style="color:rgba(255,45,107,.3)">AWAITING ASSIGNMENT</div><div class="pdev">—</div><div class="puid">UID: —</div></div><div class="pst"><div class="psd offline"></div><div class="psl">—</div></div></div>
+        <div class="pc"><div class="pav" style="opacity:.4">🔴</div><div class="pi"><div class="pign" style="color:rgba(255,255,255,.3)">— SLOT EMPTY —</div><div class="prole" style="color:rgba(255,45,107,.3)">AWAITING ASSIGNMENT</div><div class="pdev">—</div><div class="puid">UID: —</div></div><div class="pst"><div class="psd offline"></div><div class="psl">—</div></div></div>
       </div>
     </section>
 
     <!-- ===== RULES ===== -->
     <section id="rules" class="section">
       <div class="card">
-        <div class="section-title">📋 CLAN RULES & REGULATIONS</div>
+        <div class="sec-title">📋 CLAN CODE OF CONDUCT</div>
 
         <div class="rule-block">
-          <h3>◈ SECTION 01 — MEMBERSHIP</h3>
-          <p>• عضو جدید باید حداقل ۳ روز trial period داشته باشد</p>
-          <p>• تمام اعضا باید اسم خود را با پرفیکس <span class="allowed-txt">𝙤𝙣𝙡𝙮ゝ</span> شروع کنند</p>
-          <p>• غیبت بیش از ۷ روز بدون اطلاع = <span class="banned-txt">KICK</span></p>
-          <p>• حداقل رنک برای عضویت: <span class="allowed-txt">Legendary</span></p>
+          <h3>◈ 01 — MEMBERSHIP PROTOCOL</h3>
+          <p>• عضو جدید باید ۳ روز trial داشته باشد</p>
+          <p>• پرفیکس اجباری: <span class="ok-t">𝙤𝙣𝙡𝙮ゝ</span></p>
+          <p>• غیبت +۷ روز بدون اطلاع: <span class="banned-t">KICK</span></p>
+          <p>• حداقل رنک: <span class="ok-t">Legendary</span></p>
         </div>
 
         <div class="rule-block">
-          <h3>◈ SECTION 02 — CONDUCT</h3>
-          <p>• تاکسیسیتی و توهین به اعضا: <span class="banned-txt">INSTANT KICK</span></p>
-          <p>• بردن لود در جنگ کلن بدون هماهنگی: <span class="banned-txt">WARNING</span></p>
+          <h3>◈ 02 — CONDUCT RULES</h3>
+          <p>• تاکسیسیتی و توهین: <span class="banned-t">INSTANT KICK</span></p>
           <p>• همکاری و کووردیناسیون اجباری است</p>
-          <p>• Scrimmage پنجشنبه‌ها ساعت ۲۱ الزامی است</p>
+          <p>• Scrim پنجشنبه ساعت ۲۱: <span class="ok-t">اجباری</span></p>
         </div>
 
         <div class="rule-block">
-          <h3>◈ SECTION 03 — WAR PROTOCOL</h3>
-          <p>• حضور در Clan War: <span class="allowed-txt">اجباری</span> (با اطلاع قبلی)</p>
-          <p>• استراتژی IGL باید رعایت شود — no freelancing</p>
-          <p>• Drop calls در ۱۵ دقیقه اول ممنوع است</p>
-          <p>• خروج بدون اجازه از منطقه: <span class="banned-txt">PENALIZED</span></p>
+          <h3>◈ 03 — WAR PROTOCOL</h3>
+          <p>• حضور در Clan War: <span class="ok-t">اجباری</span></p>
+          <p>• استراتژی IGL باید رعایت شود</p>
+          <p>• Drop calls ۱۵ دقیقه اول: <span class="banned-t">ممنوع</span></p>
+          <p>• هک/چیت: <span class="banned-t">PERMANENT BAN</span></p>
         </div>
 
         <div class="rule-block">
-          <h3>◈ SECTION 04 — DEVICE / CONNECTION</h3>
-          <p>• پینگ بالای <span class="banned-txt">80ms</span> در جنگ کلن = عدم شرکت</p>
-          <p>• دیوایس باید حداقل ۶۰fps ران کنه</p>
-          <p>• هک و چیت: <span class="banned-txt">PERMANENT BAN + REPORT</span></p>
-          <p>• آپدیت بازی قبل از هر scrim الزامی است</p>
+          <h3>◈ 04 — MAP BANS (HARDPOINT)</h3>
+          <p>Maps <span class="banned-t">BANNED:</span> Echo, Coastal</p>
+          <p>Maps <span class="ok-t">PREFERRED:</span> Raid, Standoff, Hacienda</p>
+          <p>پینگ بالای <span class="banned-t">80ms</span> در war = عدم شرکت</p>
         </div>
 
-        <div class="rule-block">
-          <h3>◈ SECTION 05 — MAP BANS (HARDPOINT)</h3>
-          <p>Map بن اول توسط تیم مهمان: آزاد</p>
-          <p>Map بن دوم توسط تیم میزبان: آزاد</p>
-          <p>Maps <span class="banned-txt">ALWAYS BANNED:</span> Echo, Coastal</p>
-          <p>Maps <span class="allowed-txt">PREFERRED:</span> Raid, Standoff, Hacienda</p>
+        <div class="rule-block" style="border-left-color:var(--n3)">
+          <h3>◈ 05 — TEAM WAR RULES</h3>
+          <p style="color:rgba(200,255,232,.35);font-style:italic">// این بخش خالی است — قوانین توسط لیدر تکمیل می‌شود</p>
+          <p>•</p>
+          <p>•</p>
+          <p>•</p>
+          <p>•</p>
+          <p>•</p>
         </div>
 
       </div>
@@ -887,487 +887,593 @@ select.form-input option{background:#0a0d1a}
     <!-- ===== RECRUIT ===== -->
     <section id="recruit" class="section">
       <div class="card">
-        <div class="section-title">📨 JOIN ONLY・FAMILY</div>
-        <div style="font-size:.8rem;color:rgba(0,255,204,.45);line-height:1.9;margin-bottom:20px;direction:rtl;text-align:right">
-          برای عضویت در کلن، فرم زیر را تکمیل کنید.<br>
-          درخواست شما مستقیماً به لیدر کلن ارسال می‌شود و حداکثر ظرف ۴۸ ساعت پاسخ داده خواهد شد.
+        <div class="sec-title">📨 RECRUITMENT TERMINAL</div>
+        <div style="font-size:.75rem;color:rgba(0,255,204,.35);line-height:2;margin-bottom:18px;direction:rtl;text-align:right;font-family:'Rajdhani','Noto Kufi Arabic',sans-serif">
+          فرم را کامل کنید — درخواست مستقیماً به لیدر ارسال می‌شود
         </div>
-
-        <div class="form-grid">
-          <div class="form-field">
-            <label class="form-label">IGN (IN-GAME NAME)</label>
-            <input class="form-input" id="r-ign" placeholder="Your in-game name" type="text">
-          </div>
-          <div class="form-field">
-            <label class="form-label">GAME UID (NUMERIC)</label>
-            <input class="form-input" id="r-uid" placeholder="e.g. 12345678901" type="number">
-          </div>
-          <div class="form-field">
-            <label class="form-label">TELEGRAM ID</label>
-            <input class="form-input" id="r-tg" placeholder="@yourusername" type="text">
-          </div>
-          <div class="form-field">
-            <label class="form-label">CURRENT RANK</label>
-            <select class="form-input" id="r-rank">
-              <option value="">-- SELECT RANK --</option>
-              <option value="Legendary">Legendary</option>
-              <option value="Immortal">Immortal</option>
-              <option value="Undying">Undying</option>
-              <option value="Master">Master</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-          <div class="form-field">
-            <label class="form-label">PRIMARY ROLE</label>
-            <select class="form-input" id="r-role">
-              <option value="">-- SELECT ROLE --</option>
-              <option value="IGL">IGL</option>
-              <option value="Sniper">Sniper / Marksman</option>
-              <option value="Rusher">Rusher / Entry</option>
-              <option value="Support">Support / Anchor</option>
-              <option value="Flex">Flex</option>
-            </select>
-          </div>
-          <div class="form-field">
-            <label class="form-label">DEVICE</label>
-            <input class="form-input" id="r-device" placeholder="e.g. iPhone 14 Pro" type="text">
-          </div>
-          <div class="form-field" style="grid-column:1/-1">
-            <label class="form-label">WHY DO YOU WANT TO JOIN? (فارسی یا انگلیسی)</label>
-            <textarea class="form-input" id="r-note" placeholder="توضیح مختصر..."></textarea>
-          </div>
+        <div class="fgrid">
+          <div class="ff"><label class="fl">// IN-GAME NAME</label><input class="fi" id="r-ign" placeholder="Your IGN" type="text"></div>
+          <div class="ff"><label class="fl">// GAME UID (NUMERIC)</label><input class="fi" id="r-uid" placeholder="12345678901" type="number"></div>
+          <div class="ff"><label class="fl">// TELEGRAM ID</label><input class="fi" id="r-tg" placeholder="@username" type="text"></div>
+          <div class="ff"><label class="fl">// CURRENT RANK</label>
+            <select class="fi" id="r-rank"><option value="">-- SELECT --</option><option>Legendary</option><option>Immortal</option><option>Undying</option><option>Master</option><option>Other</option></select></div>
+          <div class="ff"><label class="fl">// PRIMARY ROLE</label>
+            <select class="fi" id="r-role"><option value="">-- SELECT --</option><option>IGL</option><option>Sniper</option><option>Rusher / Entry</option><option>Support / Anchor</option><option>Flex</option></select></div>
+          <div class="ff"><label class="fl">// DEVICE</label><input class="fi" id="r-device" placeholder="e.g. iPhone 14 Pro" type="text"></div>
+          <div class="ff" style="grid-column:1/-1"><label class="fl">// WHY JOIN? (فارسی یا انگلیسی)</label><textarea class="fi" id="r-note" placeholder="توضیح مختصر..."></textarea></div>
         </div>
-        <button class="submit-btn" id="recruit-btn" onclick="submitRecruit()">◈ SEND APPLICATION ◈</button>
-        <div class="form-status" id="recruit-status"></div>
+        <button class="sbtn" id="r-btn" onclick="submitRecruit()">[ SEND APPLICATION ]</button>
+        <div class="fstat" id="r-status"></div>
       </div>
     </section>
 
-    <!-- ===== WAR COORDINATION ===== -->
+    <!-- ===== WAR ROOM ===== -->
     <section id="war" class="section">
       <div class="card">
-        <div class="section-title">🗡️ CLAN WAR COORDINATION</div>
-
+        <div class="sec-title">🗡️ WAR ROOM — OPERATIONS</div>
         <div id="war-list">
-          <div class="war-card">
-            <div class="war-icon">⚔️</div>
-            <div class="war-info">
-              <div class="war-title">CLAN WAR — FRIDAY 21:00</div>
-              <div class="war-detail">Bo3 • Hardpoint • Map: TBD</div>
-              <div class="war-tg">📬 @VoidSpctre — IGL Coordination</div>
-            </div>
-            <div class="war-status-badge ws-soon">SOON</div>
-          </div>
-          <div class="war-card">
-            <div class="war-icon">🔥</div>
-            <div class="war-info">
-              <div class="war-title">SCRIM SESSION — THURSDAY 20:00</div>
-              <div class="war-detail">Internal practice • All 3 teams</div>
-              <div class="war-tg">📬 @VoidSpctre — Scrim Setup</div>
-            </div>
-            <div class="war-status-badge ws-soon">UPCOMING</div>
-          </div>
-          <div class="war-card">
-            <div class="war-icon">✅</div>
-            <div class="war-info">
-              <div class="war-title">SCRIM vs SHADOW CLAN — MON</div>
-              <div class="war-detail">Result: W 2-1</div>
-              <div class="war-tg">📬 @VoidSpctre</div>
-            </div>
-            <div class="war-status-badge ws-done">DONE</div>
-          </div>
+          <div class="wcard"><div class="wicon">⚔️</div><div class="winfo"><div class="wtitle">CLAN WAR — FRIDAY 21:00</div><div class="wdetail">Bo3 • Hardpoint • vs TBD</div><div class="wtg">📬 @VoidSpctre</div></div><div class="wbadge ws-u">SOON</div></div>
+          <div class="wcard"><div class="wicon">🔥</div><div class="winfo"><div class="wtitle">SCRIM — THURSDAY 20:00</div><div class="wdetail">Internal practice • All teams</div><div class="wtg">📬 @VoidSpctre</div></div><div class="wbadge ws-u">UPCOMING</div></div>
+          <div class="wcard"><div class="wicon">✅</div><div class="winfo"><div class="wtitle">SCRIM vs SHADOW CLAN</div><div class="wdetail">Result: W 2-1</div><div class="wtg">📬 @VoidSpctre</div></div><div class="wbadge ws-d">DONE</div></div>
         </div>
-
-        <div class="war-add-form card" style="margin-top:16px;margin-bottom:0">
-          <div class="section-title" style="font-size:.8rem">➕ ADD WAR / SCRIM REQUEST</div>
-          <div class="form-grid war-add-form">
-            <div class="form-field">
-              <label class="form-label">EVENT TITLE</label>
-              <input class="form-input" id="w-title" placeholder="e.g. Clan War vs X" type="text">
-            </div>
-            <div class="form-field">
-              <label class="form-label">DATE & TIME</label>
-              <input class="form-input" id="w-time" placeholder="e.g. Friday 21:00" type="text">
-            </div>
-            <div class="form-field">
-              <label class="form-label">YOUR TELEGRAM ID</label>
-              <input class="form-input" id="w-tg" placeholder="@yourusername" type="text">
-            </div>
-            <div class="form-field">
-              <label class="form-label">TYPE</label>
-              <select class="form-input" id="w-type">
-                <option value="Clan War">Clan War</option>
-                <option value="Scrim">Scrim</option>
-                <option value="Practice">Practice</option>
-              </select>
-            </div>
-            <div class="form-field" style="grid-column:1/-1">
-              <label class="form-label">NOTES / DETAILS</label>
-              <textarea class="form-input" id="w-note" placeholder="Map, mode, opponent info, etc..." style="min-height:70px"></textarea>
-            </div>
+        <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px">
+          <div class="sec-title" style="font-size:.75rem">➕ NEW WAR REQUEST</div>
+          <div class="fgrid" style="grid-template-columns:1fr 1fr;gap:8px">
+            <div class="ff"><label class="fl">// TITLE</label><input class="fi" id="w-title" placeholder="e.g. Clan War vs X" type="text"></div>
+            <div class="ff"><label class="fl">// DATE & TIME</label><input class="fi" id="w-time" placeholder="Friday 21:00" type="text"></div>
+            <div class="ff"><label class="fl">// YOUR TELEGRAM</label><input class="fi" id="w-tg" placeholder="@username" type="text"></div>
+            <div class="ff"><label class="fl">// TYPE</label><select class="fi" id="w-type"><option>Clan War</option><option>Scrim</option><option>Practice</option></select></div>
+            <div class="ff" style="grid-column:1/-1"><label class="fl">// NOTES</label><textarea class="fi" id="w-note" placeholder="Map, mode, opponent..." style="min-height:60px"></textarea></div>
           </div>
-          <button class="submit-btn" id="war-btn" onclick="submitWar()">◈ SEND TO LEADER ◈</button>
-          <div class="form-status" id="war-status"></div>
-          <div class="war-tg-note">درخواست شما از طریق ربات به @VoidSpctre ارسال می‌شود<br>لیدر ظرف چند ساعت پاسخ خواهد داد</div>
+          <button class="sbtn" id="w-btn" onclick="submitWar()">[ SEND TO LEADER ]</button>
+          <div class="fstat" id="w-status"></div>
+          <div style="text-align:center;font-size:.6rem;color:rgba(0,255,204,.2);margin-top:10px;letter-spacing:2px">درخواست از طریق ربات به @VoidSpctre ارسال می‌شود</div>
         </div>
       </div>
     </section>
 
-    <!-- ===== META ===== -->
+    <!-- ===== ARMORY / META ===== -->
     <section id="meta" class="section">
       <div class="card">
-        <div class="section-title">🔫 CURRENT WEAPON META</div>
-        <div id="weapon-meta">
-          <div class="meta-row">
-            <div class="meta-rank">#1</div>
-            <div class="meta-weapon-name">SVD-V2 / Kilo Bolt</div>
-            <div class="meta-tier tier-s">S-TIER</div>
-            <div class="meta-bar-wrap"><div class="meta-bar" style="width:95%"></div></div>
-          </div>
-          <div class="meta-row">
-            <div class="meta-rank">#2</div>
-            <div class="meta-weapon-name">Lachmann Sub</div>
-            <div class="meta-tier tier-s">S-TIER</div>
-            <div class="meta-bar-wrap"><div class="meta-bar" style="width:90%"></div></div>
-          </div>
-          <div class="meta-row">
-            <div class="meta-rank">#3</div>
-            <div class="meta-weapon-name">MCW</div>
-            <div class="meta-tier tier-a">A-TIER</div>
-            <div class="meta-bar-wrap"><div class="meta-bar" style="width:82%"></div></div>
-          </div>
-          <div class="meta-row">
-            <div class="meta-rank">#4</div>
-            <div class="meta-weapon-name">Holger 556</div>
-            <div class="meta-tier tier-a">A-TIER</div>
-            <div class="meta-bar-wrap"><div class="meta-bar" style="width:75%"></div></div>
-          </div>
-          <div class="meta-row">
-            <div class="meta-rank">#5</div>
-            <div class="meta-weapon-name">Rival-9</div>
-            <div class="meta-tier tier-a">A-TIER</div>
-            <div class="meta-bar-wrap"><div class="meta-bar" style="width:70%"></div></div>
-          </div>
-          <div class="meta-row">
-            <div class="meta-rank">#6</div>
-            <div class="meta-weapon-name">WSP Swarm</div>
-            <div class="meta-tier tier-b">B-TIER</div>
-            <div class="meta-bar-wrap"><div class="meta-bar" style="width:58%"></div></div>
-          </div>
+        <div class="sec-title">🔫 WEAPON META — CURRENT PATCH</div>
+        <div class="meta-row"><div class="mr-rank">#1</div><div class="mr-name">SVD-V2 / Kilo Bolt</div><div class="mr-tier ts">S</div><div class="mr-bar-w"><div class="mr-bar" style="width:95%"></div></div></div>
+        <div class="meta-row"><div class="mr-rank">#2</div><div class="mr-name">Lachmann Sub</div><div class="mr-tier ts">S</div><div class="mr-bar-w"><div class="mr-bar" style="width:90%"></div></div></div>
+        <div class="meta-row"><div class="mr-rank">#3</div><div class="mr-name">MCW</div><div class="mr-tier ta">A</div><div class="mr-bar-w"><div class="mr-bar" style="width:82%"></div></div></div>
+        <div class="meta-row"><div class="mr-rank">#4</div><div class="mr-name">Holger 556</div><div class="mr-tier ta">A</div><div class="mr-bar-w"><div class="mr-bar" style="width:75%"></div></div></div>
+        <div class="meta-row"><div class="mr-rank">#5</div><div class="mr-name">Rival-9</div><div class="mr-tier ta">A</div><div class="mr-bar-w"><div class="mr-bar" style="width:70%"></div></div></div>
+        <div class="meta-row"><div class="mr-rank">#6</div><div class="mr-name">WSP Swarm</div><div class="mr-tier tb">B</div><div class="mr-bar-w"><div class="mr-bar" style="width:58%"></div></div></div>
+      </div>
+      <div class="card">
+        <div class="sec-title">🗺️ MAP POOL</div>
+        <div class="mgrid">
+          <div class="mc"><div class="mi">🏠</div><div class="mn">RAID</div></div>
+          <div class="mc"><div class="mi">🌵</div><div class="mn">STANDOFF</div></div>
+          <div class="mc"><div class="mi">🏡</div><div class="mn">HACIENDA</div></div>
+          <div class="mc"><div class="mi">🏔️</div><div class="mn">SUMMIT</div></div>
+          <div class="mc"><div class="mi">🌊</div><div class="mn">SEASIDE</div></div>
+          <div class="mc banned"><div class="mi">🌆</div><div class="mn">ECHO</div></div>
         </div>
       </div>
+    </section>
 
+    <!-- ===== HALL OF LEGENDS ===== -->
+    <section id="legends" class="section">
       <div class="card">
-        <div class="section-title">🗺️ MAP POOL</div>
-        <div class="map-grid">
-          <div class="map-card"><div class="map-icon">🏠</div><div class="map-name">RAID</div></div>
-          <div class="map-card"><div class="map-icon">🌵</div><div class="map-name">STANDOFF</div></div>
-          <div class="map-card"><div class="map-icon">🏡</div><div class="map-name">HACIENDA</div></div>
-          <div class="map-card"><div class="map-icon">🏔️</div><div class="map-name">SUMMIT</div></div>
-          <div class="map-card"><div class="map-icon">🌊</div><div class="map-name">SEASIDE</div></div>
-          <div class="map-card banned"><div class="map-icon">🌆</div><div class="map-name">ECHO</div></div>
+        <div class="sec-title">👑 HALL OF LEGENDS</div>
+        <div style="font-size:.68rem;color:rgba(0,255,204,.25);margin-bottom:14px;letter-spacing:2px;font-family:'Share Tech Mono',monospace">// بازیکنان افسانه‌ای که تاریخ ساختند</div>
+
+        <div class="legend-card">
+          <div class="legend-num">01</div>
+          <div class="legend-av">👑</div>
+          <div class="legend-info">
+            <div class="legend-name">𝙤𝙣𝙡𝙮ゝMaru</div>
+            <div class="legend-title">FOUNDER · IGL · COMMANDER</div>
+            <div class="legend-achievements">
+              <span class="la">FOUNDER</span>
+              <span class="la">IGL</span>
+              <span class="la">LEGENDARY RANK</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="text-align:center;padding:20px;margin-top:10px;border:1px dashed rgba(123,47,255,.2);border-radius:8px">
+          <div style="font-size:1.5rem;margin-bottom:8px">🏆</div>
+          <div style="font-size:.65rem;letter-spacing:3px;color:rgba(0,255,204,.2);font-family:'Share Tech Mono',monospace">
+            WHEN YOUR CLAN ACHIEVES GLORY<br>THEIR NAMES WILL LIVE HERE FOREVER
+          </div>
         </div>
       </div>
     </section>
 
     <!-- ===== ADMIN ===== -->
     <section id="admin" class="section">
-      <div id="admin-lock-view">
+      <div id="adm-lock">
         <div class="card">
-          <div class="section-title">🔐 ADMIN PANEL</div>
-          <div class="admin-lock">
-            <div class="admin-lock-icon">🔐</div>
-            <div class="admin-lock-txt">ADMIN ACCESS REQUIRED</div>
-            <div class="input-wrap" style="max-width:280px;margin:0 auto 14px">
-              <input class="form-input" id="admin-pass" type="password" placeholder="ADMIN CODE" onkeydown="if(event.key==='Enter')checkAdmin()">
+          <div class="sec-title">🔐 ADMIN PANEL</div>
+          <div class="adm-lock">
+            <span class="adm-lock-icon">🔐</span>
+            <div class="adm-lock-txt">COMMANDER AUTHENTICATION REQUIRED</div>
+            <div class="lt-prompt" style="max-width:300px;margin:0 auto 14px">
+              <span class="lt-prompt-sym">admin@of:~$</span>
+              <input id="adm-pass" type="password" placeholder="admin code" onkeydown="if(event.key==='Enter')checkAdmin()">
             </div>
-            <button class="submit-btn" onclick="checkAdmin()" style="max-width:280px;margin:0 auto">◈ AUTHENTICATE ◈</button>
-            <div class="form-status" id="admin-login-status" style="max-width:280px;margin:10px auto 0"></div>
+            <button class="sbtn" onclick="checkAdmin()" style="max-width:300px;margin:0 auto">[ AUTHENTICATE ]</button>
+            <div class="fstat" id="adm-st" style="max-width:300px;margin:10px auto 0"></div>
           </div>
         </div>
       </div>
 
-      <div id="admin-panel" style="display:none">
-        <div class="admin-grid">
-          <div class="admin-stat">
-            <div class="admin-num" id="adm-req-count">0</div>
-            <div class="admin-lbl">PENDING REQUESTS</div>
-          </div>
-          <div class="admin-stat">
-            <div class="admin-num">5</div>
-            <div class="admin-lbl">TOTAL MEMBERS</div>
-          </div>
-          <div class="admin-stat">
-            <div class="admin-num" style="color:var(--neon5)">3</div>
-            <div class="admin-lbl">ONLINE NOW</div>
-          </div>
-          <div class="admin-stat">
-            <div class="admin-num" style="color:var(--neon4)">1</div>
-            <div class="admin-lbl">WARS THIS WEEK</div>
-          </div>
+      <div id="adm-panel" style="display:none">
+        <div class="adm-stats">
+          <div class="adm-s"><div class="adm-n" id="adm-req-n">0</div><div class="adm-l">PENDING RECRUIT</div></div>
+          <div class="adm-s"><div class="adm-n">5</div><div class="adm-l">TOTAL MEMBERS</div></div>
+          <div class="adm-s"><div class="adm-n" style="color:var(--n5)">3</div><div class="adm-l">ONLINE NOW</div></div>
+          <div class="adm-s"><div class="adm-n" style="color:var(--n4)">1</div><div class="adm-l">WARS THIS WEEK</div></div>
         </div>
 
         <div class="card">
-          <div class="section-title">📨 RECRUITMENT REQUESTS</div>
-          <div id="admin-requests">
-            <div style="text-align:center;padding:30px;color:rgba(0,255,204,.3);font-size:.8rem;letter-spacing:2px;font-family:'Share Tech Mono',monospace">
-              NO PENDING REQUESTS
-            </div>
-          </div>
+          <div class="sec-title">📨 RECRUIT REQUESTS</div>
+          <div id="adm-requests"><div style="text-align:center;padding:24px;color:rgba(0,255,204,.2);font-size:.68rem;letter-spacing:2px;font-family:'Share Tech Mono',monospace">// NO PENDING REQUESTS</div></div>
         </div>
 
         <div class="card">
-          <div class="section-title">🗡️ WAR REQUESTS</div>
-          <div id="admin-war-requests">
-            <div style="text-align:center;padding:30px;color:rgba(0,255,204,.3);font-size:.8rem;letter-spacing:2px;font-family:'Share Tech Mono',monospace">
-              NO PENDING WAR REQUESTS
-            </div>
-          </div>
+          <div class="sec-title">⚔️ WAR REQUESTS</div>
+          <div id="adm-war-requests"><div style="text-align:center;padding:24px;color:rgba(0,255,204,.2);font-size:.68rem;letter-spacing:2px;font-family:'Share Tech Mono',monospace">// NO PENDING WAR REQUESTS</div></div>
         </div>
 
         <div class="card">
-          <div class="section-title">📢 BROADCAST MESSAGE</div>
-          <div class="form-grid">
-            <div class="form-field" style="grid-column:1/-1">
-              <label class="form-label">MESSAGE TO ALL MEMBERS (via Bot)</label>
-              <textarea class="form-input" id="broadcast-msg" placeholder="Type your announcement..." style="min-height:80px"></textarea>
-            </div>
+          <div class="sec-title">📢 BROADCAST</div>
+          <div class="ff"><label class="fl">// MESSAGE TO CLAN (via Bot)</label><textarea class="fi" id="bc-msg" placeholder="Type announcement..." style="min-height:70px"></textarea></div>
+          <button class="sbtn" onclick="sendBroadcast()" style="margin-top:8px">[ 📢 BROADCAST ]</button>
+          <div class="fstat" id="bc-status"></div>
+          <div class="broadcast-log" id="bc-log" style="display:none"></div>
+        </div>
+
+        <div class="card">
+          <div class="sec-title">🏆 ADD TO LEGENDS</div>
+          <div class="fgrid" style="grid-template-columns:1fr 1fr;gap:8px">
+            <div class="ff"><label class="fl">// PLAYER NAME</label><input class="fi" id="leg-name" placeholder="IGN" type="text"></div>
+            <div class="ff"><label class="fl">// TITLE</label><input class="fi" id="leg-title" placeholder="e.g. Season 1 Champion" type="text"></div>
+            <div class="ff" style="grid-column:1/-1"><label class="fl">// ACHIEVEMENTS (comma separated)</label><input class="fi" id="leg-ach" placeholder="Champion, MVP, Legendary" type="text"></div>
           </div>
-          <button class="submit-btn" onclick="sendBroadcast()">📢 BROADCAST VIA BOT</button>
-          <div class="form-status" id="broadcast-status"></div>
+          <button class="sbtn" onclick="addLegend()" style="margin-top:8px">[ ADD TO HALL OF LEGENDS ]</button>
+          <div class="fstat" id="leg-status"></div>
         </div>
       </div>
     </section>
 
-  </main>
+  </div>
 </div>
 
-<!-- TERMINAL -->
-<div id="hackText"></div>
+<!-- PLAYER MODAL -->
+<div id="player-modal">
+  <div class="pm-box">
+    <button class="pm-close" onclick="closePlayer()">✕</button>
+    <div class="pm-header">
+      <div class="pm-avatar" id="pm-av">👑</div>
+      <div><div class="pm-name" id="pm-name">—</div><div class="pm-role" id="pm-role">—</div></div>
+    </div>
+    <div class="pm-stats">
+      <div class="pm-stat"><div class="pm-stat-n" id="pm-aim">—</div><div class="pm-stat-l">AIM</div></div>
+      <div class="pm-stat"><div class="pm-stat-n" id="pm-reflex">—</div><div class="pm-stat-l">REFLEX</div></div>
+      <div class="pm-stat"><div class="pm-stat-n" id="pm-iq">—</div><div class="pm-stat-l">GAME IQ</div></div>
+    </div>
+    <div class="pm-genome-full">
+      <div class="pgr"><div class="pgr-l">AIM ACCURACY</div><div class="pgr-bw"><div class="pgr-b" id="pg-aim"></div></div><div class="pgr-v" id="pgv-aim">—</div></div>
+      <div class="pgr"><div class="pgr-l">REFLEX SPEED</div><div class="pgr-bw"><div class="pgr-b" id="pg-ref"></div></div><div class="pgr-v" id="pgv-ref">—</div></div>
+      <div class="pgr"><div class="pgr-l">GAME IQ</div><div class="pgr-bw"><div class="pgr-b" id="pg-iq"></div></div><div class="pgr-v" id="pgv-iq">—</div></div>
+      <div class="pgr"><div class="pgr-l">LEADERSHIP</div><div class="pgr-bw"><div class="pgr-b" id="pg-lead"></div></div><div class="pgr-v" id="pgv-lead">—</div></div>
+      <div class="pgr"><div class="pgr-l">AGGRESSION</div><div class="pgr-bw"><div class="pgr-b" id="pg-agg"></div></div><div class="pgr-v" id="pgv-agg">—</div></div>
+      <div class="pgr"><div class="pgr-l">TEAMWORK</div><div class="pgr-bw"><div class="pgr-b" id="pg-team"></div></div><div class="pgr-v" id="pgv-team">—</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- AUDIO -->
+<audio id="snd-click" src="data:audio/wav;base64,UklGRlQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YTAAAAC7/7//u/+7/7v/u/+7/7v/u/+7/7v/u/+7/7v/u/+7/7v/u/+7/7v/" preload="auto"></audio>
+<audio id="snd-boot" src="data:audio/wav;base64,UklGRlQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YTAAAAC7/7//u/+7/7v/u/+7/7v/u/+7/7v/u/+7/7v/u/+7/7v/u/+7/7v/" preload="auto"></audio>
 
 <script>
 // ===== CONSTANTS =====
-const BOT_TOKEN = '8963561814:AAHsuyZO81HXEHzI96TOfY8eTzAJsrU1PXo';
-const ADMIN_CHAT_ID = '8249371770';
-const ACCESS_CODE = 'onlyfamily';
-const ADMIN_CODE = 'maru2025';
+const BOT_TOKEN='8963561814:AAHsuyZO81HXEHzI96TOfY8eTzAJsrU1PXo';
+const ADMIN_ID='8249371770';
+const CODE='onlyfamily';
+const ADMIN_CODE='maru2025';
 
-// ===== CANVAS BG =====
+// ===== SOUND ENGINE =====
+const AC=new(window.AudioContext||window.webkitAudioContext)();
+function beep(freq=440,dur=0.08,vol=0.15,type='square'){
+  try{
+    const o=AC.createOscillator(),g=AC.createGain();
+    o.connect(g);g.connect(AC.destination);
+    o.frequency.value=freq;o.type=type;
+    g.gain.setValueAtTime(vol,AC.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+dur);
+    o.start(AC.currentTime);o.stop(AC.currentTime+dur);
+  }catch(e){}
+}
+function sfxClick(){beep(800,0.06,0.1,'square')}
+function sfxSuccess(){beep(440,0.1,0.15);setTimeout(()=>beep(660,0.15,0.15),100);setTimeout(()=>beep(880,0.2,0.15),200)}
+function sfxError(){beep(200,0.2,0.2,'sawtooth')}
+function sfxBoot(){[220,330,440,550,660,880].forEach((f,i)=>setTimeout(()=>beep(f,0.12,0.1),i*120))}
+function sfxNotif(){beep(660,0.08,0.12);setTimeout(()=>beep(880,0.12,0.12),90)}
+function sfxSection(){beep(400,0.05,0.08,'sine');setTimeout(()=>beep(600,0.08,0.08,'sine'),60)}
+
+document.addEventListener('click',()=>{if(AC.state==='suspended')AC.resume()});
+
+// ===== BG CANVAS =====
 (function(){
-  const c = document.getElementById('bgCanvas');
-  const ctx = c.getContext('2d');
-  let W,H,particles=[];
+  const c=document.getElementById('bgCanvas');
+  const ctx=c.getContext('2d');
+  let W,H,pts=[];
   function resize(){W=c.width=window.innerWidth;H=c.height=window.innerHeight}
   resize();window.addEventListener('resize',resize);
-  for(let i=0;i<60;i++)particles.push({x:Math.random()*9999,y:Math.random()*9999,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,r:Math.random()*1.5+.5,a:Math.random()*.5+.1});
-  // Grid
-  function drawGrid(){
-    ctx.strokeStyle='rgba(0,255,204,0.03)';ctx.lineWidth=1;
-    const gs=50;
-    for(let x=0;x<W;x+=gs){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
-    for(let y=0;y<H;y+=gs){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
-  }
-  function loop(){
+  for(let i=0;i<80;i++)pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.2+.3,a:Math.random()*.3+.05});
+  function draw(){
     ctx.clearRect(0,0,W,H);
-    drawGrid();
-    particles.forEach(p=>{
+    // Grid
+    ctx.strokeStyle='rgba(0,255,204,0.025)';ctx.lineWidth=1;
+    for(let x=0;x<W;x+=60){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
+    for(let y=0;y<H;y+=60){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+    // Pts
+    pts.forEach(p=>{
       p.x+=p.vx;p.y+=p.vy;
       if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;
       ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
       ctx.fillStyle=`rgba(0,255,204,${p.a})`;ctx.fill();
     });
-    // Connect nearby
-    for(let i=0;i<particles.length;i++){
-      for(let j=i+1;j<particles.length;j++){
-        const dx=particles[i].x-particles[j].x,dy=particles[i].y-particles[j].y;
-        const d=Math.sqrt(dx*dx+dy*dy);
-        if(d<100){ctx.beginPath();ctx.moveTo(particles[i].x,particles[i].y);ctx.lineTo(particles[j].x,particles[j].y);ctx.strokeStyle=`rgba(0,255,204,${.06*(1-d/100)})`;ctx.lineWidth=.5;ctx.stroke()}
+    // Connections
+    for(let i=0;i<pts.length;i++){
+      for(let j=i+1;j<pts.length;j++){
+        const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.hypot(dx,dy);
+        if(d<90){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.strokeStyle=`rgba(0,255,204,${.05*(1-d/90)})`;ctx.lineWidth=.4;ctx.stroke()}
       }
     }
-    requestAnimationFrame(loop);
+    requestAnimationFrame(draw);
   }
-  loop();
+  draw();
 })();
 
-// ===== LOADER =====
-const loadMsgs = ['BOOTING SYSTEM...','LOADING CLAN DATA...','FETCHING ROSTER...','INITIALIZING COMMS...','SYSTEM ONLINE'];
-let li=0;
-const ldtxt = document.getElementById('ld-txt');
-const ltimer = setInterval(()=>{li++;if(li<loadMsgs.length)ldtxt.textContent=loadMsgs[li];},520);
-setTimeout(()=>{
-  clearInterval(ltimer);
-  document.getElementById('loader').style.opacity='0';
-  document.getElementById('loader').style.transition='opacity .5s';
-  setTimeout(()=>{document.getElementById('loader').style.display='none'},500);
-},2700);
+// ===== RADAR CANVAS =====
+function drawRadar(){
+  const c=document.getElementById('radarCanvas');
+  if(!c)return;
+  const sz=Math.min(220,window.innerWidth*0.45);
+  c.width=sz;c.height=sz;
+  const ctx=c.getContext('2d');
+  const cx=sz/2,cy=sz/2,r=sz/2-10;
+  const stats=[0.90,0.85,0.95,0.88,0.82,0.91]; // aim,reflex,iq,leadership,aggression,teamwork
+  const labels=['AIM','REFLEX','IQ','LEAD','AGG','TEAM'];
+  const n=6;
+  // Rings
+  for(let ring=1;ring<=4;ring++){
+    ctx.beginPath();
+    for(let i=0;i<n;i++){const a=i/n*Math.PI*2-Math.PI/2;const rr=r*ring/4;ctx.lineTo(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr)}
+    ctx.closePath();ctx.strokeStyle='rgba(0,255,204,0.12)';ctx.lineWidth=1;ctx.stroke();
+  }
+  // Axes
+  for(let i=0;i<n;i++){
+    const a=i/n*Math.PI*2-Math.PI/2;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);
+    ctx.strokeStyle='rgba(0,255,204,0.15)';ctx.lineWidth=1;ctx.stroke();
+    const lx=cx+Math.cos(a)*(r+12),ly=cy+Math.sin(a)*(r+12);
+    ctx.fillStyle='rgba(0,255,204,0.4)';ctx.font='9px Share Tech Mono';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(labels[i],lx,ly);
+  }
+  // Data
+  ctx.beginPath();
+  for(let i=0;i<n;i++){
+    const a=i/n*Math.PI*2-Math.PI/2;const rr=r*stats[i];
+    i===0?ctx.moveTo(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr):ctx.lineTo(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr);
+  }
+  ctx.closePath();
+  ctx.fillStyle='rgba(0,255,204,0.12)';ctx.fill();
+  ctx.strokeStyle='rgba(0,255,204,0.7)';ctx.lineWidth=1.5;ctx.stroke();
+  // Dots
+  for(let i=0;i<n;i++){
+    const a=i/n*Math.PI*2-Math.PI/2;const rr=r*stats[i];
+    ctx.beginPath();ctx.arc(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr,3,0,Math.PI*2);
+    ctx.fillStyle='var(--n)';ctx.fill();
+  }
+  // Radar sweep
+  let angle=0;
+  function sweep(){
+    // Clear sweep
+    ctx.save();
+    const grad=ctx.createConicalGradient?ctx.createConicalGradient(cx,cy,0):null;
+    // Simple rotating line
+    ctx.clearRect(0,0,sz,sz);
+    // Redraw base
+    for(let ring=1;ring<=4;ring++){
+      ctx.beginPath();
+      for(let i=0;i<n;i++){const a=i/n*Math.PI*2-Math.PI/2;const rr=r*ring/4;ctx.lineTo(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr)}
+      ctx.closePath();ctx.strokeStyle='rgba(0,255,204,0.12)';ctx.lineWidth=1;ctx.stroke();
+    }
+    for(let i=0;i<n;i++){
+      const a=i/n*Math.PI*2-Math.PI/2;
+      ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);
+      ctx.strokeStyle='rgba(0,255,204,0.15)';ctx.lineWidth=1;ctx.stroke();
+      const lx=cx+Math.cos(a)*(r+12),ly=cy+Math.sin(a)*(r+12);
+      ctx.fillStyle='rgba(0,255,204,0.4)';ctx.font='9px Share Tech Mono';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(labels[i],lx,ly);
+    }
+    ctx.beginPath();
+    for(let i=0;i<n;i++){
+      const a=i/n*Math.PI*2-Math.PI/2;const rr=r*stats[i];
+      i===0?ctx.moveTo(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr):ctx.lineTo(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr);
+    }
+    ctx.closePath();ctx.fillStyle='rgba(0,255,204,0.12)';ctx.fill();ctx.strokeStyle='rgba(0,255,204,0.7)';ctx.lineWidth=1.5;ctx.stroke();
+    // Sweep line
+    const sweepGrad=ctx.createLinearGradient(cx,cy,cx+Math.cos(angle)*r,cy+Math.sin(angle)*r);
+    sweepGrad.addColorStop(0,'rgba(0,255,204,0.5)');sweepGrad.addColorStop(1,'rgba(0,255,204,0)');
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(angle)*r,cy+Math.sin(angle)*r);
+    ctx.strokeStyle='rgba(0,255,204,0.5)';ctx.lineWidth=2;ctx.stroke();
+    // Sweep trail
+    ctx.save();ctx.beginPath();ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,r,angle-0.8,angle);ctx.lineTo(cx,cy);
+    ctx.fillStyle='rgba(0,255,204,0.04)';ctx.fill();ctx.restore();
+    angle+=0.03;
+    ctx.restore();
+    requestAnimationFrame(sweep);
+  }
+  sweep();
+}
+
+// ===== HERO CANVAS =====
+function initHeroCanvas(){
+  const c=document.getElementById('heroCanvas');
+  if(!c||!c.parentElement)return;
+  const p=c.parentElement;
+  c.width=p.offsetWidth;c.height=p.offsetHeight;
+  const ctx=c.getContext('2d');
+  const pts=[];
+  for(let i=0;i<30;i++)pts.push({x:Math.random()*c.width,y:Math.random()*c.height,vy:-(Math.random()*1+0.5),r:Math.random()*2+.5,a:0});
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    pts.forEach(p=>{
+      p.y+=p.vy;p.a=Math.max(0,0.6-p.y/c.height);
+      if(p.y<-10){p.y=c.height;p.x=Math.random()*c.width;p.a=0}
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(0,255,204,${p.a*.5})`;ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ===== WIN PROBABILITY RING =====
+function animateWPRing(pct){
+  const circle=document.getElementById('wp-circle');
+  if(!circle)return;
+  const circumference=2*Math.PI*28;
+  const offset=circumference-(pct/100)*circumference;
+  setTimeout(()=>{circle.style.strokeDashoffset=offset},500);
+}
+
+// ===== BOOT SEQUENCE =====
+let bootDone=false;
+function runBoot(){
+  sfxBoot();
+  const lines=document.querySelectorAll('.boot-line');
+  const fill=document.getElementById('bp-fill');
+  const pct=document.getElementById('boot-pct');
+  lines.forEach((l,i)=>{
+    setTimeout(()=>{
+      l.classList.add('show');
+      beep(300+i*50,0.05,0.08);
+    },i*320);
+  });
+  let p=0;
+  const t=setInterval(()=>{
+    p+=2;fill.style.width=p+'%';pct.textContent=p+'%';
+    if(p>=100){
+      clearInterval(t);
+      setTimeout(()=>{
+        document.getElementById('boot').style.opacity='0';
+        document.getElementById('boot').style.transition='opacity .6s';
+        setTimeout(()=>{
+          document.getElementById('boot').style.display='none';
+          document.getElementById('login').style.display='flex';
+          sfxSuccess();
+        },600);
+      },400);
+    }
+  },40);
+}
+setTimeout(runBoot,300);
 
 // ===== LOGIN =====
 function checkCode(){
   const v=document.getElementById('code').value.trim().toLowerCase();
-  const msg=document.getElementById('login-msg');
-  if(v===ACCESS_CODE){
-    msg.textContent='◈ ACCESS GRANTED ◈';msg.style.color='#00ff88';
-    document.getElementById('success-flash').classList.add('flash');
+  const msg=document.getElementById('lt-msg');
+  if(v===CODE){
+    sfxSuccess();
+    msg.style.color='#00ff88';msg.textContent='> ACCESS GRANTED — WELCOME COMMANDER';
     setTimeout(()=>{
       document.getElementById('login').style.display='none';
       document.getElementById('app').style.display='block';
       initApp();
-    },700);
+    },800);
   } else {
-    msg.textContent='✕ INVALID CODE — TRY AGAIN';
+    sfxError();
+    msg.style.color='var(--n3)';msg.textContent='> AUTHENTICATION FAILED — RETRY';
     document.getElementById('code').value='';
-    document.getElementById('code').style.borderColor='var(--neon3)';
-    setTimeout(()=>document.getElementById('code').style.borderColor='',1000);
   }
-}
-
-// ===== SIDEBAR =====
-function toggleSB(){
-  const sb=document.getElementById('sidebar');
-  sb.classList.toggle('exp');
-  document.getElementById('sb-toggle-btn').textContent=sb.classList.contains('exp')?'‹':'›';
 }
 
 // ===== SECTION SWITCH =====
 function show(id,btn){
+  sfxSection();
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.osb-item').forEach(b=>b.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  btn.classList.add('active');
+  if(btn)btn.classList.add('active');
+  triggerSatScan();
+}
+
+// ===== SAT SCAN =====
+function triggerSatScan(){
+  const s=document.getElementById('sat-scan');
+  s.style.display='block';
+  const ring=s.querySelector('.sat-ring');
+  ring.style.animation='none';
+  setTimeout(()=>{ring.style.animation='satPulse 2s ease-out forwards'},10);
+  setTimeout(()=>{s.style.display='none'},2000);
+}
+
+// ===== NOTIFICATION =====
+function showNotif(title,body,duration=4000){
+  sfxNotif();
+  document.getElementById('notif-title').textContent=title;
+  document.getElementById('notif-body').textContent=body;
+  document.getElementById('notif').classList.add('show');
+  setTimeout(()=>document.getElementById('notif').classList.remove('show'),duration);
 }
 
 // ===== CLOCK =====
-function updateClock(){
+setInterval(()=>{
+  const el=document.getElementById('os-clock');
+  if(el)el.textContent=new Date().toLocaleTimeString('en-US',{hour12:false});
+},1000);
+
+// ===== COUNTDOWN =====
+function updateCD(){
   const now=new Date();
-  const t=now.toLocaleTimeString('en-US',{hour12:false});
-  const el=document.getElementById('server-time');
-  if(el)el.textContent=t;
+  const next=new Date();
+  const day=now.getDay();
+  const daysToFri=(5-day+7)%7||7;
+  next.setDate(now.getDate()+daysToFri);
+  next.setHours(21,0,0,0);
+  const diff=Math.max(0,next-now);
+  const d=Math.floor(diff/86400000);
+  const h=Math.floor((diff%86400000)/3600000);
+  const m=Math.floor((diff%3600000)/60000);
+  const s=Math.floor((diff%60000)/1000);
+  const f=n=>String(n).padStart(2,'0');
+  ['d','h','m','s'].forEach((id,i)=>{
+    const el=document.getElementById('cd-'+id);
+    if(el)el.textContent=f([d,h,m,s][i]);
+  });
 }
-setInterval(updateClock,1000);
+setInterval(updateCD,1000);
+
+// ===== PING =====
+setInterval(()=>{
+  const p=[12,14,16,18,20,22][Math.floor(Math.random()*6)];
+  const el=document.getElementById('ping-disp');
+  if(el)el.textContent=p+'ms';
+},3000);
 
 // ===== KILL FEED =====
 const kills=[
-  {killer:'𝙤𝙣𝙡𝙮ゝMaru',weapon:'SVD',victim:'Enemy_01'},
-  {killer:'𝙤𝙣𝙡𝙮ゝFlash',weapon:'Lachmann',victim:'ShadowX'},
-  {killer:'𝙤𝙣𝙡𝙮ゝSniper',weapon:'Kilo Bolt',victim:'ProGunner'},
-  {killer:'𝙤𝙣𝙡𝙮ゝBlaze',weapon:'MCW',victim:'RushKing'},
-  {killer:'𝙤𝙣𝙡𝙮ゝShield',weapon:'WSP',victim:'NoScope99'},
-  {killer:'𝙤𝙣𝙡𝙮ゝMaru',weapon:'SVD',victim:'DarkElite'},
-  {killer:'𝙤𝙣𝙡𝙮ゝFlash',weapon:'Rival-9',victim:'GhostSnp'},
+  {k:'𝙤𝙣𝙡𝙮ゝMaru',w:'SVD',v:'Enemy_01'},
+  {k:'𝙤𝙣𝙡𝙮ゝFlash',w:'Lachmann',v:'ShadowX'},
+  {k:'𝙤𝙣𝙡𝙮ゝSniper',w:'Kilo Bolt',v:'ProGunner'},
+  {k:'𝙤𝙣𝙡𝙮ゝBlaze',w:'MCW',v:'RushKing'},
+  {k:'𝙤𝙣𝙡𝙮ゝShield',w:'WSP',v:'NoScope99'},
+  {k:'𝙤𝙣𝙡𝙮ゝMaru',w:'Rival-9',v:'DarkElite'},
 ];
 let kfi=0;
 function addKill(){
   const feed=document.getElementById('killfeed');
   if(!feed)return;
   const k=kills[kfi%kills.length];kfi++;
-  const line=document.createElement('div');line.className='kf-line';
-  line.innerHTML=`<span class="kf-skull">☠</span><span class="kf-killer">${k.killer}</span><span class="kf-weapon">${k.weapon}</span><span style="color:rgba(0,255,204,.3)">→</span><span class="kf-victim">${k.victim}</span>`;
-  feed.appendChild(line);
-  if(feed.children.length>6)feed.removeChild(feed.children[0]);
-  setTimeout(()=>line.classList.add('show'),50);
+  const el=document.createElement('div');el.className='kf';
+  el.innerHTML=`<span class="kfs">☠</span><span class="kfk">${k.k}</span><span class="kfw">${k.w}</span><span style="color:rgba(0,255,204,.2)">→</span><span class="kfv">${k.v}</span>`;
+  feed.appendChild(el);
+  if(feed.children.length>5)feed.removeChild(feed.children[0]);
+  setTimeout(()=>el.classList.add('show'),30);
 }
 
-// ===== ACTIVITY LOG =====
-const activities=[
-  {time:'just now',text:'<b>𝙤𝙣𝙡𝙮ゝMaru</b> came online'},
-  {time:'2m ago',text:'New recruit application from <b>ProPlayer99</b>'},
-  {time:'5m ago',text:'<b>𝙤𝙣𝙡𝙮ゝSniper</b> joined the lobby'},
-  {time:'12m ago',text:'Scrim result recorded: <b>W 2-1</b> vs ShadowClan'},
-  {time:'1h ago',text:'Clan war scheduled for <b>Friday 21:00</b>'},
-  {time:'2h ago',text:'<b>𝙤𝙣𝙡𝙮ゝFlash</b> updated loadout'},
-  {time:'3h ago',text:'New rule added: <b>Section 05 — Map Bans</b>'},
+// ===== ACTIVITY =====
+const acts=[
+  {t:'just now',txt:'<b>𝙤𝙣𝙡𝙮ゝMaru</b> came online'},
+  {t:'2m ago',txt:'New application from <b>ProPlayer99</b>'},
+  {t:'8m ago',txt:'Scrim result: <b>W 2-1</b> vs ShadowClan'},
+  {t:'1h ago',txt:'War scheduled: <b>Friday 21:00</b>'},
+  {t:'2h ago',txt:'<b>𝙤𝙣𝙡𝙮ゝFlash</b> updated loadout'},
 ];
-function renderActivity(){
-  const log=document.getElementById('activity-log');
-  if(!log)return;
-  log.innerHTML=activities.map(a=>`<div class="act-item"><div class="act-time">${a.time}</div><div class="act-text">${a.text}</div></div>`).join('');
+function renderActs(){
+  const el=document.getElementById('actlog');
+  if(!el)return;
+  el.innerHTML=acts.map(a=>`<div class="act"><div class="act-t">${a.t}</div><div class="act-txt">${a.txt}</div></div>`).join('');
 }
 
 // ===== CHART =====
 function renderChart(){
-  const wrap=document.getElementById('chart-bars');
-  if(!wrap)return;
-  const data=[{l:'MON',v:2},{l:'TUE',v:3},{l:'WED',v:1},{l:'THU',v:2},{l:'FRI',v:3},{l:'SAT',v:2},{l:'SUN',v:0}];
-  const max=3;
-  wrap.innerHTML=data.map(d=>`<div class="chart-bar-wrap"><div class="chart-bar" style="height:${d.v/max*100}%"></div><div class="chart-bar-lbl">${d.l}</div></div>`).join('');
-}
-
-// ===== HERO PARTICLES =====
-function spawnHeroParticles(){
-  const c=document.getElementById('heroP');
-  if(!c)return;
-  for(let i=0;i<20;i++){
-    const p=document.createElement('div');p.className='hero-p';
-    p.style.left=Math.random()*100+'%';
-    p.style.animationDuration=(3+Math.random()*4)+'s';
-    p.style.animationDelay=(Math.random()*4)+'s';
-    p.style.width=p.style.height=(1+Math.random()*2)+'px';
-    p.style.background=Math.random()>.5?'var(--neon)':'var(--neon2)';
-    c.appendChild(p);
-  }
-}
-
-// ===== COUNTDOWN =====
-function updateCountdown(){
-  const now=new Date();
-  const next=new Date();
-  next.setDate(now.getDate()+(5-now.getDay()+7)%7||7);
-  next.setHours(21,0,0,0);
-  if(next<=now)next.setDate(next.getDate()+7);
-  const diff=next-now;
-  const d=Math.floor(diff/86400000);
-  const h=Math.floor((diff%86400000)/3600000);
-  const m=Math.floor((diff%3600000)/60000);
-  const s=Math.floor((diff%60000)/1000);
-  const f=n=>String(n).padStart(2,'0');
-  const de=document.getElementById('cd-d');const he=document.getElementById('cd-h');
-  const me=document.getElementById('cd-m');const se=document.getElementById('cd-s');
-  if(de)de.textContent=f(d);if(he)he.textContent=f(h);if(me)me.textContent=f(m);if(se)se.textContent=f(s);
-}
-setInterval(updateCountdown,1000);
-
-// ===== PING SIMULATOR =====
-function updatePing(){
-  const pings=[12,14,16,18,20,22];
-  const p=pings[Math.floor(Math.random()*pings.length)];
-  const el=document.getElementById('ping-display');
-  if(el)el.textContent=p+'ms';
-}
-setInterval(updatePing,3000);
-
-// ===== TERMINAL =====
-const hackLines=['> SYSTEM ONLINE','> MEMBERS: 5 ACTIVE','> CLAN WAR: FRIDAY','> PING: 18ms','> ENCRYPTION: AES-256','> STATUS: COMBAT READY'];
-let hi=0;
-function updateHack(){
-  const el=document.getElementById('hackText');
+  const el=document.getElementById('chart-bars');
   if(!el)return;
-  const line=hackLines[hi%hackLines.length];hi++;
-  const cur=el.textContent.split('\n');
-  cur.push(line);if(cur.length>5)cur.shift();
-  el.textContent=cur.join('\n');
-}
-setInterval(updateHack,1800);
-
-// ===== INIT APP =====
-function initApp(){
-  updateClock();updateCountdown();renderActivity();renderChart();spawnHeroParticles();
-  setInterval(addKill,2200);
-  updateHack();
+  const data=[{l:'M',v:2},{l:'T',v:3},{l:'W',v:1},{l:'T',v:2},{l:'F',v:3},{l:'S',v:2},{l:'S',v:0}];
+  const max=3;
+  el.innerHTML=data.map(d=>`<div class="bw"><div class="b" style="height:${Math.max(d.v/max*100,4)}%"></div><div class="bl">${d.l}</div></div>`).join('');
 }
 
-// ===== TELEGRAM BOT =====
-async function sendTelegramMessage(text){
+// ===== AI MESSAGES =====
+const aiMsgs=[
+  'All systems nominal, Commander.',
+  'Team power: 9,250 — Combat ready.',
+  `Next clan war: Friday 21:00.`,
+  'Win probability vs current opponent: 84%.',
+  'Recommended loadout: SVD-V2 + Lachmann Sub.',
+  '2 enemy clans detected nearby. Stay sharp.',
+  'Recruitment portal is open. New talent incoming.',
+  'Scrim session scheduled for Thursday 20:00.',
+  'Threat level: HIGH. Prepare accordingly.',
+  'OF-NET connection stable. Ping: 18ms.',
+];
+let aiIdx=0;
+function cycleAI(){
+  const msg=document.getElementById('ai-msg');
+  const typing=document.getElementById('ai-typing');
+  if(!msg)return;
+  typing.style.display='flex';msg.style.opacity='0';
+  setTimeout(()=>{
+    msg.textContent=aiMsgs[aiIdx%aiMsgs.length];aiIdx++;
+    msg.style.opacity='1';msg.style.transition='opacity .4s';
+    typing.style.display='none';
+  },1200);
+}
+
+// ===== PLAYER MODAL =====
+function openPlayer(name,role,av,device,uid,aim,reflex,iq,leadership,aggression,teamwork){
+  sfxClick();
+  document.getElementById('pm-av').textContent=av;
+  document.getElementById('pm-name').textContent=name;
+  document.getElementById('pm-role').textContent=role;
+  document.getElementById('pm-aim').textContent=aim;
+  document.getElementById('pm-reflex').textContent=reflex;
+  document.getElementById('pm-iq').textContent=iq;
+  const stats=[['aim',aim],['ref',reflex],['iq',iq],['lead',leadership],['agg',aggression],['team',teamwork]];
+  stats.forEach(([id,val])=>{
+    const b=document.getElementById('pg-'+id);
+    const v=document.getElementById('pgv-'+id);
+    if(b){setTimeout(()=>b.style.width=val+'%',100)}
+    if(v)v.textContent=val;
+  });
+  document.getElementById('player-modal').classList.add('open');
+}
+function closePlayer(){
+  document.getElementById('player-modal').classList.remove('open');
+  // Reset bars
+  ['aim','ref','iq','lead','agg','team'].forEach(id=>{
+    const b=document.getElementById('pg-'+id);if(b)b.style.width='0';
+  });
+}
+document.getElementById('player-modal').addEventListener('click',function(e){if(e.target===this)closePlayer()});
+
+// ===== TELEGRAM =====
+async function tgSend(text){
   try{
     const r=await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({chat_id:ADMIN_CHAT_ID,text,parse_mode:'HTML'})
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({chat_id:ADMIN_ID,text,parse_mode:'HTML'})
     });
-    const d=await r.json();
-    return d.ok;
+    const d=await r.json();return d.ok;
   }catch(e){return false}
 }
 
 // ===== RECRUIT SUBMIT =====
+const adminReqs=[];
 async function submitRecruit(){
   const ign=document.getElementById('r-ign').value.trim();
   const uid=document.getElementById('r-uid').value.trim();
@@ -1376,36 +1482,22 @@ async function submitRecruit(){
   const role=document.getElementById('r-role').value;
   const device=document.getElementById('r-device').value.trim();
   const note=document.getElementById('r-note').value.trim();
-  const st=document.getElementById('recruit-status');
-  const btn=document.getElementById('recruit-btn');
-
-  if(!ign||!uid||!tg||!rank||!role){
-    st.className='form-status error';st.textContent='✕ FILL ALL REQUIRED FIELDS';return;
-  }
-
-  btn.disabled=true;
-  st.className='form-status sending';st.textContent='⟳ SENDING TO LEADER...';
-
-  const now=new Date().toLocaleString('fa-IR');
-  const msg=`🎮 <b>NEW CLAN APPLICATION</b>\n━━━━━━━━━━━━━━━\n👤 IGN: <code>${ign}</code>\n🔢 UID: <code>${uid}</code>\n📬 Telegram: ${tg}\n🏆 Rank: <b>${rank}</b>\n⚔️ Role: <b>${role}</b>\n📱 Device: ${device||'—'}\n📝 Note: ${note||'—'}\n⏰ Time: ${now}\n━━━━━━━━━━━━━━━\n#recruitment #application`;
-
-  const ok=await sendTelegramMessage(msg);
-
+  const st=document.getElementById('r-status');
+  const btn=document.getElementById('r-btn');
+  if(!ign||!uid||!tg||!rank||!role){sfxError();st.className='fstat err';st.textContent='> FILL ALL REQUIRED FIELDS';return}
+  sfxClick();btn.disabled=true;st.className='fstat loading';st.textContent='> SENDING TO COMMANDER...';
+  const msg=`🎮 <b>NEW CLAN APPLICATION</b>\n━━━━━━━━━━━━━━━\n👤 IGN: <code>${ign}</code>\n🔢 UID: <code>${uid}</code>\n📬 Telegram: ${tg}\n🏆 Rank: <b>${rank}</b>\n⚔️ Role: <b>${role}</b>\n📱 Device: ${device||'—'}\n📝 Note: ${note||'—'}\n⏰ ${new Date().toLocaleString('fa-IR')}\n━━━━━━━━━━━━━━━\n#recruit`;
+  const ok=await tgSend(msg);
   if(ok){
-    st.className='form-status success';st.textContent='✓ APPLICATION SENT — AWAIT RESPONSE';
-    document.getElementById('r-ign').value='';document.getElementById('r-uid').value='';
-    document.getElementById('r-tg').value='';document.getElementById('r-rank').value='';
-    document.getElementById('r-role').value='';document.getElementById('r-device').value='';
-    document.getElementById('r-note').value='';
-
-    // Add to activity
-    activities.unshift({time:'just now',text:`New recruit application from <b>${ign}</b>`});
-    activities.pop();renderActivity();
-
-    // Add to admin panel
-    addToAdminRequests({ign,uid,tg,rank,role,device,note,time:'just now'});
+    sfxSuccess();st.className='fstat ok';st.textContent='> APPLICATION TRANSMITTED — AWAIT RESPONSE';
+    ['r-ign','r-uid','r-tg','r-device','r-note'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('r-rank').value='';document.getElementById('r-role').value='';
+    const req={ign,uid,tg,rank,role,device,note,time:'just now'};
+    adminReqs.push(req);renderAdminReqs();
+    acts.unshift({t:'just now',txt:`New application from <b>${ign}</b>`});acts.pop();renderActs();
+    showNotif('NEW APPLICATION',`${ign} applied to join the clan`);
   } else {
-    st.className='form-status error';st.textContent='✕ SEND FAILED — CHECK CONNECTION';
+    sfxError();st.className='fstat err';st.textContent='> TRANSMISSION FAILED — RETRY OR CONTACT @VoidSpctre';
   }
   btn.disabled=false;
 }
@@ -1417,100 +1509,147 @@ async function submitWar(){
   const tg=document.getElementById('w-tg').value.trim();
   const type=document.getElementById('w-type').value;
   const note=document.getElementById('w-note').value.trim();
-  const st=document.getElementById('war-status');
-  const btn=document.getElementById('war-btn');
-
-  if(!title||!time||!tg){
-    st.className='form-status error';st.textContent='✕ FILL REQUIRED FIELDS';return;
-  }
-
-  btn.disabled=true;
-  st.className='form-status sending';st.textContent='⟳ SENDING TO LEADER...';
-
-  const now=new Date().toLocaleString('fa-IR');
-  const msg=`⚔️ <b>WAR/SCRIM REQUEST</b>\n━━━━━━━━━━━━━━━\n📌 Title: <b>${title}</b>\n📅 Time: <b>${time}</b>\n🎮 Type: ${type}\n📬 Telegram: ${tg}\n📝 Notes: ${note||'—'}\n⏰ Sent: ${now}\n━━━━━━━━━━━━━━━\n#war #coordination`;
-
-  const ok=await sendTelegramMessage(msg);
-
+  const st=document.getElementById('w-status');
+  const btn=document.getElementById('w-btn');
+  if(!title||!time||!tg){sfxError();st.className='fstat err';st.textContent='> FILL REQUIRED FIELDS';return}
+  sfxClick();btn.disabled=true;st.className='fstat loading';st.textContent='> SENDING...';
+  const msg=`⚔️ <b>WAR/SCRIM REQUEST</b>\n━━━━━━━━━━━━━━━\n📌 <b>${title}</b>\n📅 Time: <b>${time}</b>\n🎮 Type: ${type}\n📬 Telegram: ${tg}\n📝 Notes: ${note||'—'}\n⏰ ${new Date().toLocaleString('fa-IR')}\n━━━━━━━━━━━━━━━\n#war #coordination`;
+  const ok=await tgSend(msg);
   if(ok){
-    st.className='form-status success';st.textContent='✓ SENT — LEADER WILL CONFIRM';
-    // Add to war list UI
+    sfxSuccess();st.className='fstat ok';st.textContent='> SENT — LEADER WILL CONFIRM';
     const wl=document.getElementById('war-list');
-    const wc=document.createElement('div');wc.className='war-card';
-    wc.innerHTML=`<div class="war-icon">🗡️</div><div class="war-info"><div class="war-title">${type.toUpperCase()} — ${title}</div><div class="war-detail">${time}</div><div class="war-tg">📬 ${tg}</div></div><div class="war-status-badge ws-soon">PENDING</div>`;
+    const wc=document.createElement('div');wc.className='wcard';
+    wc.innerHTML=`<div class="wicon">🗡️</div><div class="winfo"><div class="wtitle">${type.toUpperCase()} — ${title}</div><div class="wdetail">${time}</div><div class="wtg">📬 ${tg}</div></div><div class="wbadge ws-u">PENDING</div>`;
     wl.prepend(wc);
-    document.getElementById('w-title').value='';document.getElementById('w-time').value='';
-    document.getElementById('w-tg').value='';document.getElementById('w-note').value='';
+    ['w-title','w-time','w-tg','w-note'].forEach(id=>document.getElementById(id).value='');
+    showNotif('WAR REQUEST',`${type}: ${title} — sent to leader`);
   } else {
-    st.className='form-status error';st.textContent='✕ FAILED — RETRY OR CONTACT @VoidSpctre';
+    sfxError();st.className='fstat err';st.textContent='> FAILED — CONTACT @VoidSpctre DIRECTLY';
   }
   btn.disabled=false;
 }
 
 // ===== ADMIN =====
-const adminRequests=[];
-function addToAdminRequests(req){
-  adminRequests.push(req);
-  renderAdminRequests();
-  const el=document.getElementById('adm-req-count');
-  if(el)el.textContent=adminRequests.length;
-}
-function renderAdminRequests(){
-  const el=document.getElementById('admin-requests');
+function renderAdminReqs(){
+  const el=document.getElementById('adm-requests');
+  const ct=document.getElementById('adm-req-n');
+  if(ct)ct.textContent=adminReqs.length;
   if(!el)return;
-  if(adminRequests.length===0){
-    el.innerHTML='<div style="text-align:center;padding:30px;color:rgba(0,255,204,.3);font-size:.8rem;letter-spacing:2px;font-family:\'Share Tech Mono\',monospace">NO PENDING REQUESTS</div>';
-    return;
-  }
-  el.innerHTML=adminRequests.map((r,i)=>`
-    <div class="req-card" id="req-${i}">
-      <div class="req-header">
-        <div class="req-ign">${r.ign}</div>
-        <div class="req-time">${r.time}</div>
+  if(!adminReqs.length){el.innerHTML='<div style="text-align:center;padding:20px;color:rgba(0,255,204,.2);font-size:.65rem;letter-spacing:2px;font-family:\'Share Tech Mono\',monospace">// NO PENDING REQUESTS</div>';return}
+  el.innerHTML=adminReqs.map((r,i)=>`
+    <div class="rcard">
+      <div class="rc-hdr"><div class="rc-ign">${r.ign}</div><div class="rc-time">${r.time}</div></div>
+      <div class="rc-info">
+        <div class="rf"><div class="rf-l">UID</div><div class="rf-v">${r.uid}</div></div>
+        <div class="rf"><div class="rf-l">TELEGRAM</div><div class="rf-v">${r.tg}</div></div>
+        <div class="rf"><div class="rf-l">RANK</div><div class="rf-v">${r.rank}</div></div>
+        <div class="rf"><div class="rf-l">ROLE</div><div class="rf-v">${r.role}</div></div>
       </div>
-      <div class="req-info">
-        <div class="req-field"><div class="req-field-label">UID</div><div class="req-field-val">${r.uid}</div></div>
-        <div class="req-field"><div class="req-field-label">TELEGRAM</div><div class="req-field-val">${r.tg}</div></div>
-        <div class="req-field"><div class="req-field-label">RANK</div><div class="req-field-val">${r.rank}</div></div>
-        <div class="req-field"><div class="req-field-label">ROLE</div><div class="req-field-val">${r.role}</div></div>
+      ${r.note?`<div class="rc-note">${r.note}</div>`:''}
+      <div class="rc-actions">
+        <button class="rc-btn rc-ok" onclick="handleReq(${i},'accept')">✓ ACCEPT</button>
+        <button class="rc-btn rc-no" onclick="handleReq(${i},'reject')">✕ REJECT</button>
       </div>
-      ${r.note?`<div class="req-note">${r.note}</div>`:''}
-      <div class="req-actions">
-        <button class="req-btn req-accept" onclick="handleReq(${i},'accept')">✓ ACCEPT</button>
-        <button class="req-btn req-reject" onclick="handleReq(${i},'reject')">✕ REJECT</button>
-      </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 async function handleReq(i,action){
-  const req=adminRequests[i];
-  const decision=action==='accept'?'✅ ACCEPTED':'❌ REJECTED';
-  const msg=`${decision} — Application from <b>${req.ign}</b> (${req.tg}) has been ${action}ed by admin.`;
-  await sendTelegramMessage(msg);
-  adminRequests.splice(i,1);
-  renderAdminRequests();
-  const el=document.getElementById('adm-req-count');
-  if(el)el.textContent=adminRequests.length;
+  sfxClick();
+  const r=adminReqs[i];
+  await tgSend(`${action==='accept'?'✅':'❌'} <b>${r.ign}</b> (${r.tg}) has been ${action}ed.`);
+  adminReqs.splice(i,1);renderAdminReqs();
 }
 function checkAdmin(){
-  const v=document.getElementById('admin-pass').value;
-  const st=document.getElementById('admin-login-status');
+  const v=document.getElementById('adm-pass').value;
+  const st=document.getElementById('adm-st');
   if(v===ADMIN_CODE){
-    document.getElementById('admin-lock-view').style.display='none';
-    document.getElementById('admin-panel').style.display='block';
+    sfxSuccess();
+    document.getElementById('adm-lock').style.display='none';
+    document.getElementById('adm-panel').style.display='block';
+    showNotif('ADMIN ACCESS','Welcome, Commander. All systems accessible.');
   } else {
-    st.className='form-status error';st.textContent='✕ INVALID ADMIN CODE';st.style.display='block';
+    sfxError();st.className='fstat err';st.textContent='> INVALID CREDENTIALS';st.style.display='block';
   }
 }
+const bcLog=[];
 async function sendBroadcast(){
-  const msg=document.getElementById('broadcast-msg').value.trim();
-  const st=document.getElementById('broadcast-status');
-  if(!msg){st.className='form-status error';st.textContent='✕ EMPTY MESSAGE';st.style.display='block';return;}
-  st.className='form-status sending';st.textContent='⟳ BROADCASTING...';st.style.display='block';
+  const msg=document.getElementById('bc-msg').value.trim();
+  const st=document.getElementById('bc-status');
+  if(!msg){sfxError();st.className='fstat err';st.textContent='> EMPTY MESSAGE';st.style.display='block';return}
+  sfxClick();st.className='fstat loading';st.textContent='> BROADCASTING...';st.style.display='block';
   const text=`📢 <b>CLAN BROADCAST</b>\n━━━━━━━━━━━━━━━\n${msg}\n━━━━━━━━━━━━━━━\n— ONLY FAMILY ESPORTS`;
-  const ok=await sendTelegramMessage(text);
-  if(ok){st.className='form-status success';st.textContent='✓ BROADCAST SENT';document.getElementById('broadcast-msg').value='';}
-  else{st.className='form-status error';st.textContent='✕ FAILED';}
+  const ok=await tgSend(text);
+  if(ok){
+    sfxSuccess();st.className='fstat ok';st.textContent='> BROADCAST TRANSMITTED';
+    bcLog.push(`[${new Date().toLocaleTimeString('en-US',{hour12:false})}] ${msg}`);
+    const logEl=document.getElementById('bc-log');
+    logEl.style.display='block';logEl.innerHTML=bcLog.map(l=>`<div class="bl-item">> ${l}</div>`).join('');
+    document.getElementById('bc-msg').value='';
+  } else {
+    sfxError();st.className='fstat err';st.textContent='> TRANSMISSION FAILED';
+  }
+}
+const legends=[{name:'𝙤𝙣𝙡𝙮ゝMaru',title:'FOUNDER · IGL · COMMANDER',av:'👑',achievements:['FOUNDER','IGL','LEGENDARY']}];
+function renderLegends(){
+  const el=document.querySelector('#legends .card');
+  if(!el)return;
+  const existing=el.querySelector('.legend-list');
+  if(existing)existing.remove();
+  const div=document.createElement('div');div.className='legend-list';
+  div.innerHTML=legends.map((l,i)=>`
+    <div class="legend-card">
+      <div class="legend-num">${String(i+1).padStart(2,'0')}</div>
+      <div class="legend-av">${l.av}</div>
+      <div class="legend-info">
+        <div class="legend-name">${l.name}</div>
+        <div class="legend-title">${l.title}</div>
+        <div class="legend-achievements">${l.achievements.map(a=>`<span class="la">${a}</span>`).join('')}</div>
+      </div>
+    </div>`).join('');
+  const placeholder=el.querySelector('.legend-placeholder');
+  if(placeholder)placeholder.remove();
+  el.insertBefore(div,el.querySelector('.sec-title').nextSibling);
+}
+function addLegend(){
+  const name=document.getElementById('leg-name').value.trim();
+  const title=document.getElementById('leg-title').value.trim();
+  const ach=document.getElementById('leg-ach').value.trim();
+  const st=document.getElementById('leg-status');
+  if(!name||!title){sfxError();st.className='fstat err';st.textContent='> FILL REQUIRED FIELDS';st.style.display='block';return}
+  sfxSuccess();
+  legends.push({name,title,av:'⭐',achievements:ach?ach.split(',').map(a=>a.trim()):[]});
+  renderLegends();
+  st.className='fstat ok';st.textContent='> ADDED TO HALL OF LEGENDS';st.style.display='block';
+  document.getElementById('leg-name').value='';document.getElementById('leg-title').value='';document.getElementById('leg-ach').value='';
+  showNotif('HALL OF LEGENDS',`${name} has been immortalized`);
+}
+
+// ===== CURSOR TRAIL =====
+const trailDots=[];
+for(let i=0;i<8;i++){
+  const d=document.createElement('div');d.className='cursor-dot';
+  d.style.cssText=`width:${6-i*0.5}px;height:${6-i*0.5}px;background:rgba(0,255,204,${0.5-i*0.05});position:fixed;pointer-events:none;z-index:9990;border-radius:50%;mix-blend-mode:screen;transition:all ${i*0.02+0.05}s ease`;
+  document.body.appendChild(d);trailDots.push(d);
+}
+let mx=0,my=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  trailDots.forEach((d,i)=>{
+    setTimeout(()=>{d.style.left=(mx-3)+'px';d.style.top=(my-3)+'px'},i*20);
+  });
+});
+
+// ===== INIT =====
+function initApp(){
+  updateCD();renderActs();renderChart();drawRadar();
+  setTimeout(initHeroCanvas,100);
+  setTimeout(()=>animateWPRing(84),800);
+  setInterval(addKill,2500);
+  setInterval(cycleAI,6000);
+  setTimeout(()=>{
+    document.getElementById('ai-assist').classList.add('visible');
+    cycleAI();
+  },1000);
+  setTimeout(()=>showNotif('SYSTEM ONLINE','Welcome to OF-OS. All modules loaded.'),1500);
 }
 </script>
 </body>
