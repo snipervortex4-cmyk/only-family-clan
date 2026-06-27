@@ -1,0 +1,2275 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OF-OS // ONLY·FAMILY OPERATING SYSTEM</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&family=Noto+Kufi+Arabic:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --n:#22d3ee;--n2:#0ea5e9;--n3:#f43f5e;--n4:#f59e0b;--n5:#38bdf8;
+  --bg:#020c14;--bg2:#031220;--bg3:#04192c;
+  --card:rgba(34,211,238,0.06);--border:rgba(34,211,238,0.18);
+  --text:#e8f8ff;
+  --glow:0 0 20px #22d3ee99,0 0 60px #22d3ee1a;
+  --glow2:0 0 20px #0ea5e999;
+}
+html{font-size:15px}
+body{background:var(--bg);color:var(--text);font-family:'Share Tech Mono',monospace;min-height:100vh;overflow-x:hidden;cursor:default}
+
+
+/* ===== CANVAS LAYERS ===== */
+#bgCanvas{display:none}
+#aurora{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.55;
+  background:
+    radial-gradient(circle at 20% 25%,#22d3ee55,transparent 38%),
+    radial-gradient(circle at 80% 20%,#0ea5e944,transparent 38%),
+    radial-gradient(circle at 50% 80%,#38bdf833,transparent 42%);
+}
+
+
+#scanlines{display:none}
+#vignette{position:fixed;inset:0;z-index:2;pointer-events:none;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,.8) 100%)}
+
+/* CRT flicker removed for performance */
+
+/* ===== BOOT SEQUENCE ===== */
+#boot{position:fixed;inset:0;z-index:9999;background:#000;
+  display:flex;flex-direction:column;justify-content:center;padding:clamp(20px,5vw,60px);
+  font-family:'Share Tech Mono',monospace}
+.boot-line{font-size:clamp(.7rem,2vw,.88rem);line-height:2;color:rgba(34,211,238,.95);
+  opacity:0;transform:translateX(-10px);transition:all .3s}
+.boot-line.show{opacity:1;transform:translateX(0)}
+.boot-line.ok::after{content:' [OK]';color:#4ade80}
+.boot-line.warn::after{content:' [WARN]';color:var(--n4)}
+.boot-line.err::after{content:' [ERR]';color:var(--n3)}
+.boot-cursor{display:inline-block;width:10px;height:1.2em;background:var(--n);animation:cur .6s step-end infinite;vertical-align:middle}
+@keyframes cur{0%,100%{opacity:1}50%{opacity:0}}
+#boot-progress{margin-top:20px;width:100%;max-width:600px}
+.bp-label{font-size:.65rem;letter-spacing:3px;color:rgba(34,211,238,.4);margin-bottom:6px}
+.bp-bar{height:2px;background:rgba(34,211,238,.1);border-radius:1px;overflow:hidden}
+.bp-fill{height:100%;width:0;background:var(--n);box-shadow:0 0 10px var(--n);transition:width .1s linear}
+#boot-pct{font-size:1.5rem;font-weight:900;color:var(--n);text-shadow:var(--glow);margin-top:8px;font-family:'Orbitron',sans-serif}
+
+/* ===== LOGIN ===== */
+#login{position:fixed;inset:0;z-index:9998;display:none;align-items:center;justify-content:center;
+  background:rgba(3,14,20,.97)}
+.login-terminal{width:min(480px,94vw);position:relative}
+.lt-header{font-size:.65rem;letter-spacing:4px;color:rgba(34,211,238,.3);margin-bottom:4px}
+.lt-box{border:1px solid rgba(34,211,238,.25);border-radius:4px;padding:clamp(24px,5vw,44px);
+  background:rgba(0,18,26,.8);position:relative;overflow:hidden}
+.lt-box::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--n),var(--n2),transparent)}
+.lt-scanline{position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(180deg,rgba(34,211,238,.15),transparent);
+  animation:scanDown 6s linear infinite}
+@keyframes scanDown{0%{top:-3px}100%{top:100%}}
+.lt-logo{font-family:'Orbitron',sans-serif;font-size:clamp(1rem,4vw,1.6rem);font-weight:900;
+  color:var(--n);text-shadow:var(--glow);letter-spacing:6px;text-align:center;margin-bottom:4px}
+.lt-sub{text-align:center;font-size:.62rem;letter-spacing:4px;color:rgba(34,211,238,.6);margin-bottom:28px}
+
+/* Login entrance animation */
+@keyframes loginEnterAnim{
+  0%{opacity:0;transform:scale(.82) translateY(40px) rotateX(8deg);filter:blur(8px)}
+  60%{opacity:1;transform:scale(1.02) translateY(-4px) rotateX(0);filter:blur(0)}
+  100%{opacity:1;transform:scale(1) translateY(0);filter:blur(0)}
+}
+.login-enter{animation:loginEnterAnim 1.1s cubic-bezier(.16,1,.3,1) both}
+
+.lt-glow-ring{position:absolute;inset:-2px;border-radius:6px;z-index:-1;pointer-events:none;
+  background:linear-gradient(135deg,var(--n),var(--n2),var(--n3),var(--n));
+  background-size:300% 300%;opacity:.35;filter:blur(4px);
+  opacity:.25}
+@keyframes ringGlow{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+
+.lt-welcome{text-align:center;font-family:'Orbitron',sans-serif;font-size:clamp(.65rem,2vw,.8rem);
+  letter-spacing:3px;color:var(--n);text-shadow:0 0 12px currentColor;margin-bottom:10px;
+  opacity:0;animation:welcomeFade 1.6s ease .4s forwards}
+@keyframes welcomeFade{0%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:translateY(0)}}
+
+.lt-eye{cursor:pointer;opacity:.4;transition:opacity .2s;flex-shrink:0;font-size:.85rem}
+.lt-eye:hover{opacity:.9}
+.lt-prompt{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.5);
+  border:1px solid var(--border);border-radius:8px;padding:13px 16px;margin-bottom:14px;
+  transition:border-color .3s,box-shadow .3s}
+.lt-prompt:focus-within{border-color:var(--n);box-shadow:0 0 18px rgba(34,211,238,.25),inset 0 0 12px rgba(34,211,238,.06)}
+.lt-prompt-sym{color:var(--n);font-size:.9rem;flex-shrink:0;filter:drop-shadow(0 0 6px currentColor)}
+.lt-prompt input{flex:1;background:none;border:none;outline:none;color:#fff;
+  font-family:'Share Tech Mono',monospace;font-size:.9rem;letter-spacing:4px}
+.lt-prompt input::placeholder{color:rgba(255,255,255,.15);letter-spacing:2px}
+.lt-btn{
+  width:100%;background:linear-gradient(135deg,rgba(34,211,238,.08),rgba(14,165,233,.08));
+  border:1px solid rgba(34,211,238,.4);border-radius:10px;
+  padding:15px;font-family:'Orbitron',sans-serif;font-size:.75rem;letter-spacing:5px;
+  color:var(--n);cursor:pointer;transition:all .3s cubic-bezier(.22,1,.36,1);
+  position:relative;overflow:hidden;
+  box-shadow:0 0 0 0 rgba(34,211,238,0),inset 0 1px 0 rgba(34,211,238,.15)}
+.lt-btn::before{content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(34,211,238,.15),rgba(14,165,233,.1));
+  opacity:0;transition:opacity .3s}
+.lt-btn::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(34,211,238,.2),transparent);
+  transition:left .5s ease}
+.lt-btn:hover::before{opacity:1}
+.lt-btn:hover::after{left:100%}
+.lt-btn:hover{
+  border-color:var(--n);
+  box-shadow:0 0 30px rgba(34,211,238,.3),0 0 60px rgba(34,211,238,.1),inset 0 0 20px rgba(34,211,238,.05);
+  letter-spacing:6px}
+.lt-btn:active{transform:translateY(0);box-shadow:0 0 15px rgba(34,211,238,.2)}
+#lt-msg{margin-top:12px;text-align:center;font-size:.72rem;letter-spacing:2px;
+  min-height:18px;color:var(--n3)}
+.lt-hint{text-align:center;font-size:.58rem;color:rgba(34,211,238,.4);margin-top:16px;letter-spacing:3px}
+
+/* AI ASSISTANT FLOAT */
+#ai-assist{position:fixed;bottom:20px;right:20px;z-index:200;
+  width:260px;background:rgba(0,0,0,.9);border:1px solid rgba(34,211,238,.2);
+  border-radius:12px;padding:14px;pointer-events:auto;
+  transform:translateY(100px);opacity:0;transition:all .5s cubic-bezier(.22,1,.36,1)}
+#ai-assist.visible{transform:translateY(0);opacity:1}
+.ai-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.ai-avatar{width:32px;height:32px;border-radius:50%;border:1px solid var(--n);
+  display:flex;align-items:center;justify-content:center;font-size:.9rem;
+  background:rgba(34,211,238,.06);flex-shrink:0;box-shadow:0 0 10px rgba(34,211,238,.3)}
+
+.ai-name{font-size:.6rem;letter-spacing:2px;color:var(--n)}
+.ai-status{font-size:.5rem;color:rgba(34,211,238,.4);letter-spacing:1px}
+.ai-msg{font-size:.68rem;color:rgba(200,255,232,.7);line-height:1.7;min-height:40px}
+.ai-typing{display:flex;gap:3px;margin-top:6px}
+.ai-typing span{width:4px;height:4px;border-radius:50%;background:rgba(34,211,238,.4);
+  animation:aiType .8s ease infinite}
+.ai-typing span:nth-child(2){animation-delay:.15s}
+.ai-typing span:nth-child(3){animation-delay:.3s}
+@keyframes aiType{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px);background:var(--n)}}
+
+/* cursor trail removed */
+
+/* ===== APP ===== */
+#app{display:none;position:relative;z-index:3;min-height:100vh}
+
+/* OS TOP BAR */
+/* ===== TOP STATUS BAR (all devices) ===== */
+#top-bar{
+  position:fixed;top:0;left:0;right:0;height:38px;z-index:200;
+  background:rgba(2,10,22,.98);border-bottom:1px solid rgba(34,211,238,.18);
+  display:flex;align-items:center;padding:0 16px;gap:12px;
+  
+}
+#top-bar::after{display:none}
+.tb-logo{font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:900;
+  color:var(--n);letter-spacing:3px;text-shadow:var(--glow)}
+.tb-right{display:flex;align-items:center;gap:12px;margin-left:auto}
+.tb-clock{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:rgba(34,211,238,.4);letter-spacing:1px}
+.tb-ping{font-size:.6rem;color:#4ade80;letter-spacing:1px;font-family:'Share Tech Mono',monospace}
+.tb-live{display:flex;align-items:center;gap:5px;font-size:.58rem;color:rgba(34,211,238,.35)}
+.music-btn{background:rgba(34,211,238,.06);border:1px solid var(--border);border-radius:50%;
+  width:24px;height:24px;font-size:.7rem;color:var(--n);cursor:pointer;display:flex;
+  align-items:center;justify-content:center;transition:all .25s;flex-shrink:0}
+.music-btn:hover{border-color:var(--n);box-shadow:0 0 12px rgba(34,211,238,.4)}
+.music-btn.playing{box-shadow:0 0 12px rgba(34,211,238,.5)}
+
+.live-dot{width:5px;height:5px;border-radius:50%;background:#4ade80;box-shadow:0 0 8px #4ade80;animation:blink 1.5s ease infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* ===== SIDEBAR (PC / Tablet ≥ 768px) ===== */
+#sidebar{
+  position:fixed;top:38px;left:0;bottom:0;width:220px;z-index:150;
+  background:rgba(2,10,22,.98);border-right:1px solid rgba(34,211,238,.2);
+  display:flex;flex-direction:column;padding:16px 10px 20px;gap:3px;
+  
+  transition:width .3s cubic-bezier(.22,1,.36,1);
+  overflow:hidden;
+}
+#sidebar.collapsed{width:60px}
+
+.sb-section-label{
+  font-size:.5rem;letter-spacing:3px;color:rgba(34,211,238,.5);
+  padding:8px 10px 4px;white-space:nowrap;overflow:hidden;
+  transition:opacity .2s;font-family:'Share Tech Mono',monospace;
+}
+#sidebar.collapsed .sb-section-label{opacity:0}
+
+.nav-item{
+  display:flex;align-items:center;gap:11px;
+  padding:11px 12px;border-radius:12px;cursor:pointer;
+  font-family:'Share Tech Mono',monospace;font-size:.72rem;
+  letter-spacing:1.5px;color:rgba(34,211,238,.65);
+  transition:all .25s cubic-bezier(.22,1,.36,1);border:1px solid transparent;
+  white-space:nowrap;overflow:hidden;position:relative;
+  text-align:left;background:none;width:100%;
+}
+.nav-item .ni-icon{font-size:1rem;flex-shrink:0;width:20px;height:20px;text-align:center;transition:transform .25s;display:flex;align-items:center;justify-content:center;color:currentColor}
+.nav-item .ni-label{flex:1;transition:opacity .2s}
+#sidebar.collapsed .ni-label{opacity:0;pointer-events:none}
+.nav-item:hover{
+  color:var(--n);
+  background:linear-gradient(135deg,rgba(34,211,238,.08),rgba(14,165,233,.04));
+  border-color:rgba(34,211,238,.18);
+  box-shadow:0 2px 12px rgba(34,211,238,.08)
+}
+.nav-item:hover .ni-icon{transform:scale(1.2) rotate(-5deg)}
+.nav-item.active{
+  color:var(--n);
+  background:linear-gradient(135deg,rgba(34,211,238,.12),rgba(14,165,233,.06));
+  border-color:rgba(34,211,238,.25);
+  box-shadow:inset 3px 0 0 var(--n),0 4px 20px rgba(34,211,238,.12);
+}
+.nav-item.active::after{
+  content:'';position:absolute;right:10px;top:50%;transform:translateY(-50%);
+  width:5px;height:5px;border-radius:50%;
+  background:var(--n);box-shadow:0 0 8px var(--n),0 0 16px var(--n)44;
+}
+#sidebar.collapsed .nav-item.active::after{display:none}
+
+.sb-divider{height:1px;background:var(--border);margin:6px 4px}
+
+.sb-toggle-btn{
+  margin-top:auto;display:flex;align-items:center;justify-content:center;
+  gap:8px;padding:10px;border-radius:8px;
+  background:none;border:1px solid var(--border);
+  color:rgba(34,211,238,.35);cursor:pointer;font-size:.75rem;
+  transition:all .2s;white-space:nowrap;overflow:hidden;
+  font-family:'Share Tech Mono',monospace;letter-spacing:1px;
+}
+.sb-toggle-btn:hover{background:rgba(34,211,238,.06);color:var(--n);border-color:rgba(34,211,238,.3)}
+#sidebar.collapsed .sb-toggle-btn .sb-toggle-label{opacity:0;pointer-events:none}
+
+/* ===== BOTTOM NAV (Mobile < 768px) ===== */
+#bottom-nav{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;z-index:200;
+  background:rgba(2,10,22,.99);border-top:1px solid rgba(34,211,238,.2);
+  
+  padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+}
+.bnav-scroll{
+  display:flex;gap:2px;overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;padding:0 4px;
+}
+.bnav-scroll::-webkit-scrollbar{display:none}
+.bnav-item{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:7px 10px;border-radius:12px;cursor:pointer;
+  color:rgba(34,211,238,.6);transition:all .25s cubic-bezier(.22,1,.36,1);
+  scroll-snap-align:start;flex-shrink:0;min-width:58px;
+  border:1px solid transparent;background:none;position:relative;
+}
+.bnav-item .bi-icon{font-size:1.15rem;transition:transform .25s;display:flex;align-items:center;justify-content:center;color:currentColor}
+.bnav-item .bi-label{font-size:.48rem;letter-spacing:1.5px;
+  font-family:'Share Tech Mono',monospace;white-space:nowrap;transition:color .25s}
+.bnav-item:hover{
+  color:var(--n);
+  background:linear-gradient(135deg,rgba(34,211,238,.08),rgba(14,165,233,.04));
+  border-color:rgba(34,211,238,.18);
+  box-shadow:0 4px 16px rgba(34,211,238,.1);
+}
+.bnav-item.active{
+  color:var(--n);
+  background:linear-gradient(135deg,rgba(34,211,238,.12),rgba(14,165,233,.06));
+  border-color:rgba(34,211,238,.22);
+  box-shadow:0 4px 20px rgba(34,211,238,.15),inset 0 -2px 0 var(--n);
+}
+.bnav-item.active .bi-icon{transform:scale(1.2) translateY(-1px)}
+.bnav-item.active .bi-label{color:var(--n)}
+
+/* ===== MAIN CONTENT ===== */
+#main{
+  padding-top:54px;        /* below top-bar */
+  padding-left:236px;      /* beside sidebar */
+  padding-right:16px;
+  padding-bottom:40px;
+  min-height:100vh;
+  transition:padding-left .3s cubic-bezier(.22,1,.36,1);
+}
+#main.sb-collapsed{padding-left:76px}
+
+/* ===== RESPONSIVE BREAKPOINTS ===== */
+
+/* Tablet: sidebar collapsed by default */
+@media(max-width:1024px) and (min-width:768px){
+  #sidebar{width:60px}
+  #sidebar.collapsed{width:60px}
+  #sidebar.expanded{width:220px}
+  #main{padding-left:76px}
+  #main.sb-expanded{padding-left:236px}
+  .ni-label{opacity:0;pointer-events:none}
+  #sidebar.expanded .ni-label{opacity:1;pointer-events:auto}
+  #sidebar.collapsed .sb-section-label{opacity:0}
+  #sidebar.expanded .sb-section-label{opacity:1}
+}
+
+/* Mobile: hide sidebar, show bottom nav */
+@media(max-width:767px){
+  #sidebar{display:none !important}
+  #bottom-nav{display:block}
+  #main{
+    padding-left:12px !important;
+    padding-right:12px !important;
+    padding-top:50px;
+    padding-bottom:calc(80px + env(safe-area-inset-bottom));
+  }
+  #ai-assist{bottom:calc(80px + env(safe-area-inset-bottom) + 8px);right:10px;width:210px}
+}
+
+/* SECTIONS */
+.section{display:none;animation:fadeUp .35s ease}
+.section.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* CARDS */
+.card{background:rgba(3,18,38,.8);border:1px solid rgba(34,211,238,.22);border-radius:14px;padding:clamp(14px,3.5vw,22px);margin-bottom:14px;position:relative;overflow:hidden;transition:transform .35s cubic-bezier(.22,1,.36,1),box-shadow .35s ease,border-color .35s ease}
+.card:hover{box-shadow:0 0 20px rgba(34,211,238,.15);border-color:rgba(34,211,238,.38)}
+.card::after{display:none}
+@keyframes cardSweep{0%{transform:translateX(0)}100%{transform:translateX(50%)}}
+.sec-title{font-family:'Orbitron',sans-serif;font-size:clamp(.75rem,2vw,.9rem);color:var(--n);letter-spacing:3px;margin-bottom:16px;display:flex;align-items:center;gap:10px;text-shadow:0 0 16px rgba(34,211,238,.4)}
+.sec-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent)}
+
+/* ===== HQ DASHBOARD ===== */
+.hq-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:14px}
+
+
+.hq-cell{background:rgba(4,20,45,.75);border:1px solid rgba(34,211,238,.22);border-radius:8px;
+  padding:14px;text-align:center;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+.hq-cell:hover{border-color:var(--n);background:rgba(34,211,238,.05)}
+.hq-cell::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(34,211,238,.08),transparent 70%);opacity:0;transition:opacity .3s}
+.hq-cell:hover::before{opacity:1}
+.hq-cell-icon{font-size:1.6rem;margin-bottom:6px;color:var(--n);display:flex;align-items:center;justify-content:center}
+.hq-cell-label{font-size:.58rem;letter-spacing:3px;color:rgba(34,211,238,.7);margin-bottom:4px}
+.hq-cell-val{font-family:'Orbitron',sans-serif;font-size:clamp(.8rem,2.5vw,1rem);font-weight:700;color:#fff}
+.hq-cell-sub{font-size:.52rem;color:rgba(34,211,238,.5);margin-top:2px;letter-spacing:1px}
+
+/* THREAT METER */
+.threat-wrap{position:relative;padding:16px;background:rgba(4,20,45,.8);border:1px solid rgba(34,211,238,.2);border-radius:8px;margin-bottom:14px}
+.threat-label{font-size:.58rem;letter-spacing:3px;color:rgba(34,211,238,.7);margin-bottom:8px}
+.threat-bar{height:8px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden;position:relative}
+.threat-fill{height:100%;border-radius:4px;transition:width 2s ease;
+  background:linear-gradient(90deg,#00ff88,var(--n4),var(--n3))}
+.threat-markers{display:flex;justify-content:space-between;margin-top:4px}
+.threat-m{font-size:.5rem;letter-spacing:1px}
+.threat-level{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:900;
+  position:absolute;right:16px;top:50%;transform:translateY(-50%);text-shadow:var(--glow3)}
+
+/* WIN PROBABILITY */
+.win-prob{display:flex;align-items:center;gap:16px;padding:14px;
+  background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:8px;margin-bottom:14px}
+.wp-ring{position:relative;width:70px;height:70px;flex-shrink:0}
+.wp-ring svg{transform:rotate(-90deg)}
+.wp-ring .track{fill:none;stroke:rgba(34,211,238,.1);stroke-width:6}
+.wp-ring .fill{fill:none;stroke:var(--n);stroke-width:6;stroke-linecap:round;
+  stroke-dasharray:188;stroke-dashoffset:188;transition:stroke-dashoffset 2s ease}
+.wp-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:'Orbitron',sans-serif;font-size:.9rem;font-weight:900;color:var(--n)}
+.wp-info{flex:1}
+.wp-title{font-family:'Orbitron',sans-serif;font-size:.7rem;letter-spacing:2px;color:#fff;margin-bottom:6px}
+.wp-detail{font-size:.62rem;color:rgba(180,220,255,.7);line-height:1.8}
+
+/* RADAR */
+#radar-wrap{position:relative;width:min(220px,50vw);height:min(220px,50vw);margin:0 auto}
+#radarCanvas{border-radius:50%;border:1px solid rgba(34,211,238,.2)}
+.radar-label{text-align:center;font-size:.55rem;letter-spacing:3px;color:rgba(34,211,238,.6);margin-top:8px}
+
+/* ENERGY REACTOR */
+#reactor{display:flex;flex-direction:column;align-items:center;padding:20px 10px;margin-bottom:14px}
+.reactor-ring-wrap{position:relative;width:140px;height:140px;margin-bottom:10px}
+.reactor-ring{position:absolute;border-radius:50%;border:2px solid}
+.reactor-ring:nth-child(1){inset:0;border-color:rgba(34,211,238,.5)}
+.reactor-ring:nth-child(2){inset:12px;border-color:rgba(14,165,233,.3)}
+.reactor-ring:nth-child(3){inset:24px;border-color:rgba(34,211,238,.2)}
+@keyframes reactorSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.reactor-core{position:absolute;inset:36px;border-radius:50%;
+  background:radial-gradient(circle,rgba(34,211,238,.4),rgba(14,165,233,.2),transparent);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Orbitron',sans-serif;font-size:.5rem;letter-spacing:2px;color:var(--n);
+  text-align:center;animation:coreBreath 2s ease infinite}
+
+.reactor-status{font-size:.6rem;letter-spacing:3px;color:rgba(34,211,238,.4)}
+.reactor-power{font-family:'Orbitron',sans-serif;font-size:1.2rem;font-weight:900;color:var(--n);text-shadow:var(--glow)}
+
+/* TICKER */
+.ticker{background:rgba(0,0,0,.6);border:1px solid var(--border);border-radius:6px;padding:7px 14px;overflow:hidden;white-space:nowrap;margin-bottom:14px;contain:layout style}
+.ticker-inner{display:inline-flex;gap:40px;animation:tick 28s linear infinite;font-size:.68rem;letter-spacing:1.5px}
+@keyframes tick{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.ti{display:flex;align-items:center;gap:6px;color:rgba(34,211,238,.8)}
+.ti b{color:var(--n4)}
+
+/* HERO */
+.hero{text-align:center;padding:clamp(20px,4vw,40px) 10px;position:relative;overflow:hidden}
+
+.hero-badge{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(34,211,238,.2);
+  border-radius:20px;padding:4px 16px;font-size:.6rem;letter-spacing:3px;
+  color:rgba(34,211,238,.5);margin-bottom:14px;background:rgba(34,211,238,.03)}
+.hero-name{font-family:'Orbitron',sans-serif;font-size:clamp(1.8rem,7vw,4rem);font-weight:900;
+  line-height:1;position:relative;z-index:1;
+  background:linear-gradient(135deg,#fff 0%,var(--n) 25%,var(--n2) 50%,var(--n3) 75%,var(--n) 100%);
+  background-size:300% 300%;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:heroShimmer 8s ease-in-out infinite}
+@keyframes heroShimmer{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+
+.hero-sub{font-size:clamp(.6rem,2vw,.75rem);letter-spacing:6px;color:rgba(34,211,238,.65);
+  margin:8px 0 16px;position:relative;z-index:1}
+.hero-divider{display:flex;align-items:center;gap:10px;margin:12px auto;max-width:260px}
+.hero-divider::before,.hero-divider::after{content:'';flex:1;height:1px;background:rgba(34,211,238,.2)}
+.hero-divider span{font-size:.55rem;letter-spacing:3px;color:rgba(34,211,238,.25)}
+
+/* COUNTDOWN */
+.countdown{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0}
+.cd{background:rgba(3,15,40,.85);border:1px solid rgba(34,211,238,.25);border-radius:8px;padding:12px 6px;text-align:center}
+.cd-n{font-family:'Orbitron',sans-serif;font-size:clamp(1rem,3.5vw,1.6rem);font-weight:900;color:var(--n);text-shadow:var(--glow)}
+.cd-l{font-size:.5rem;letter-spacing:2px;color:rgba(34,211,238,.3);margin-top:3px}
+
+/* KILL FEED */
+.kfeed{background:rgba(0,0,0,.5);border:1px solid var(--border);border-radius:8px;
+  padding:12px;overflow:hidden;min-height:110px}
+.kf{display:flex;align-items:center;gap:7px;padding:4px 0;font-size:.75rem;
+  border-bottom:1px solid rgba(34,211,238,.05);opacity:0;transform:translateX(-16px);transition:all .4s}
+.kf.show{opacity:1;transform:translateX(0)}
+.kf:last-child{border-bottom:none}
+.kfk{color:var(--n);font-weight:700}.kfw{color:var(--n2);font-size:.65rem;padding:1px 6px;background:rgba(14,165,233,.12);border-radius:3px}.kfv{color:rgba(255,255,255,.35)}.kfs{color:var(--n3)}
+
+/* CHART */
+.bars{display:flex;align-items:flex-end;gap:5px;height:70px;padding:0 2px}
+.bw{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.b{width:100%;border-radius:2px 2px 0 0;background:linear-gradient(180deg,var(--n),var(--n2));
+  transition:height .8s cubic-bezier(.22,1,.36,1);box-shadow:0 0 6px rgba(34,211,238,.25);min-height:2px}
+.bl{font-size:.5rem;color:rgba(34,211,238,.35);letter-spacing:.5px}
+
+/* ACTIVITY */
+.actlog{background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:8px;
+  padding:10px;max-height:160px;overflow-y:auto}
+.actlog::-webkit-scrollbar{width:2px}
+.actlog::-webkit-scrollbar-thumb{background:rgba(34,211,238,.2);border-radius:1px}
+.act{display:flex;gap:8px;padding:5px 0;border-bottom:1px solid rgba(34,211,238,.04);font-size:.72rem}
+.act:last-child{border-bottom:none}
+.act-t{font-size:.55rem;color:rgba(34,211,238,.55);white-space:nowrap;flex-shrink:0;margin-top:2px;font-family:'Share Tech Mono',monospace}
+.act-txt{color:rgba(220,240,255,.85);line-height:1.5;font-family:'Rajdhani','Noto Kufi Arabic',sans-serif}
+.act-txt b{color:var(--n)}
+
+/* INFO GRID */
+.igrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.ii{background:rgba(4,20,45,.7);border:1px solid rgba(34,211,238,.2);border-radius:7px;padding:10px;transition:border-color .2s}
+.ii:hover{border-color:rgba(34,211,238,.25)}
+.ii-l{font-size:.55rem;letter-spacing:2px;color:rgba(34,211,238,.65);margin-bottom:3px;font-family:'Share Tech Mono',monospace}
+.ii-v{font-size:.82rem;color:#fff;font-weight:600;font-family:'Rajdhani',sans-serif}
+
+/* ===== ROSTER ===== */
+.team-hdr{display:flex;align-items:center;gap:10px;margin:16px 0 12px}
+.tbadge{font-family:'Orbitron',sans-serif;font-size:.62rem;letter-spacing:2px;
+  padding:4px 12px;border-radius:4px;font-weight:700}
+.t1{background:rgba(34,211,238,.1);color:var(--n);border:1px solid rgba(34,211,238,.25)}
+.t2{background:rgba(14,165,233,.1);color:var(--n2);border:1px solid rgba(14,165,233,.25)}
+.t3{background:rgba(244,63,94,.1);color:var(--n3);border:1px solid rgba(244,63,94,.25)}
+.tline{flex:1;height:1px;background:var(--border)}
+
+.pc{background:rgba(3,15,35,.75);border:1px solid rgba(34,211,238,.18);border-radius:10px;
+  padding:clamp(10px,3vw,16px);margin-bottom:8px;display:flex;align-items:center;gap:12px;
+  transition:all .25s;cursor:pointer;position:relative;overflow:hidden}
+.pc:hover{border-color:rgba(34,211,238,.3);background:rgba(34,211,238,.04)}
+.pc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:linear-gradient(180deg,var(--n),var(--n2));opacity:0;transition:.25s}
+.pc:hover::before{opacity:1}
+.pav{width:clamp(42px,9vw,52px);height:clamp(42px,9vw,52px);border-radius:50%;
+  border:2px solid rgba(34,211,238,.3);background:rgba(34,211,238,.05);
+  display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;
+  box-shadow:0 0 14px rgba(34,211,238,.15)}
+.pi{flex:1;min-width:0}
+.pign{font-family:'Orbitron',sans-serif;font-size:clamp(.65rem,2.2vw,.8rem);color:#fff;font-weight:700;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prole{font-size:.6rem;letter-spacing:2px;color:var(--n);margin:2px 0}
+.pdev{font-size:.58rem;color:rgba(200,230,255,.5)}
+.puid{font-family:'Share Tech Mono',monospace;font-size:.52rem;color:rgba(34,211,238,.45);margin-top:1px}
+
+/* GENOME BARS */
+.genome{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:8px}
+.gen-row{display:flex;align-items:center;gap:6px}
+.gen-label{font-size:.5rem;letter-spacing:1px;color:rgba(34,211,238,.65);width:55px;flex-shrink:0}
+.gen-bar-w{flex:1;height:3px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
+.gen-bar{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--n2),var(--n))}
+
+/* PLAYER MODAL */
+#player-modal{position:fixed;inset:0;z-index:500;display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.85);backdrop-filter:blur(4px)}
+#player-modal.open{display:flex}
+.pm-box{background:rgba(2,12,30,.97);border:1px solid rgba(34,211,238,.25);border-radius:12px;
+  width:min(400px,92vw);padding:24px;position:relative;animation:loginIn .4s cubic-bezier(.22,1,.36,1);
+  max-height:90vh;overflow-y:auto}
+@keyframes loginIn{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+.pm-close{position:absolute;top:12px;right:14px;background:none;border:none;
+  color:rgba(34,211,238,.4);cursor:pointer;font-size:1rem;transition:color .2s}
+.pm-close:hover{color:var(--n3)}
+.pm-header{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.pm-avatar{width:60px;height:60px;border-radius:50%;border:2px solid var(--n);
+  background:rgba(34,211,238,.08);display:flex;align-items:center;justify-content:center;font-size:1.8rem;
+  box-shadow:0 0 20px rgba(34,211,238,.2)}
+.pm-name{font-family:'Orbitron',sans-serif;font-size:.9rem;color:#fff;font-weight:700;margin-bottom:3px}
+.pm-role{font-size:.65rem;letter-spacing:2px;color:var(--n);text-shadow:0 0 10px rgba(34,211,238,.5)}
+.pm-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.pm-stat{text-align:center;background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:6px;padding:10px 6px}
+.pm-stat-n{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:900;color:var(--n)}
+.pm-stat-l{font-size:.5rem;letter-spacing:2px;color:rgba(34,211,238,.65);margin-top:2px}
+.pm-genome-full{display:grid;gap:6px}
+.pgr{display:flex;align-items:center;gap:8px}
+.pgr-l{font-size:.58rem;letter-spacing:1px;color:rgba(34,211,238,.75);width:80px;flex-shrink:0}
+.pgr-bw{flex:1;height:5px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden}
+.pgr-b{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--n2),var(--n));transition:width 1s ease}
+.pgr-v{font-size:.58rem;color:rgba(34,211,238,.85);width:30px;text-align:right;flex-shrink:0}
+
+/* STATUS ONLINE/OFFLINE */
+.pst{flex-shrink:0;text-align:center}
+.psd{width:7px;height:7px;border-radius:50%;margin:0 auto 3px}
+.online{background:#4ade80;box-shadow:0 0 8px #4ade80;animation:blink 2s ease infinite}
+.offline{background:rgba(255,255,255,.15)}
+.psl{font-size:.5rem;letter-spacing:1px;color:rgba(34,211,238,.55)}
+
+/* ===== RULES ===== */
+.rule-block{background:rgba(2,12,30,.92);border-left:3px solid var(--n2);border-radius:0 10px 10px 0;padding:18px 20px;margin-bottom:12px;font-size:.92rem;line-height:2.1;direction:rtl;text-align:right;box-shadow:inset 0 0 30px rgba(0,0,0,.5)}
+.rule-block h3{font-family:'Orbitron',sans-serif;font-size:.72rem;letter-spacing:2px;color:var(--n);margin-bottom:10px;direction:ltr;text-align:left;text-shadow:0 0 12px rgba(34,211,238,.5)}
+.rule-block p{color:#e8f4ff;margin:3px 0;font-family:'Rajdhani','Noto Kufi Arabic',sans-serif;font-size:.92rem;line-height:2.1;text-shadow:0 1px 3px rgba(0,0,0,.8)}
+.banned-t{color:var(--n3)!important;font-weight:700}
+.ok-t{color:#4ade80!important;font-weight:700}
+
+/* ===== RECRUIT ===== */
+.fgrid{display:grid;gap:10px}
+.ff{display:flex;flex-direction:column;gap:5px}
+.fl{font-size:.58rem;letter-spacing:2px;color:rgba(34,211,238,.35);font-family:'Share Tech Mono',monospace}
+.fi{background:rgba(0,0,0,.5);border:1px solid var(--border);border-radius:6px;
+  padding:11px 13px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:.88rem;
+  outline:none;transition:all .25s;direction:ltr;width:100%}
+.fi:focus{border-color:var(--n);box-shadow:0 0 0 2px rgba(34,211,238,.08)}
+.fi::placeholder{color:rgba(255,255,255,.15)}
+textarea.fi{resize:vertical;min-height:80px}
+select.fi option{background:#0a0d1a}
+.sbtn{
+  width:100%;
+  background:linear-gradient(135deg,rgba(34,211,238,.06),rgba(14,165,233,.06));
+  border:1px solid rgba(34,211,238,.35);border-radius:10px;
+  padding:14px 20px;font-family:'Orbitron',sans-serif;font-size:.7rem;letter-spacing:4px;
+  color:var(--n);cursor:pointer;
+  transition:all .3s cubic-bezier(.22,1,.36,1);
+  margin-top:10px;position:relative;overflow:hidden;
+  box-shadow:inset 0 1px 0 rgba(34,211,238,.1),0 4px 15px rgba(0,0,0,.3)}
+.sbtn::before{content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(34,211,238,.12),rgba(14,165,233,.08));
+  opacity:0;transition:opacity .3s}
+.sbtn::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(34,211,238,.18),transparent);
+  transition:left .5s ease}
+.sbtn:hover::before{opacity:1}
+.sbtn:hover::after{left:100%}
+.sbtn:hover{
+  border-color:var(--n);
+  box-shadow:0 0 25px rgba(34,211,238,.25),0 0 50px rgba(34,211,238,.08),inset 0 0 15px rgba(34,211,238,.05);
+}
+.sbtn:active{transform:translateY(0)}
+.sbtn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.fstat{margin-top:10px;padding:10px 14px;border-radius:6px;font-size:.7rem;
+  text-align:center;letter-spacing:2px;display:none;font-family:'Share Tech Mono',monospace}
+.fstat.ok{background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.25);color:#4ade80;display:block}
+.fstat.err{background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.25);color:var(--n3);display:block}
+.fstat.loading{background:rgba(34,211,238,.05);border:1px solid var(--border);color:var(--n);display:block}
+
+/* ===== WAR COORD ===== */
+.wcard{background:rgba(3,15,35,.75);border:1px solid rgba(34,211,238,.2);border-radius:10px;
+  padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;transition:all .2s}
+.wcard:hover{border-color:rgba(245,158,11,.25);background:rgba(245,158,11,.02)}
+.wicon{font-size:1.6rem;flex-shrink:0}
+.winfo{flex:1}
+.wtitle{font-family:'Orbitron',sans-serif;font-size:.72rem;letter-spacing:1.5px;color:#fff;margin-bottom:3px}
+.wdetail{font-size:.65rem;color:rgba(180,220,255,.65)}
+.wtg{font-size:.65rem;color:var(--n5);margin-top:2px}
+.wbadge{font-size:.55rem;padding:3px 8px;border-radius:4px;letter-spacing:1px;font-family:'Orbitron',sans-serif;flex-shrink:0}
+.ws-s{background:rgba(0,255,136,.1);color:#4ade80;border:1px solid rgba(0,255,136,.25)}
+.ws-u{background:rgba(245,158,11,.1);color:var(--n4);border:1px solid rgba(245,158,11,.25)}
+.ws-d{background:rgba(255,255,255,.04);color:rgba(255,255,255,.25);border:1px solid rgba(255,255,255,.08)}
+
+/* ===== META ===== */
+.meta-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(34,211,238,.05)}
+.meta-row:last-child{border-bottom:none}
+.mr-rank{font-size:.68rem;color:rgba(34,211,238,.25);width:18px;flex-shrink:0;font-family:'Share Tech Mono',monospace}
+.mr-name{flex:1;font-size:.8rem;color:#fff;font-weight:600;font-family:'Rajdhani',sans-serif}
+.mr-tier{font-size:.55rem;padding:2px 7px;border-radius:3px;letter-spacing:1.5px;font-family:'Orbitron',sans-serif;flex-shrink:0}
+.ts{background:rgba(245,158,11,.12);color:var(--n4);border:1px solid rgba(245,158,11,.25)}
+.ta{background:rgba(34,211,238,.08);color:var(--n);border:1px solid rgba(34,211,238,.18)}
+.tb{background:rgba(56,189,248,.08);color:var(--n5);border:1px solid rgba(56,189,248,.18)}
+.mr-bar-w{width:55px;height:3px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;flex-shrink:0}
+.mr-bar{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--n2),var(--n))}
+
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:14px}
+.mc{border:1px solid var(--border);border-radius:8px;padding:9px;text-align:center;
+  cursor:pointer;transition:all .25s;background:rgba(0,0,0,.3);position:relative;overflow:hidden}
+.mc:hover{border-color:var(--n);background:rgba(34,211,238,.05)}
+.mc.banned{border-color:var(--n3);background:rgba(244,63,94,.04);opacity:.5}
+.mc.banned::after{content:'BAN';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-15deg);
+  font-family:'Orbitron',sans-serif;font-size:.55rem;color:var(--n3);letter-spacing:2px}
+.mi{font-size:1.3rem;margin-bottom:3px}
+.mn{font-size:.58rem;letter-spacing:2px;color:rgba(34,211,238,.4)}
+
+/* ===== HALL OF LEGENDS ===== */
+.legend-card{background:linear-gradient(135deg,rgba(0,0,0,.6),rgba(14,165,233,.05));
+  border:1px solid rgba(14,165,233,.25);border-radius:10px;padding:16px;
+  margin-bottom:10px;display:flex;align-items:center;gap:14px;
+  position:relative;overflow:hidden;transition:all .3s}
+.legend-card:hover{border-color:rgba(14,165,233,.5);transform:translateX(4px)}
+.legend-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--n2),transparent)}
+.legend-num{font-family:'Orbitron',sans-serif;font-size:2rem;font-weight:900;
+  color:rgba(14,165,233,.2);flex-shrink:0;width:40px;text-align:center;line-height:1}
+.legend-av{width:52px;height:52px;border-radius:50%;border:2px solid var(--n2);
+  background:rgba(14,165,233,.1);display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;flex-shrink:0;box-shadow:0 0 16px rgba(14,165,233,.3)}
+.legend-info{flex:1}
+.legend-name{font-family:'Orbitron',sans-serif;font-size:.8rem;color:#fff;font-weight:700;margin-bottom:3px}
+.legend-title{font-size:.62rem;letter-spacing:2px;color:var(--n2);margin-bottom:4px}
+.legend-achievements{display:flex;gap:5px;flex-wrap:wrap}
+.la{font-size:.52rem;padding:2px 6px;background:rgba(14,165,233,.12);
+  border:1px solid rgba(14,165,233,.2);border-radius:3px;color:rgba(200,255,232,.5);letter-spacing:1px}
+.legacy-empty{text-align:center;padding:30px;color:rgba(34,211,238,.2);font-size:.72rem;letter-spacing:3px}
+
+/* ===== ADMIN ===== */
+.adm-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
+.adm-s{background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center}
+.adm-n{font-family:'Orbitron',sans-serif;font-size:1.3rem;font-weight:900;color:var(--n);text-shadow:var(--glow)}
+.adm-l{font-size:.55rem;letter-spacing:2px;color:rgba(34,211,238,.3);margin-top:3px}
+
+.rcard{background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:8px;padding:13px;margin-bottom:8px}
+.rc-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.rc-ign{font-family:'Orbitron',sans-serif;font-size:.75rem;color:#fff;letter-spacing:1px}
+.rc-time{font-size:.55rem;color:rgba(34,211,238,.25);font-family:'Share Tech Mono',monospace}
+.rc-info{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px}
+.rf{background:rgba(34,211,238,.02);border:1px solid rgba(34,211,238,.07);border-radius:5px;padding:7px}
+.rf-l{font-size:.5rem;letter-spacing:2px;color:rgba(34,211,238,.3);margin-bottom:2px}
+.rf-v{font-size:.72rem;color:#fff;font-family:'Share Tech Mono',monospace}
+.rc-note{background:rgba(0,0,0,.3);border-radius:5px;padding:7px;font-size:.7rem;
+  color:rgba(200,255,232,.45);line-height:1.6;margin-bottom:8px;font-family:'Rajdhani',sans-serif}
+.rc-actions{display:flex;gap:7px}
+.rc-btn{flex:1;padding:8px;border:none;border-radius:5px;font-family:'Share Tech Mono',monospace;
+  font-size:.6rem;letter-spacing:1.5px;cursor:pointer;transition:all .2s}
+.rc-ok{background:rgba(0,255,136,.1);color:#4ade80;border:1px solid rgba(0,255,136,.25)}
+.rc-ok:hover{background:rgba(0,255,136,.2)}
+.rc-no{background:rgba(244,63,94,.08);color:var(--n3);border:1px solid rgba(244,63,94,.25)}
+.rc-no:hover{background:rgba(244,63,94,.18)}
+
+.adm-lock{text-align:center;padding:30px}
+.adm-lock-icon{font-size:2.5rem;margin-bottom:14px;display:block}
+.adm-lock-txt{font-family:'Orbitron',sans-serif;font-size:.72rem;letter-spacing:2px;color:rgba(34,211,238,.4);margin-bottom:18px}
+
+/* BROADCAST */
+.broadcast-log{max-height:120px;overflow-y:auto;background:rgba(0,0,0,.3);
+  border:1px solid var(--border);border-radius:6px;padding:8px;margin-top:10px}
+.broadcast-log::-webkit-scrollbar{width:2px}
+.broadcast-log::-webkit-scrollbar-thumb{background:rgba(34,211,238,.2)}
+.bl-item{font-size:.65rem;color:rgba(34,211,238,.45);padding:3px 0;border-bottom:1px solid rgba(34,211,238,.04);font-family:'Share Tech Mono',monospace}
+.bl-item:last-child{border-bottom:none}
+
+/* SATELLITE SCAN OVERLAY */
+#sat-scan{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:300px;height:300px;pointer-events:none;z-index:10;display:none}
+.sat-ring{position:absolute;border-radius:50%;border:1px solid rgba(34,211,238,.2);
+  inset:0;animation:satPulse 2s ease-out forwards}
+@keyframes satPulse{0%{transform:scale(0);opacity:.8}100%{transform:scale(2);opacity:0}}
+
+/* NOTIFICATION POPUP */
+#notif{position:fixed;top:46px;right:14px;z-index:300;
+  background:rgba(0,0,0,.9);border:1px solid rgba(34,211,238,.2);border-radius:8px;
+  padding:12px 16px;width:260px;opacity:0;pointer-events:none;
+  transition:all .3s;transform:translateY(-8px)}
+#notif.show{opacity:1;transform:translateY(0);pointer-events:auto}
+.notif-title{font-size:.66rem;letter-spacing:2px;color:var(--n);margin-bottom:4px;font-family:'Orbitron',sans-serif;text-shadow:0 0 12px rgba(34,211,238,.6)}
+.notif-body{font-size:.72rem;color:rgba(220,245,255,.85);line-height:1.6;font-family:'Rajdhani',sans-serif}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:500px){
+  .igrid{grid-template-columns:1fr}
+  .hq-grid{grid-template-columns:1fr 1fr}
+  .rc-info{grid-template-columns:1fr}
+  .war-add-form .fgrid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div id="aurora"></div>
+<canvas id="bgCanvas"></canvas>
+<div id="scanlines"></div>
+<div id="vignette"></div>
+<div id="sat-scan"><div class="sat-ring"></div></div>
+<div id="notif"><div class="notif-title" id="notif-title">SYSTEM</div><div class="notif-body" id="notif-body">...</div></div>
+
+<!-- ===== BOOT ===== -->
+<div id="boot">
+  <div class="boot-line" id="bl0">[ OF-OS v3.0 ] ONLY·FAMILY OPERATING SYSTEM</div>
+  <div class="boot-line" id="bl1">Initializing kernel modules...</div>
+  <div class="boot-line ok" id="bl2">Network interface OF-NET connected</div>
+  <div class="boot-line ok" id="bl3">Clan database loaded — 5 members</div>
+  <div class="boot-line ok" id="bl4">AI Commander module online</div>
+  <div class="boot-line warn" id="bl5">2 enemy clans detected in proximity</div>
+  <div class="boot-line ok" id="bl6">Encryption layer active — AES-256</div>
+  <div class="boot-line ok" id="bl7">War simulation engine ready</div>
+  <div class="boot-line" id="bl8">Authenticating commander... <span class="boot-cursor"></span></div>
+  <div id="boot-progress">
+    <div class="bp-label">SYSTEM LOAD</div>
+    <div class="bp-bar"><div class="bp-fill" id="bp-fill"></div></div>
+    <div id="boot-pct">0%</div>
+  </div>
+</div>
+
+<!-- ===== LOGIN ===== -->
+<div id="login">
+  <div class="login-terminal login-enter">
+    <div class="lt-glow-ring"></div>
+    <div class="lt-header">// OF-OS AUTHENTICATION TERMINAL v3.0</div>
+    <div class="lt-box">
+      <div class="lt-scanline"></div>
+      <div class="lt-welcome">WELCOME TO ONLY FAMILY</div>
+      <div class="lt-logo">ONLY・FAMILY</div>
+      <div class="lt-sub">OPERATING SYSTEM // COMMANDER LOGIN</div>
+      <div class="lt-prompt">
+        <span class="lt-prompt-sym">🔒</span>
+        <input id="code" type="password" placeholder="enter access code" autocomplete="off" autofocus onkeydown="if(event.key==='Enter')checkCode()">
+        <span class="lt-eye" onclick="togglePass()" title="show/hide"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span>
+      </div>
+      <button class="lt-btn" onclick="checkCode()">[ AUTHENTICATE ]</button>
+      <div id="lt-msg"></div>
+      <div class="lt-hint">AUTHORIZED PERSONNEL ONLY</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== AI ASSISTANT ===== -->
+<div id="ai-assist">
+  <button onclick="closeAI()" style="position:absolute;top:8px;right:10px;background:none;border:none;color:rgba(34,211,238,.35);cursor:pointer;font-size:.9rem;line-height:1;padding:2px 4px;transition:color .2s" onmouseover="this.style.color='var(--n3)'" onmouseout="this.style.color='rgba(34,211,238,.35)'">✕</button>
+  <div class="ai-header">
+    <div class="ai-avatar"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M12 11V7"/><circle cx="12" cy="5" r="2"/><line x1="8" y1="15" x2="8" y2="15" stroke-width="3"/><line x1="16" y1="15" x2="16" y2="15" stroke-width="3"/><line x1="9" y1="19" x2="15" y2="19"/></svg></div>
+    <div>
+      <div class="ai-name">OF-AI COMMANDER</div>
+      <div class="ai-status">● ONLINE — MONITORING</div>
+    </div>
+  </div>
+  <div class="ai-msg" id="ai-msg">Good evening, Commander. All systems nominal.</div>
+  <div class="ai-typing" id="ai-typing" style="display:none">
+    <span></span><span></span><span></span>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div id="app">
+
+  <!-- TOP STATUS BAR -->
+  <div id="top-bar">
+    <div class="tb-logo">OF-OS</div>
+    <div class="tb-right">
+      <button id="music-toggle" class="music-btn" onclick="toggleAmbient()" title="Ambient Sound"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></button>
+      <div class="tb-ping" id="ping-disp">18ms</div>
+      <div class="tb-clock" id="os-clock">--:--:--</div>
+      <div class="tb-live"><div class="live-dot"></div>ONLINE</div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR (PC / Tablet) -->
+  <nav id="sidebar">
+    <div class="sb-section-label">// NAVIGATION</div>
+    <button class="nav-item active" onclick="show('home',this)"><span class="ni-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span><span class="ni-label">HQ DASHBOARD</span></button>
+    <button class="nav-item" onclick="show('rules',this)"><span class="ni-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span><span class="ni-label">RULES</span></button>
+    <button class="nav-item" onclick="show('roster',this)"><span class="ni-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><line x1="19" y1="21" x2="21" y2="19"/></svg></span><span class="ni-label">ROSTER</span></button>
+    <button class="nav-item" onclick="show('changes',this)"><span class="ni-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></span><span class="ni-label">CHANGES</span></button>
+    <button class="nav-item" onclick="show('recruit',this)"><span class="ni-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span><span class="ni-label">RECRUIT</span></button>
+    <div class="sb-divider"></div>
+    <div class="sb-section-label">// OPERATIONS</div>
+    <button class="nav-item" onclick="show('war',this)"><span class="ni-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span><span class="ni-label">WAR ROOM</span></button>
+
+    <button class="nav-item" onclick="show('admin',this)"><span class="ni-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span><span class="ni-label">ADMIN</span></button>
+    <div class="sb-divider"></div>
+    <button class="sb-toggle-btn" id="sb-toggle" onclick="toggleSidebar()">
+      <span style="font-size:.9rem" id="sb-arrow">‹</span>
+      <span class="sb-toggle-label">COLLAPSE</span>
+    </button>
+  </nav>
+
+  <!-- BOTTOM NAV (Mobile) -->
+  <nav id="bottom-nav">
+    <div class="bnav-scroll">
+      <button class="bnav-item active" onclick="show('home',this)"><span class="bi-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span><span class="bi-label">HQ</span></button>
+      <button class="bnav-item" onclick="show('rules',this)"><span class="bi-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span><span class="bi-label">RULES</span></button>
+      <button class="bnav-item" onclick="show('roster',this)"><span class="bi-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><line x1="19" y1="21" x2="21" y2="19"/></svg></span><span class="bi-label">ROSTER</span></button>
+      <button class="bnav-item" onclick="show('changes',this)"><span class="bi-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></span><span class="bi-label">CHANGES</span></button>
+      <button class="bnav-item" onclick="show('recruit',this)"><span class="bi-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span><span class="bi-label">RECRUIT</span></button>
+      <button class="bnav-item" onclick="show('war',this)"><span class="bi-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span><span class="bi-label">WAR</span></button>
+
+      <button class="bnav-item" onclick="show('admin',this)"><span class="bi-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span><span class="bi-label">ADMIN</span></button>
+    </div>
+  </nav>
+
+  <div id="main">
+
+    <!-- ===== HOME / HQ ===== -->
+    <section id="home" class="section active">
+
+      <!-- Ticker -->
+      <div class="ticker">
+        <div class="ticker-inner">
+          <span class="ti">🏆 <b>ONLY FAMILY ESPORTS</b> — CODM Competitive</span>
+          <span class="ti">⚔️ Next War: <b>FRIDAY 21:00</b></span>
+          <span class="ti">🎯 Recruiting: <b>OPEN</b></span>
+          <span class="ti">👑 IGL: <b>𝙤𝙣𝙡𝙮ゝMaru</b></span>
+          <span class="ti">📡 Server Status: <b>NOMINAL</b></span>
+          <span class="ti">🔥 Team Power: <b>9,250</b></span>
+          <span class="ti">🏆 <b>ONLY FAMILY ESPORTS</b> — CODM Competitive</span>
+          <span class="ti">⚔️ Next War: <b>FRIDAY 21:00</b></span>
+          <span class="ti">🎯 Recruiting: <b>OPEN</b></span>
+          <span class="ti">👑 IGL: <b>𝙤𝙣𝙡𝙮ゝMaru</b></span>
+          <span class="ti">📡 Server Status: <b>NOMINAL</b></span>
+          <span class="ti">🔥 Team Power: <b>9,250</b></span>
+        </div>
+      </div>
+
+      <!-- Hero -->
+      <div class="hero card">
+        <div class="hero-badge"><span style="color:var(--n);animation:blink 1s ease infinite;display:inline-block">●</span>&nbsp;CODM PRO LEAGUE — ELITE DIVISION</div>
+        <div class="hero-name">ONLY<br>FAMILY</div>
+        <div class="hero-sub">OPERATING SYSTEM // HEADQUARTERS</div>
+        <div class="hero-divider"><span>◈ SYSTEM ACTIVE ◈</span></div>
+      </div>
+
+      <!-- HQ Grid -->
+      <div class="hq-grid">
+        <div class="hq-cell" onclick="show('roster',null)">
+          <div class="hq-cell-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><line x1="19" y1="21" x2="21" y2="19"/></svg></div>
+          <div class="hq-cell-label">ROSTER</div>
+          <div class="hq-cell-val">15</div>
+          <div class="hq-cell-sub">ACROSS 3 TEAMS</div>
+        </div>
+        <div class="hq-cell" onclick="show('war',null)">
+          <div class="hq-cell-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+          <div class="hq-cell-label">WAR ROOM</div>
+          <div class="hq-cell-val" style="color:var(--n4)">FRIDAY</div>
+          <div class="hq-cell-sub">NEXT CLAN WAR</div>
+        </div>
+        <div class="hq-cell" onclick="show('recruit',null)">
+          <div class="hq-cell-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+          <div class="hq-cell-label">RECRUIT</div>
+          <div class="hq-cell-val" style="color:#4ade80">OPEN</div>
+          <div class="hq-cell-sub">APPLY NOW</div>
+        </div>
+
+        <div class="hq-cell" onclick="show('rules',null)">
+          <div class="hq-cell-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
+          <div class="hq-cell-label">RULES</div>
+          <div class="hq-cell-val">CODE</div>
+          <div class="hq-cell-sub">READ BEFORE JOINING</div>
+        </div>
+      </div>
+
+      <!-- Threat + Win Prob -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div class="threat-wrap">
+          <div class="threat-label">THREAT LEVEL</div>
+          <div class="threat-bar"><div class="threat-fill" id="threat-fill" style="width:72%"></div></div>
+          <div class="threat-markers">
+            <span class="threat-m" style="color:#4ade80">LOW</span>
+            <span class="threat-m" style="color:var(--n4)">MED</span>
+            <span class="threat-m" style="color:var(--n3)">HIGH</span>
+          </div>
+          <div class="threat-level" style="color:var(--n4);font-family:'Orbitron',sans-serif;font-size:.8rem;font-weight:900;position:static;margin-top:4px;text-align:center">HIGH</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="win-prob" style="flex:1;margin-bottom:0;padding:10px">
+            <div class="wp-ring">
+              <svg width="70" height="70" viewBox="0 0 70 70">
+                <circle class="track" cx="35" cy="35" r="28"/>
+                <circle class="fill" cx="35" cy="35" r="28" id="wp-circle"/>
+              </svg>
+              <div class="wp-pct" id="wp-pct">84%</div>
+            </div>
+            <div class="wp-info">
+              <div class="wp-title">WIN PROBABILITY</div>
+              <div class="wp-detail">vs TBD<br>Team Power: 9,250<br>Enemy: ~8,100</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Countdown -->
+      <div class="card">
+        <div class="sec-title">◈ NEXT CLAN WAR</div>
+        <div class="countdown">
+          <div class="cd"><div class="cd-n" id="cd-d">00</div><div class="cd-l">DAYS</div></div>
+          <div class="cd"><div class="cd-n" id="cd-h">00</div><div class="cd-l">HRS</div></div>
+          <div class="cd"><div class="cd-n" id="cd-m">00</div><div class="cd-l">MIN</div></div>
+          <div class="cd"><div class="cd-n" id="cd-s">00</div><div class="cd-l">SEC</div></div>
+        </div>
+        <div style="text-align:center;font-size:.6rem;letter-spacing:2px;color:rgba(34,211,238,.25);font-family:'Share Tech Mono',monospace">FRIDAY 21:00 — CLAN WAR vs TBD</div>
+      </div>
+
+      <!-- Reactor + Radar -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div class="card" style="margin-bottom:0">
+          <div class="sec-title" style="margin-bottom:8px">◈ ENERGY CORE</div>
+          <div id="reactor">
+            <div class="reactor-ring-wrap">
+              <div class="reactor-ring"></div>
+              <div class="reactor-ring"></div>
+              <div class="reactor-ring"></div>
+              <div class="reactor-core">OF<br>CORE</div>
+            </div>
+            <div class="reactor-power">9,250</div>
+            <div class="reactor-status">TEAM POWER</div>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:0">
+          <div class="sec-title" style="margin-bottom:8px">📡 RADAR</div>
+          <div id="radar-wrap"><canvas id="radarCanvas"></canvas></div>
+          <div class="radar-label">SKILL ANALYSIS</div>
+        </div>
+      </div>
+
+      <!-- Kill Feed -->
+      <div class="card">
+        <div class="sec-title">◈ LIVE KILL FEED</div>
+        <div class="kfeed" id="killfeed"></div>
+      </div>
+
+      <!-- Chart + Activity -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div class="card" style="margin-bottom:0">
+          <div class="sec-title" style="margin-bottom:8px">◈ SCRIM W/L</div>
+          <div class="bars" id="chart-bars"></div>
+        </div>
+        <div class="card" style="margin-bottom:0">
+          <div class="sec-title" style="margin-bottom:8px">◈ ACTIVITY</div>
+          <div class="actlog" id="actlog"></div>
+        </div>
+      </div>
+
+      <!-- Leadership -->
+      <div class="card">
+        <div class="sec-title">◈ COMMAND STRUCTURE</div>
+        <div class="igrid">
+          <div class="ii"><div class="ii-l">LEADER / IGL</div><div class="ii-v">𝙤𝙣𝙡𝙮ゝMaru</div></div>
+          <div class="ii"><div class="ii-l">TELEGRAM</div><div class="ii-v" style="color:var(--n5)">@VoidSpctre</div></div>
+          <div class="ii"><div class="ii-l">STATUS</div><div class="ii-v" style="color:#4ade80">🟢 ACTIVE</div></div>
+          <div class="ii"><div class="ii-l">REGION</div><div class="ii-v">🇮🇷 IRAN / MENA</div></div>
+          <div class="ii"><div class="ii-l">FORMAT</div><div class="ii-v">Bo3 HARDPOINT</div></div>
+          <div class="ii"><div class="ii-l">RECRUIT</div><div class="ii-v" style="color:#4ade80">🟢 OPEN</div></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ===== ROSTER ===== -->
+    <section id="roster" class="section">
+      <div class="card">
+        <div class="sec-title">◈ SQUAD LINEUP</div>
+
+        <div class="team-hdr"><div class="tbadge t1">◈ ALPHA — TEAM 1</div><div class="tline"></div></div>
+        <div class="pc" data-player="0">
+          <div class="pav"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20M5 20V10l7-7 7 7v10"/><polyline points="5 10 12 3 19 10"/></svg></div>
+          <div class="pi">
+            <div class="pign">onlyゝMaru</div>
+            <div class="prole">IGL / LEADER</div>
+            <div class="pdev">Poco X 6 Pro</div>
+            <div class="puid">UID: 7098766198...</div>
+            <div class="genome">
+              <div class="gen-row"><span class="gen-label">AIM</span><div class="gen-bar-w"><div class="gen-bar" style="width:95%"></div></div></div>
+              <div class="gen-row"><span class="gen-label">LEADERSHIP</span><div class="gen-bar-w"><div class="gen-bar" style="width:98%"></div></div></div>
+            </div>
+          </div>
+          <div class="pst"><div class="psd online"></div><div class="psl">ONLINE</div></div>
+        </div>
+        <div class="pc" data-player="1">
+          <div class="pav"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
+          <div class="pi">
+            <div class="pign">onlyゝJiTAX</div>
+            <div class="prole">PLAYER 02</div>
+            <div class="pdev">Poco F 3</div>
+            <div class="puid">UID: 7191442868...</div>
+            <div class="genome">
+              <div class="gen-row"><span class="gen-label">AIM</span><div class="gen-bar-w"><div class="gen-bar" style="width:88%"></div></div></div>
+              <div class="gen-row"><span class="gen-label">REFLEX</span><div class="gen-bar-w"><div class="gen-bar" style="width:92%"></div></div></div>
+            </div>
+          </div>
+          <div class="pst"><div class="psd online"></div><div class="psl">ONLINE</div></div>
+        </div>
+        <div class="pc" data-player="2">
+          <div class="pav"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+          <div class="pi">
+            <div class="pign">onlyゝfans</div>
+            <div class="prole">PLAYER 03</div>
+            <div class="pdev">iPhone 13</div>
+            <div class="puid">UID: 7065612241...</div>
+            <div class="genome">
+              <div class="gen-row"><span class="gen-label">AGGRESSION</span><div class="gen-bar-w"><div class="gen-bar" style="width:90%"></div></div></div>
+              <div class="gen-row"><span class="gen-label">SPEED</span><div class="gen-bar-w"><div class="gen-bar" style="width:86%"></div></div></div>
+            </div>
+          </div>
+          <div class="pst"><div class="psd offline"></div><div class="psl">OFFLINE</div></div>
+        </div>
+        <div class="pc" data-player="3">
+          <div class="pav"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+          <div class="pi">
+            <div class="pign">Onlyゝgl0ry</div>
+            <div class="prole">PLAYER 04</div>
+            <div class="pdev">Poco X 7 Pro</div>
+            <div class="puid">UID: 7304502075...</div>
+            <div class="genome">
+              <div class="gen-row"><span class="gen-label">DEFENSE</span><div class="gen-bar-w"><div class="gen-bar" style="width:88%"></div></div></div>
+              <div class="gen-row"><span class="gen-label">TEAMWORK</span><div class="gen-bar-w"><div class="gen-bar" style="width:85%"></div></div></div>
+            </div>
+          </div>
+          <div class="pst"><div class="psd online"></div><div class="psl">ONLINE</div></div>
+        </div>
+        <div class="pc" data-player="4">
+          <div class="pav"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div>
+          <div class="pi">
+            <div class="pign">onlyゝNotToday</div>
+            <div class="prole">PLAYER 05</div>
+            <div class="pdev">iPhone 13 Pro Max</div>
+            <div class="puid">UID: 7080959186...</div>
+            <div class="genome">
+              <div class="gen-row"><span class="gen-label">AIM</span><div class="gen-bar-w"><div class="gen-bar" style="width:84%"></div></div></div>
+              <div class="gen-row"><span class="gen-label">AWARENESS</span><div class="gen-bar-w"><div class="gen-bar" style="width:86%"></div></div></div>
+            </div>
+          </div>
+          <div class="pst"><div class="psd online"></div><div class="psl">ONLINE</div></div>
+        </div>
+
+        <div class="team-hdr" style="margin-top:20px"><div class="tbadge t2">◈ BETA — TEAM 2</div><div class="tline"></div></div>
+        <div class="pc" data-player="5">
+          <div class="pav"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></div><div class="pi"><div class="pign">onlyゝDemo</div><div class="prole">PLAYER 06</div><div class="pdev">iPad Pro 2025</div><div class="puid">UID: 7136200059...</div><div class="genome"><div class="gen-row"><span class="gen-label">VERSATILITY</span><div class="gen-bar-w"><div class="gen-bar" style="width:86%"></div></div></div><div class="gen-row"><span class="gen-label">AWARENESS</span><div class="gen-bar-w"><div class="gen-bar" style="width:84%"></div></div></div></div></div>
+          <div class="pst"><div class="psd online"></div><div class="psl">ONLINE</div></div>
+        </div>
+        <div class="pc" data-player="6">
+          <div class="pav"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><div class="pi"><div class="pign">OnlyゝPahlavi</div><div class="prole">PLAYER 07</div><div class="pdev">Poco X7 Pro</div><div class="puid">UID: 6975836124...</div><div class="genome"><div class="gen-row"><span class="gen-label">AGGRESSION</span><div class="gen-bar-w"><div class="gen-bar" style="width:83%"></div></div></div><div class="gen-row"><span class="gen-label">SPEED</span><div class="gen-bar-w"><div class="gen-bar" style="width:80%"></div></div></div></div></div>
+          <div class="pst"><div class="psd online"></div><div class="psl">ONLINE</div></div>
+        </div>
+        <div class="pc" data-player="7">
+          <div class="pav"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div><div class="pi"><div class="pign">OnlyゝSinaYox</div><div class="prole">PLAYER 08</div><div class="pdev">Poco X7 Pro</div><div class="puid">UID: 7505705546...</div><div class="genome"><div class="gen-row"><span class="gen-label">AIM</span><div class="gen-bar-w"><div class="gen-bar" style="width:85%"></div></div></div><div class="gen-row"><span class="gen-label">AWARENESS</span><div class="gen-bar-w"><div class="gen-bar" style="width:83%"></div></div></div></div></div>
+          <div class="pst"><div class="psd online"></div><div class="psl">ONLINE</div></div>
+        </div>
+        <div class="pc" data-player="8">
+          <div class="pav"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="pi"><div class="pign">OnlyゝSianor</div><div class="prole">PLAYER 09</div><div class="pdev">iPhone 15 Pro Max</div><div class="puid">UID: 6745135144...</div><div class="genome"><div class="gen-row"><span class="gen-label">DEFENSE</span><div class="gen-bar-w"><div class="gen-bar" style="width:85%"></div></div></div><div class="gen-row"><span class="gen-label">TEAMWORK</span><div class="gen-bar-w"><div class="gen-bar" style="width:80%"></div></div></div></div></div>
+          <div class="pst"><div class="psd online"></div><div class="psl">ONLINE</div></div>
+        </div>
+        <div class="pc" data-player="9">
+          <div class="pav"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div><div class="pi"><div class="pign">onlyゝwarden</div><div class="prole">PLAYER 10</div><div class="pdev">Samsung A25</div><div class="puid">UID: 7644448436...</div><div class="genome"><div class="gen-row"><span class="gen-label">AIM</span><div class="gen-bar-w"><div class="gen-bar" style="width:79%"></div></div></div><div class="gen-row"><span class="gen-label">SPEED</span><div class="gen-bar-w"><div class="gen-bar" style="width:81%"></div></div></div></div></div>
+          <div class="pst"><div class="psd online"></div><div class="psl">ONLINE</div></div>
+        </div>
+
+        <div class="team-hdr" style="margin-top:20px"><div class="tbadge t3">◈ GAMMA — TEAM 3</div><div class="tline"></div></div>
+        <div class="pc"><div class="pav" style="opacity:.4">🔴</div><div class="pi"><div class="pign" style="color:rgba(255,255,255,.3)">— SLOT EMPTY —</div><div class="prole" style="color:rgba(244,63,94,.3)">AWAITING ASSIGNMENT</div><div class="pdev">—</div><div class="puid">UID: —</div></div><div class="pst"><div class="psd offline"></div><div class="psl">—</div></div></div>
+        <div class="pc"><div class="pav" style="opacity:.4">🔴</div><div class="pi"><div class="pign" style="color:rgba(255,255,255,.3)">— SLOT EMPTY —</div><div class="prole" style="color:rgba(244,63,94,.3)">AWAITING ASSIGNMENT</div><div class="pdev">—</div><div class="puid">UID: —</div></div><div class="pst"><div class="psd offline"></div><div class="psl">—</div></div></div>
+        <div class="pc"><div class="pav" style="opacity:.4">🔴</div><div class="pi"><div class="pign" style="color:rgba(255,255,255,.3)">— SLOT EMPTY —</div><div class="prole" style="color:rgba(244,63,94,.3)">AWAITING ASSIGNMENT</div><div class="pdev">—</div><div class="puid">UID: —</div></div><div class="pst"><div class="psd offline"></div><div class="psl">—</div></div></div>
+        <div class="pc"><div class="pav" style="opacity:.4">🔴</div><div class="pi"><div class="pign" style="color:rgba(255,255,255,.3)">— SLOT EMPTY —</div><div class="prole" style="color:rgba(244,63,94,.3)">AWAITING ASSIGNMENT</div><div class="pdev">—</div><div class="puid">UID: —</div></div><div class="pst"><div class="psd offline"></div><div class="psl">—</div></div></div>
+        <div class="pc"><div class="pav" style="opacity:.4">🔴</div><div class="pi"><div class="pign" style="color:rgba(255,255,255,.3)">— SLOT EMPTY —</div><div class="prole" style="color:rgba(244,63,94,.3)">AWAITING ASSIGNMENT</div><div class="pdev">—</div><div class="puid">UID: —</div></div><div class="pst"><div class="psd offline"></div><div class="psl">—</div></div></div>
+      </div>
+    </section>
+
+
+    <!-- ===== CHANGES ===== -->
+    <section id="changes" class="section">
+      <div class="card">
+        <div class="sec-title">◈ ROSTER CHANGES</div>
+
+        <div class="team-hdr"><div class="tbadge t1">◈ ALPHA — TEAM 1</div><div class="tline"></div></div>
+        <div class="pc" data-change="0"><div class="pav"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div><div class="pi"><div class="pign">onlyゝLUIGI</div><div class="prole">PLAYER 01</div><div class="pdev">Poco X 7</div><div class="puid">UID: 7424150550...</div></div><div class="pst"><div class="psd online"></div><div class="psl">ONLINE</div></div></div>
+        <div class="pc"><div class="pav" style="opacity:.4">🌀</div><div class="pi"><div class="pign" style="color:rgba(255,255,255,.3)">— SLOT EMPTY —</div><div class="prole" style="color:rgba(34,211,238,.2)">AWAITING ENTRY</div><div class="pdev">—</div><div class="puid">UID: —</div></div><div class="pst"><div class="psd offline"></div><div class="psl">—</div></div></div>
+        <div class="pc"><div class="pav" style="opacity:.4">🌀</div><div class="pi"><div class="pign" style="color:rgba(255,255,255,.3)">— SLOT EMPTY —</div><div class="prole" style="color:rgba(34,211,238,.2)">AWAITING ENTRY</div><div class="pdev">—</div><div class="puid">UID: —</div></div><div class="pst"><div class="psd offline"></div><div class="psl">—</div></div></div>
+        <div class="pc"><div class="pav" style="opacity:.4">🌀</div><div class="pi"><div class="pign" style="color:rgba(255,255,255,.3)">— SLOT EMPTY —</div><div class="prole" style="color:rgba(34,211,238,.2)">AWAITING ENTRY</div><div class="pdev">—</div><div class="puid">UID: —</div></div><div class="pst"><div class="psd offline"></div><div class="psl">—</div></div></div>
+        <div class="pc"><div class="pav" style="opacity:.4">🌀</div><div class="pi"><div class="pign" style="color:rgba(255,255,255,.3)">— SLOT EMPTY —</div><div class="prole" style="color:rgba(34,211,238,.2)">AWAITING ENTRY</div><div class="pdev">—</div><div class="puid">UID: —</div></div><div class="pst"><div class="psd offline"></div><div class="psl">—</div></div></div>
+
+        <div class="team-hdr" style="margin-top:20px"><div class="tbadge t2">◈ BETA — TEAM 2</div><div class="tline"></div></div>
+        <div class="pc"><div class="pav" style="opacity:.4">🌀</div><div class="pi"><div class="pign" style="color:rgba(255,255,255,.3)">— SLOT EMPTY —</div><div class="prole" style="color:rgba(34,211,238,.2)">AWAITING ENTRY</div><div class="pdev">—</div><div class="puid">UID: —</div></div><div class="pst"><div class="psd offline"></div><div class="psl">—</div></div></div>
+        <div class="pc"><div class="pav" style="opacity:.4">🌀</div><div class="pi"><div class="pign" style="color:rgba(255,255,255,.3)">— SLOT EMPTY —</div><div class="prole" style="color:rgba(34,211,238,.2)">AWAITING ENTRY</div><div class="pdev">—</div><div class="puid">UID: —</div></div><div class="pst"><div class="psd offline"></div><div class="psl">—</div></div></div>
+        <div class="pc"><div class="pav" style="opacity:.4">🌀</div><div class="pi"><div class="pign" style="color:rgba(255,255,255,.3)">— SLOT EMPTY —</div><div class="prole" style="color:rgba(34,211,238,.2)">AWAITING ENTRY</div><div class="pdev">—</div><div class="puid">UID: —</div></div><div class="pst"><div class="psd offline"></div><div class="psl">—</div></div></div>
+        <div class="pc"><div class="pav" style="opacity:.4">🌀</div><div class="pi"><div class="pign" style="color:rgba(255,255,255,.3)">— SLOT EMPTY —</div><div class="prole" style="color:rgba(34,211,238,.2)">AWAITING ENTRY</div><div class="pdev">—</div><div class="puid">UID: —</div></div><div class="pst"><div class="psd offline"></div><div class="psl">—</div></div></div>
+        <div class="pc"><div class="pav" style="opacity:.4">🌀</div><div class="pi"><div class="pign" style="color:rgba(255,255,255,.3)">— SLOT EMPTY —</div><div class="prole" style="color:rgba(34,211,238,.2)">AWAITING ENTRY</div><div class="pdev">—</div><div class="puid">UID: —</div></div><div class="pst"><div class="psd offline"></div><div class="psl">—</div></div></div>
+
+        <div class="team-hdr" style="margin-top:20px"><div class="tbadge t3">◈ GAMMA — TEAM 3</div><div class="tline"></div></div>
+        <div class="pc"><div class="pav" style="opacity:.4">🔴</div><div class="pi"><div class="pign" style="color:rgba(255,255,255,.3)">— SLOT EMPTY —</div><div class="prole" style="color:rgba(244,63,94,.3)">AWAITING ENTRY</div><div class="pdev">—</div><div class="puid">UID: —</div></div><div class="pst"><div class="psd offline"></div><div class="psl">—</div></div></div>
+        <div class="pc"><div class="pav" style="opacity:.4">🔴</div><div class="pi"><div class="pign" style="color:rgba(255,255,255,.3)">— SLOT EMPTY —</div><div class="prole" style="color:rgba(244,63,94,.3)">AWAITING ENTRY</div><div class="pdev">—</div><div class="puid">UID: —</div></div><div class="pst"><div class="psd offline"></div><div class="psl">—</div></div></div>
+        <div class="pc"><div class="pav" style="opacity:.4">🔴</div><div class="pi"><div class="pign" style="color:rgba(255,255,255,.3)">— SLOT EMPTY —</div><div class="prole" style="color:rgba(244,63,94,.3)">AWAITING ENTRY</div><div class="pdev">—</div><div class="puid">UID: —</div></div><div class="pst"><div class="psd offline"></div><div class="psl">—</div></div></div>
+        <div class="pc"><div class="pav" style="opacity:.4">🔴</div><div class="pi"><div class="pign" style="color:rgba(255,255,255,.3)">— SLOT EMPTY —</div><div class="prole" style="color:rgba(244,63,94,.3)">AWAITING ENTRY</div><div class="pdev">—</div><div class="puid">UID: —</div></div><div class="pst"><div class="psd offline"></div><div class="psl">—</div></div></div>
+        <div class="pc"><div class="pav" style="opacity:.4">🔴</div><div class="pi"><div class="pign" style="color:rgba(255,255,255,.3)">— SLOT EMPTY —</div><div class="prole" style="color:rgba(244,63,94,.3)">AWAITING ENTRY</div><div class="pdev">—</div><div class="puid">UID: —</div></div><div class="pst"><div class="psd offline"></div><div class="psl">—</div></div></div>
+      </div>
+    </section>
+
+    <!-- ===== RULES ===== -->
+    <section id="rules" class="section">
+      <div class="card">
+        <div class="sec-title">◈ CLAN CODE OF CONDUCT</div>
+
+        <div class="rule-block">
+          <h3>◈ 01 — MEMBERSHIP PROTOCOL</h3>
+          <p>• عضو جدید باید ۳ روز trial داشته باشد</p>
+          <p>• پرفیکس اجباری: <span class="ok-t">𝙤𝙣𝙡𝙮ゝ</span></p>
+          <p>• غیبت +۷ روز بدون اطلاع: <span class="banned-t">KICK</span></p>
+          <p>• حداقل رنک: <span class="ok-t">Legendary</span></p>
+        </div>
+
+        <div class="rule-block">
+          <h3>◈ 02 — CONDUCT RULES</h3>
+          <p>• تاکسیسیتی و توهین: <span class="banned-t">INSTANT KICK</span></p>
+          <p>• همکاری و کووردیناسیون اجباری است</p>
+          <p>• Scrim پنجشنبه ساعت ۲۱: <span class="ok-t">اجباری</span></p>
+        </div>
+
+        <div class="rule-block">
+          <h3>◈ 03 — WAR PROTOCOL</h3>
+          <p>• حضور در Clan War: <span class="ok-t">اجباری</span></p>
+          <p>• استراتژی IGL باید رعایت شود</p>
+          <p>• Drop calls ۱۵ دقیقه اول: <span class="banned-t">ممنوع</span></p>
+          <p>• هک/چیت: <span class="banned-t">PERMANENT BAN</span></p>
+        </div>
+
+        <div class="rule-block">
+          <h3>◈ 04 — MAP BANS (HARDPOINT)</h3>
+          <p>Maps <span class="banned-t">BANNED:</span> Echo, Coastal</p>
+          <p>Maps <span class="ok-t">PREFERRED:</span> Raid, Standoff, Hacienda</p>
+          <p>پینگ بالای <span class="banned-t">80ms</span> در war = عدم شرکت</p>
+        </div>
+      </div>
+
+      <!-- CLAN WAR RULES -->
+      <div class="card" style="margin-top:0">
+        <div class="sec-title">◈ CLAN WAR RULES — PRO LEAGUE STANDARD</div>
+        <div style="font-size:.65rem;color:rgba(34,211,238,.25);letter-spacing:2px;margin-bottom:16px;font-family:'Share Tech Mono',monospace">Elite Competitive Regulations | No Mercy | Pro League Standard</div>
+
+        <div class="rule-block" style="border-left-color:var(--n3)">
+          <h3>◈ 01 — OFFICIAL OVERVIEW</h3>
+          <p>💠 هر‌گونه تخلف ←  <span class="banned-t">حذف مستقیم، بدون هشدار</span></p>
+        </div>
+
+        <div class="rule-block">
+          <h3>◈ 02 — MATCH STRUCTURE (Bo3)</h3>
+          <p>💠 فرمت: <span class="ok-t">Best of 3 (Bo3)</span></p>
+          <p>💠 Match 1 ← Sniper Only | Firing Range</p>
+          <p>💠 Match 2 ← انتخاب مپ توسط <span class="ok-t">بازنده</span> مچ اول</p>
+          <p>💠 Match 3 ← انتخاب مپ توسط <span class="ok-t">برنده</span> مچ اول</p>
+          <p>💠 مپ منتخب باید از مپ‌های <span class="ok-t">Search & Destroy Ranked</span> باشد</p>
+          <p>💠 هر مچ شامل <span class="ok-t">۵ راند</span> S&D می‌باشد</p>
+          <p>💠 تغییر قوانین در طول وار: <span class="banned-t">ممنوع</span></p>
+        </div>
+
+        <div class="rule-block">
+          <h3>◈ 03 — TIMING RULES</h3>
+          <p>💠 حداکثر تأخیر قابل پذیرش: <span class="ok-t">۵ دقیقه</span></p>
+          <p>💠 تأخیر بیشتر: <span class="banned-t">Forfeit مستقیم</span></p>
+          <p>💠 قطع اتصال: <span class="banned-t">ادامه بدون ReHost</span></p>
+          <p>💠 سوءاستفاده از تأخیر: <span class="banned-t">حذف تیم</span></p>
+        </div>
+
+        <div class="rule-block">
+          <h3>◈ 04 — PLAYER ELIGIBILITY</h3>
+          <p>💠 حضور فقط اعضای رسمی کلن</p>
+          <p>💠 داشتن تگ کلن: <span class="ok-t">الزامی</span></p>
+          <p>💠 شرکت با اکانت فیک: <span class="banned-t">Blacklist + حذف فوری</span></p>
+          <p>💠 ورود غیرمجاز به وار: <span class="banned-t">Blacklist + حذف فوری</span></p>
+        </div>
+
+        <div class="rule-block">
+          <h3>◈ 05 — COMMUNICATION RULES</h3>
+          <p>💠 اتصال میکروفون: <span class="ok-t">الزامی</span></p>
+          <p>💠 فقط <span class="ok-t">Leader</span> و <span class="ok-t">Vice Master</span> حق صحبت دارند</p>
+          <p>💠 Toxicity یا Noise: <span class="banned-t">Mute / Kick</span></p>
+        </div>
+
+        <div class="rule-block">
+          <h3>◈ 06 — SPECTATOR & STREAM</h3>
+          <p>💠 ورود اسپکتیتور به روم: <span class="banned-t">ممنوع</span></p>
+          <p>💠 حضور با Streamer Mode: <span class="banned-t">ممنوع</span></p>
+          <p>💠 Stream Snipe کردن: <span class="banned-t">حذف فوری</span></p>
+        </div>
+
+        <div class="rule-block" style="border-left-color:var(--n3)">
+          <h3>◈ 07 — WEAPON BAN SYSTEM</h3>
+
+          <p style="color:var(--n4);margin:6px 0 4px;font-weight:700">🔴 BANNED ASSAULT RIFLES</p>
+          <p><span class="banned-t">M16 | Swordfish | Oden | EM2 | LAG 53 | Vargo-S</span></p>
+
+          <p style="color:rgba(200,255,232,.5);margin:8px 0 4px">Banned Attachments:</p>
+          <p>• Man-O-War ← <span class="banned-t">Thermite Ammo</span></p>
+          <p>• AS VAL ← <span class="banned-t">15 Round FMJ</span></p>
+          <p>• CR-56 AMAX ← <span class="banned-t">M67 Ammo</span></p>
+          <p>• Kilo 141 ← <span class="banned-t">100 Round Reload</span></p>
+          <p>• Maddox ← <span class="banned-t">Echo Fire Mod</span></p>
+          <p>• Type 19 ← <span class="banned-t">Hi-Accuracy Sniper Ammo</span></p>
+
+          <p style="color:var(--n4);margin:10px 0 4px;font-weight:700">🔴 BANNED SMGs</p>
+          <p><span class="banned-t">Chicom | Fennec | MAC-10 | KSP-45 | OTs 9 | TEC-9 | ISO | USS9 | Sten</span></p>
+          <p style="color:rgba(200,255,232,.5);margin:8px 0 4px">Banned Attachments:</p>
+          <p>• Pharo ← <span class="banned-t">Underbarrel Stun Gun</span></p>
+          <p>• Striker 45 ← <span class="banned-t">.45 Hollow Point 12-R Mags</span></p>
+          <p>• CX-9 ← <span class="banned-t">9mm Hollow Point 12-R Mags</span></p>
+
+          <p style="color:var(--n4);margin:10px 0 4px;font-weight:700">🔴 BANNED LMGs</p>
+          <p><span class="banned-t">All LMGs Are Banned</span></p>
+
+          <p style="color:var(--n4);margin:10px 0 4px;font-weight:700">🔴 BANNED SNIPERS</p>
+          <p><span class="banned-t">XPR-50 | Arctic .50 | M21 EBR | NA-45 | SVD</span></p>
+          <p style="color:rgba(200,255,232,.5);margin:8px 0 4px">Banned Attachments:</p>
+          <p>• DL Q33 ← <span class="banned-t">Maevwat Omega-1</span></p>
+          <p>• Rytec AMR ← <span class="banned-t">All Ammunitions</span></p>
+
+          <p style="color:var(--n4);margin:10px 0 4px;font-weight:700">🔴 BANNED MARKSMAN & SHOTGUNS</p>
+          <p><span class="banned-t">All Marksman & Shotguns Are Banned</span></p>
+
+          <p style="color:var(--n4);margin:10px 0 4px;font-weight:700">🔴 BANNED PISTOLS & LAUNCHERS</p>
+          <p><span class="banned-t">All Pistols & Launchers Are Banned</span></p>
+
+          <p style="color:var(--n4);margin:10px 0 4px;font-weight:700">⚔️ MELEE</p>
+          <p><span class="ok-t">✔ فقط در Loadout مجاز است</span></p>
+          <p><span class="banned-t">❌ کیل گرفتن با نایف ممنوع می‌باشد</span></p>
+        </div>
+
+        <div class="rule-block">
+          <h3>◈ 08 — EQUIPMENT</h3>
+          <p><span class="ok-t">✔ Frag Grenade</span> مجاز است</p>
+          <p><span class="banned-t">❌ Spam یا Abuse ممنوع می‌باشد</span></p>
+        </div>
+
+        <div class="rule-block" style="border-left-color:var(--n3)">
+          <h3>◈ 09 — BANNED PERKS</h3>
+          <p style="color:rgba(200,255,232,.5);margin-bottom:4px">🔴 Red Perks:</p>
+          <p><span class="banned-t">Martyrdom | Restock | Tactician</span></p>
+          <p style="color:rgba(200,255,232,.5);margin:6px 0 4px">🟢 Green Perks:</p>
+          <p><span class="banned-t">Vulture | Tracker | Quick Fix | Recon</span></p>
+          <p style="color:rgba(200,255,232,.5);margin:6px 0 4px">🔵 Blue Perks:</p>
+          <p><span class="banned-t">Alert | Shrapnel</span></p>
+        </div>
+
+        <div class="rule-block">
+          <h3>◈ 10 — PENALTY SYSTEM</h3>
+          <p>• تخلف اول ← <span class="ok-t">حذف راند</span></p>
+          <p>• تخلف دوم ← <span class="banned-t">حذف تیمی</span></p>
+          <p>• تخلف سوم ← <span class="banned-t">Forfeit</span></p>
+          <p>• سوءاستفاده ← <span class="banned-t">Disqualification</span></p>
+        </div>
+
+        <div class="rule-block">
+          <h3>◈ 11 — COMPETITIVE RULES</h3>
+          <p>💠 بی‌احترامی در روم: <span class="banned-t">ممنوع</span></p>
+          <p>💠 بحث در روم: <span class="banned-t">ممنوع</span></p>
+        </div>
+
+        <div class="rule-block" style="border-left-color:var(--n4)">
+          <h3>◈ 12 — FINAL AUTHORITY</h3>
+          <p>💠 تصمیم نهایی با <span class="ok-t">ادمین</span> می‌باشد</p>
+          <p>💠 هیچ‌گونه اعتراض در طول وار قابل پذیرش نیست</p>
+        </div>
+
+        <div style="text-align:center;margin-top:20px;padding:16px;border:1px solid rgba(34,211,238,.12);border-radius:8px;background:rgba(34,211,238,.02)">
+          <div style="font-family:'Orbitron',sans-serif;font-size:.9rem;color:var(--n);letter-spacing:4px;text-shadow:var(--glow);margin-bottom:6px">🌍 ONLY・FAMILY</div>
+          <div style="font-size:.72rem;color:rgba(34,211,238,.35);letter-spacing:3px;font-style:italic">"Skill decides everything."</div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===== RECRUIT ===== -->
+    <section id="recruit" class="section">
+      <div class="card">
+        <div class="sec-title">◈ RECRUITMENT TERMINAL</div>
+        <div style="font-size:.75rem;color:rgba(34,211,238,.35);line-height:2;margin-bottom:18px;direction:rtl;text-align:right;font-family:'Rajdhani','Noto Kufi Arabic',sans-serif">
+          فرم را کامل کنید — درخواست مستقیماً به لیدر ارسال می‌شود
+        </div>
+        <div class="fgrid">
+          <div class="ff"><label class="fl">// IN-GAME NAME</label><input class="fi" id="r-ign" placeholder="Your IGN" type="text"></div>
+          <div class="ff"><label class="fl">// GAME UID (NUMERIC)</label><input class="fi" id="r-uid" placeholder="12345678901" type="number"></div>
+          <div class="ff"><label class="fl">// TELEGRAM ID</label><input class="fi" id="r-tg" placeholder="@username" type="text"></div>
+          <div class="ff"><label class="fl">// CURRENT RANK</label>
+            <select class="fi" id="r-rank"><option value="">-- SELECT --</option><option>Legendary</option><option>Immortal</option><option>Undying</option><option>Master</option><option>Other</option></select></div>
+          <div class="ff"><label class="fl">// PRIMARY ROLE</label>
+            <select class="fi" id="r-role"><option value="">-- SELECT --</option><option>IGL</option><option>Sniper</option><option>Rusher / Entry</option><option>Support / Anchor</option><option>Flex</option></select></div>
+          <div class="ff"><label class="fl">// DEVICE</label><input class="fi" id="r-device" placeholder="e.g. iPhone 14 Pro" type="text"></div>
+          <div class="ff" style="grid-column:1/-1"><label class="fl">// WHY JOIN? (فارسی یا انگلیسی)</label><textarea class="fi" id="r-note" placeholder="توضیح مختصر..."></textarea></div>
+        </div>
+        <button class="sbtn" id="r-btn" onclick="submitRecruit()">[ SEND APPLICATION ]</button>
+        <div class="fstat" id="r-status"></div>
+      </div>
+    </section>
+
+    <!-- ===== WAR ROOM ===== -->
+    <section id="war" class="section">
+      <div class="card">
+        <div class="sec-title">◈ WAR ROOM — OPERATIONS</div>
+        <div id="war-list">
+          <div class="wcard"><div class="wicon">⚔️</div><div class="winfo"><div class="wtitle">CLAN WAR — FRIDAY 21:00</div><div class="wdetail">Bo3 • Hardpoint • vs TBD</div><div class="wtg">📬 @VoidSpctre</div></div><div class="wbadge ws-u">SOON</div></div>
+          <div class="wcard"><div class="wicon">🔥</div><div class="winfo"><div class="wtitle">SCRIM — THURSDAY 20:00</div><div class="wdetail">Internal practice • All teams</div><div class="wtg">📬 @VoidSpctre</div></div><div class="wbadge ws-u">UPCOMING</div></div>
+          <div class="wcard"><div class="wicon">✅</div><div class="winfo"><div class="wtitle">SCRIM vs SHADOW CLAN</div><div class="wdetail">Result: W 2-1</div><div class="wtg">📬 @VoidSpctre</div></div><div class="wbadge ws-d">DONE</div></div>
+        </div>
+        <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px">
+          <div class="sec-title" style="font-size:.75rem">◈ NEW WAR REQUEST</div>
+          <div class="fgrid" style="grid-template-columns:1fr 1fr;gap:8px">
+            <div class="ff"><label class="fl">// TITLE</label><input class="fi" id="w-title" placeholder="e.g. Clan War vs X" type="text"></div>
+            <div class="ff"><label class="fl">// DATE & TIME</label><input class="fi" id="w-time" placeholder="Friday 21:00" type="text"></div>
+            <div class="ff"><label class="fl">// YOUR TELEGRAM</label><input class="fi" id="w-tg" placeholder="@username" type="text"></div>
+            <div class="ff"><label class="fl">// TYPE</label><select class="fi" id="w-type"><option>Clan War</option><option>Scrim</option><option>Practice</option></select></div>
+            <div class="ff" style="grid-column:1/-1"><label class="fl">// NOTES</label><textarea class="fi" id="w-note" placeholder="Map, mode, opponent..." style="min-height:60px"></textarea></div>
+          </div>
+          <button class="sbtn" id="w-btn" onclick="submitWar()">[ SEND TO LEADER ]</button>
+          <div class="fstat" id="w-status"></div>
+          <div style="text-align:center;font-size:.6rem;color:rgba(34,211,238,.2);margin-top:10px;letter-spacing:2px">درخواست از طریق ربات به @VoidSpctre ارسال می‌شود</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ARMORY removed -->
+
+    <!-- LEGENDS removed -->
+
+    <!-- ===== ADMIN ===== -->
+    <section id="admin" class="section">
+      <div id="adm-lock">
+        <div class="card">
+          <div class="sec-title">◈ ADMIN PANEL</div>
+          <div class="adm-lock">
+            <span class="adm-lock-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+            <div class="adm-lock-txt">COMMANDER AUTHENTICATION REQUIRED</div>
+            <div class="lt-prompt" style="max-width:300px;margin:0 auto 14px">
+              <span class="lt-prompt-sym">admin@of:~$</span>
+              <input id="adm-pass" type="password" placeholder="admin code" onkeydown="if(event.key==='Enter')checkAdmin()">
+            </div>
+            <button class="sbtn" onclick="checkAdmin()" style="max-width:300px;margin:0 auto">[ AUTHENTICATE ]</button>
+            <div class="fstat" id="adm-st" style="max-width:300px;margin:10px auto 0"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="adm-panel" style="display:none">
+        <div class="adm-stats">
+          <div class="adm-s"><div class="adm-n" id="adm-req-n">0</div><div class="adm-l">PENDING RECRUIT</div></div>
+          <div class="adm-s"><div class="adm-n">5</div><div class="adm-l">TOTAL MEMBERS</div></div>
+          <div class="adm-s"><div class="adm-n" style="color:var(--n5)">3</div><div class="adm-l">ONLINE NOW</div></div>
+          <div class="adm-s"><div class="adm-n" style="color:var(--n4)">1</div><div class="adm-l">WARS THIS WEEK</div></div>
+        </div>
+
+        <div class="card">
+          <div class="sec-title">◈ RECRUIT REQUESTS</div>
+          <div id="adm-requests"><div style="text-align:center;padding:24px;color:rgba(34,211,238,.2);font-size:.68rem;letter-spacing:2px;font-family:'Share Tech Mono',monospace">// NO PENDING REQUESTS</div></div>
+        </div>
+
+        <div class="card">
+          <div class="sec-title">◈ WAR REQUESTS</div>
+          <div id="adm-war-requests"><div style="text-align:center;padding:24px;color:rgba(34,211,238,.2);font-size:.68rem;letter-spacing:2px;font-family:'Share Tech Mono',monospace">// NO PENDING WAR REQUESTS</div></div>
+        </div>
+
+        <div class="card">
+          <div class="sec-title">◈ BROADCAST</div>
+          <div class="ff"><label class="fl">// MESSAGE TO CLAN (via Bot)</label><textarea class="fi" id="bc-msg" placeholder="Type announcement..." style="min-height:70px"></textarea></div>
+          <button class="sbtn" onclick="sendBroadcast()" style="margin-top:8px">[ 📢 BROADCAST ]</button>
+          <div class="fstat" id="bc-status"></div>
+          <div class="broadcast-log" id="bc-log" style="display:none"></div>
+        </div>
+
+
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<!-- PLAYER MODAL -->
+<div id="player-modal" onclick="if(event.target===this)closePlayer()">
+  <div class="pm-box">
+    <button class="pm-close" onclick="closePlayer()">✕</button>
+    <div class="pm-header">
+      <div class="pm-avatar" id="pm-av"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20M5 20V10l7-7 7 7v10"/><polyline points="5 10 12 3 19 10"/></svg></div>
+      <div><div class="pm-name" id="pm-name">—</div><div class="pm-role" id="pm-role">—</div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">
+      <div style="background:rgba(0,15,35,.9);border:1px solid rgba(34,211,238,.22);border-radius:8px;padding:12px 14px">
+        <div style="font-size:.5rem;letter-spacing:3px;color:rgba(34,211,238,.55);margin-bottom:6px;font-family:'Share Tech Mono',monospace">◈ GAME</div>
+        <div id="pm-game" style="font-size:.88rem;color:#e8f4ff;font-family:'Rajdhani',sans-serif;font-weight:700;letter-spacing:1px">Call of Duty: Mobile</div>
+      </div>
+      <div style="background:rgba(0,15,35,.9);border:1px solid rgba(34,211,238,.3);border-radius:8px;padding:12px 14px;position:relative">
+        <div style="font-size:.5rem;letter-spacing:3px;color:rgba(34,211,238,.55);margin-bottom:6px;font-family:'Share Tech Mono',monospace">◈ GAME UID</div>
+        <div id="pm-uid" style="font-size:.88rem;color:var(--n);font-family:'Share Tech Mono',monospace;word-break:break-all;line-height:1.6;font-weight:700;text-shadow:0 0 10px rgba(34,211,238,.4)">—</div>
+        <button onclick="copyUID()" style="position:absolute;top:10px;right:10px;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.3);border-radius:4px;color:var(--n);font-size:.55rem;padding:3px 8px;cursor:pointer;font-family:'Share Tech Mono',monospace;letter-spacing:1px" id="copy-uid-btn">COPY</button>
+      </div>
+      <div style="background:rgba(0,15,35,.9);border:1px solid rgba(34,211,238,.22);border-radius:8px;padding:12px 14px">
+        <div style="font-size:.5rem;letter-spacing:3px;color:rgba(34,211,238,.55);margin-bottom:6px;font-family:'Share Tech Mono',monospace">◈ DEVICE</div>
+        <div id="pm-device" style="font-size:.92rem;color:#e8f4ff;font-family:'Rajdhani',sans-serif;font-weight:700;letter-spacing:1px">—</div>
+      </div>
+      <button onclick="copyRow()" id="copy-row-btn" style="width:100%;background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.3);border-radius:8px;color:var(--n);font-size:.65rem;padding:10px;cursor:pointer;font-family:'Share Tech Mono',monospace;letter-spacing:2px;transition:all .2s">📋 COPY ROW</button>
+    </div>
+    <div class="pm-stats">
+      <div class="pm-stat"><div class="pm-stat-n" id="pm-aim">—</div><div class="pm-stat-l">AIM</div></div>
+      <div class="pm-stat"><div class="pm-stat-n" id="pm-reflex">—</div><div class="pm-stat-l">REFLEX</div></div>
+      <div class="pm-stat"><div class="pm-stat-n" id="pm-iq">—</div><div class="pm-stat-l">GAME IQ</div></div>
+    </div>
+    <div class="pm-genome-full">
+      <div class="pgr"><div class="pgr-l">AIM ACCURACY</div><div class="pgr-bw"><div class="pgr-b" id="pg-aim"></div></div><div class="pgr-v" id="pgv-aim">—</div></div>
+      <div class="pgr"><div class="pgr-l">REFLEX SPEED</div><div class="pgr-bw"><div class="pgr-b" id="pg-ref"></div></div><div class="pgr-v" id="pgv-ref">—</div></div>
+      <div class="pgr"><div class="pgr-l">GAME IQ</div><div class="pgr-bw"><div class="pgr-b" id="pg-iq"></div></div><div class="pgr-v" id="pgv-iq">—</div></div>
+      <div class="pgr"><div class="pgr-l">LEADERSHIP</div><div class="pgr-bw"><div class="pgr-b" id="pg-lead"></div></div><div class="pgr-v" id="pgv-lead">—</div></div>
+      <div class="pgr"><div class="pgr-l">AGGRESSION</div><div class="pgr-bw"><div class="pgr-b" id="pg-agg"></div></div><div class="pgr-v" id="pgv-agg">—</div></div>
+      <div class="pgr"><div class="pgr-l">TEAMWORK</div><div class="pgr-bw"><div class="pgr-b" id="pg-team"></div></div><div class="pgr-v" id="pgv-team">—</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- AUDIO -->
+<audio id="snd-click" src="data:audio/wav;base64,UklGRlQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YTAAAAC7/7//u/+7/7v/u/+7/7v/u/+7/7v/u/+7/7v/u/+7/7v/u/+7/7v/" preload="auto"></audio>
+<audio id="snd-boot" src="data:audio/wav;base64,UklGRlQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YTAAAAC7/7//u/+7/7v/u/+7/7v/u/+7/7v/u/+7/7v/u/+7/7v/u/+7/7v/" preload="auto"></audio>
+
+<script>
+// ===== CONSTANTS =====
+const BOT_TOKEN='8963561814:AAHsuyZO81HXEHzI96TOfY8eTzAJsrU1PXo';
+const ADMIN_ID='8249371770';
+const CODE='onlyfamily';
+const ADMIN_CODE='maru2025';
+
+// ===== SOUND ENGINE =====
+const AC=new(window.AudioContext||window.webkitAudioContext)();
+function beep(freq=440,dur=0.08,vol=0.15,type='square'){
+  try{
+    const o=AC.createOscillator(),g=AC.createGain();
+    o.connect(g);g.connect(AC.destination);
+    o.frequency.value=freq;o.type=type;
+    g.gain.setValueAtTime(vol,AC.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+dur);
+    o.start(AC.currentTime);o.stop(AC.currentTime+dur);
+  }catch(e){}
+}
+function sfxClick(){beep(800,0.06,0.1,'square')}
+function sfxSuccess(){beep(440,0.1,0.15);setTimeout(()=>beep(660,0.15,0.15),100);setTimeout(()=>beep(880,0.2,0.15),200)}
+function sfxError(){beep(200,0.2,0.2,'sawtooth')}
+function sfxBoot(){[220,330,440,550,660,880].forEach((f,i)=>setTimeout(()=>beep(f,0.12,0.1),i*120))}
+function sfxNotif(){beep(660,0.08,0.12);setTimeout(()=>beep(880,0.12,0.12),90)}
+function sfxSection(){beep(400,0.05,0.08,'sine');setTimeout(()=>beep(600,0.08,0.08,'sine'),60)}
+
+document.addEventListener('click',()=>{if(AC.state==='suspended')AC.resume()});
+
+// BG CANVAS disabled for performance
+
+// ===== RADAR CANVAS =====
+function drawRadar(){
+  const c=document.getElementById('radarCanvas');
+  if(!c)return;
+  const sz=Math.min(220,window.innerWidth*0.45);
+  c.width=sz;c.height=sz;
+  const ctx=c.getContext('2d');
+  const cx=sz/2,cy=sz/2,r=sz/2-10;
+  const stats=[0.90,0.85,0.95,0.88,0.82,0.91]; // aim,reflex,iq,leadership,aggression,teamwork
+  const labels=['AIM','REFLEX','IQ','LEAD','AGG','TEAM'];
+  const n=6;
+  // Rings
+  for(let ring=1;ring<=4;ring++){
+    ctx.beginPath();
+    for(let i=0;i<n;i++){const a=i/n*Math.PI*2-Math.PI/2;const rr=r*ring/4;ctx.lineTo(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr)}
+    ctx.closePath();ctx.strokeStyle='rgba(34,211,238,0.12)';ctx.lineWidth=1;ctx.stroke();
+  }
+  // Axes
+  for(let i=0;i<n;i++){
+    const a=i/n*Math.PI*2-Math.PI/2;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);
+    ctx.strokeStyle='rgba(34,211,238,0.15)';ctx.lineWidth=1;ctx.stroke();
+    const lx=cx+Math.cos(a)*(r+12),ly=cy+Math.sin(a)*(r+12);
+    ctx.fillStyle='rgba(34,211,238,0.4)';ctx.font='9px Share Tech Mono';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(labels[i],lx,ly);
+  }
+  // Data
+  ctx.beginPath();
+  for(let i=0;i<n;i++){
+    const a=i/n*Math.PI*2-Math.PI/2;const rr=r*stats[i];
+    i===0?ctx.moveTo(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr):ctx.lineTo(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr);
+  }
+  ctx.closePath();
+  ctx.fillStyle='rgba(34,211,238,0.12)';ctx.fill();
+  ctx.strokeStyle='rgba(34,211,238,0.7)';ctx.lineWidth=1.5;ctx.stroke();
+  // Dots
+  for(let i=0;i<n;i++){
+    const a=i/n*Math.PI*2-Math.PI/2;const rr=r*stats[i];
+    ctx.beginPath();ctx.arc(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr,3,0,Math.PI*2);
+    ctx.fillStyle='var(--n)';ctx.fill();
+  }
+  // radar sweep removed - static render only
+}
+
+function initHeroCanvas(){} // removed
+
+// ===== WIN PROBABILITY RING =====
+function animateWPRing(pct){
+  const circle=document.getElementById('wp-circle');
+  if(!circle)return;
+  const circumference=2*Math.PI*28;
+  const offset=circumference-(pct/100)*circumference;
+  setTimeout(()=>{circle.style.strokeDashoffset=offset},500);
+}
+
+// ===== BOOT SEQUENCE =====
+let bootDone=false;
+function runBoot(){
+  sfxBoot();
+  const lines=document.querySelectorAll('.boot-line');
+  const fill=document.getElementById('bp-fill');
+  const pct=document.getElementById('boot-pct');
+  lines.forEach((l,i)=>{
+    setTimeout(()=>{
+      l.classList.add('show');
+      beep(300+i*50,0.05,0.08);
+    },i*320);
+  });
+  let p=0;
+  const t=setInterval(()=>{
+    p+=2;fill.style.width=p+'%';pct.textContent=p+'%';
+    if(p>=100){
+      clearInterval(t);
+      setTimeout(()=>{
+        document.getElementById('boot').style.opacity='0';
+        document.getElementById('boot').style.transition='opacity .6s';
+        setTimeout(()=>{
+          document.getElementById('boot').style.display='none';
+          document.getElementById('login').style.display='flex';
+          sfxSuccess();
+        },600);
+      },400);
+    }
+  },40);
+}
+setTimeout(runBoot,300);
+
+// ===== LOGIN =====
+function checkCode(){
+  const v=document.getElementById('code').value.trim().toLowerCase();
+  const msg=document.getElementById('lt-msg');
+  if(v===CODE){
+    sfxSuccess();
+    msg.style.color='#00ff88';msg.textContent='> ACCESS GRANTED — WELCOME COMMANDER';
+    setTimeout(()=>{
+      document.getElementById('login').style.display='none';
+      document.getElementById('app').style.display='block';
+      initApp();
+    },800);
+  } else {
+    sfxError();
+    msg.style.color='var(--n3)';msg.textContent='> AUTHENTICATION FAILED — RETRY';
+    document.getElementById('code').value='';
+  }
+}
+
+function closeAI(){
+  document.getElementById('ai-assist').classList.remove('visible');
+  document.getElementById('ai-assist').style.display='none';
+}
+
+function show(id, btn){
+  sfxSection();
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  // Deactivate all nav items (sidebar + bottom nav)
+  document.querySelectorAll('.nav-item, .bnav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  // Activate matching items in BOTH navs
+  if(btn) btn.classList.add('active');
+  // Sync the other nav
+  const sections=['home','rules','roster','changes','recruit','war','admin'];
+  const idx=sections.indexOf(id);
+  if(idx>=0){
+    const sbItems=document.querySelectorAll('.nav-item');
+    // sidebar items order matches sections array
+    if(sbItems[idx]) sbItems[idx].classList.add('active');
+    const bnItems=document.querySelectorAll('.bnav-item');
+    if(bnItems[idx]) bnItems[idx].classList.add('active');
+  }
+  triggerSatScan();
+}
+
+// ===== SIDEBAR TOGGLE =====
+function toggleSidebar(){
+  const sb=document.getElementById('sidebar');
+  const main=document.getElementById('main');
+  const arrow=document.getElementById('sb-arrow');
+  const lbl=document.querySelector('.sb-toggle-label');
+  const isCollapsed=sb.classList.contains('collapsed');
+  if(isCollapsed){
+    sb.classList.remove('collapsed');
+    main.classList.remove('sb-collapsed');
+    if(arrow) arrow.textContent='‹';
+    if(lbl) lbl.textContent='COLLAPSE';
+  } else {
+    sb.classList.add('collapsed');
+    main.classList.add('sb-collapsed');
+    if(arrow) arrow.textContent='›';
+    if(lbl) lbl.textContent='EXPAND';
+  }
+}
+
+// ===== SAT SCAN =====
+function triggerSatScan(){} // removed
+
+// ===== NOTIFICATION =====
+function showNotif(title,body,duration=4000){
+  sfxNotif();
+  document.getElementById('notif-title').textContent=title;
+  document.getElementById('notif-body').textContent=body;
+  document.getElementById('notif').classList.add('show');
+  setTimeout(()=>document.getElementById('notif').classList.remove('show'),duration);
+}
+
+// ===== CLOCK =====
+setInterval(()=>{
+  const el=document.getElementById('os-clock');
+  if(el)el.textContent=new Date().toLocaleTimeString('en-US',{hour12:false});
+},1000);
+
+// ===== COUNTDOWN =====
+function updateCD(){
+  const now=new Date();
+  const next=new Date();
+  const day=now.getDay();
+  const daysToFri=(5-day+7)%7||7;
+  next.setDate(now.getDate()+daysToFri);
+  next.setHours(21,0,0,0);
+  const diff=Math.max(0,next-now);
+  const d=Math.floor(diff/86400000);
+  const h=Math.floor((diff%86400000)/3600000);
+  const m=Math.floor((diff%3600000)/60000);
+  const s=Math.floor((diff%60000)/1000);
+  const f=n=>String(n).padStart(2,'0');
+  ['d','h','m','s'].forEach((id,i)=>{
+    const el=document.getElementById('cd-'+id);
+    if(el)el.textContent=f([d,h,m,s][i]);
+  });
+}
+setInterval(updateCD,1000);
+
+// ===== PING =====
+setInterval(()=>{
+  const p=[12,14,16,18,20,22][Math.floor(Math.random()*6)];
+  const el=document.getElementById('ping-disp');
+  if(el)el.textContent=p+'ms';
+},3000);
+
+// ===== KILL FEED =====
+const kills=[
+  {k:'𝙤𝙣𝙡𝙮ゝMaru',w:'SVD',v:'Enemy_01'},
+  {k:'𝙤𝙣𝙡𝙮ゝFlash',w:'Lachmann',v:'ShadowX'},
+  {k:'𝙤𝙣𝙡𝙮ゝSniper',w:'Kilo Bolt',v:'ProGunner'},
+  {k:'𝙤𝙣𝙡𝙮ゝBlaze',w:'MCW',v:'RushKing'},
+  {k:'𝙤𝙣𝙡𝙮ゝShield',w:'WSP',v:'NoScope99'},
+  {k:'𝙤𝙣𝙡𝙮ゝMaru',w:'Rival-9',v:'DarkElite'},
+];
+let kfi=0;
+function addKill(){
+  const feed=document.getElementById('killfeed');
+  if(!feed)return;
+  const k=kills[kfi%kills.length];kfi++;
+  const el=document.createElement('div');el.className='kf';
+  el.innerHTML=`<span class="kfs"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><path d="M8 20v2h8v-2"/><path d="M12.5 17.5H12"/><path d="M8 20h8"/><path d="M2 13.5V12a10 10 0 0 1 20 0v1.5"/><path d="M2 13.5A4 4 0 0 0 6 17h12a4 4 0 0 0 4-3.5"/></svg></span><span class="kfk">${k.k}</span><span class="kfw">${k.w}</span><span style="color:rgba(34,211,238,.2)">→</span><span class="kfv">${k.v}</span>`;
+  feed.appendChild(el);
+  if(feed.children.length>5)feed.removeChild(feed.children[0]);
+  setTimeout(()=>el.classList.add('show'),30);
+}
+
+// ===== ACTIVITY =====
+const acts=[
+  {t:'just now',txt:'<b>𝙤𝙣𝙡𝙮ゝMaru</b> came online'},
+  {t:'2m ago',txt:'New application from <b>ProPlayer99</b>'},
+  {t:'8m ago',txt:'Scrim result: <b>W 2-1</b> vs ShadowClan'},
+  {t:'1h ago',txt:'War scheduled: <b>Friday 21:00</b>'},
+  {t:'2h ago',txt:'<b>𝙤𝙣𝙡𝙮ゝFlash</b> updated loadout'},
+];
+function renderActs(){
+  const el=document.getElementById('actlog');
+  if(!el)return;
+  el.innerHTML=acts.map(a=>`<div class="act"><div class="act-t">${a.t}</div><div class="act-txt">${a.txt}</div></div>`).join('');
+}
+
+// ===== CHART =====
+function renderChart(){
+  const el=document.getElementById('chart-bars');
+  if(!el)return;
+  const data=[{l:'M',v:2},{l:'T',v:3},{l:'W',v:1},{l:'T',v:2},{l:'F',v:3},{l:'S',v:2},{l:'S',v:0}];
+  const max=3;
+  el.innerHTML=data.map(d=>`<div class="bw"><div class="b" style="height:${Math.max(d.v/max*100,4)}%"></div><div class="bl">${d.l}</div></div>`).join('');
+}
+
+// ===== AI MESSAGES =====
+const aiMsgs=[
+  'All systems nominal, Commander.',
+  'Team power: 9,250 — Combat ready.',
+  `Next clan war: Friday 21:00.`,
+  'Win probability vs current opponent: 84%.',
+  'Recommended loadout: SVD-V2 + Lachmann Sub.',
+  '2 enemy clans detected nearby. Stay sharp.',
+  'Recruitment portal is open. New talent incoming.',
+  'Scrim session scheduled for Thursday 20:00.',
+  'Threat level: HIGH. Prepare accordingly.',
+  'OF-NET connection stable. Ping: 18ms.',
+];
+let aiIdx=0;
+function cycleAI(){
+  const msg=document.getElementById('ai-msg');
+  const typing=document.getElementById('ai-typing');
+  if(!msg)return;
+  typing.style.display='flex';msg.style.opacity='0';
+  setTimeout(()=>{
+    msg.textContent=aiMsgs[aiIdx%aiMsgs.length];aiIdx++;
+    msg.style.opacity='1';msg.style.transition='opacity .4s';
+    typing.style.display='none';
+  },1200);
+}
+
+// ===== PLAYER DATA (roster) =====
+// Keeping this data in JS (instead of inline onclick="..." attributes) avoids the
+// HTML-attribute quote collisions that happen when raw SVG markup with double quotes
+// gets embedded inside an already double-quoted onclick="..." attribute.
+const PLAYERS=[
+  {name:'onlyゝMaru',role:'IGL / LEADER',av:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20M5 20V10l7-7 7 7v10"/><polyline points="5 10 12 3 19 10"/></svg>',device:'Poco X 6 Pro',uid:'7098766198632349698',aim:95,reflex:90,iq:98,leadership:85,aggression:92,teamwork:88,game:'Call of Duty: Mobile'},
+  {name:'onlyゝJiTAX',role:'PLAYER 02',av:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',device:'Poco F 3',uid:'7191442868291698689',aim:88,reflex:92,iq:80,leadership:72,aggression:85,teamwork:78,game:'Call of Duty: Mobile'},
+  {name:'onlyゝfans',role:'PLAYER 03',av:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',device:'iPhone 13',uid:'7065612241814945793',aim:82,reflex:86,iq:78,leadership:70,aggression:90,teamwork:80,game:'Call of Duty: Mobile'},
+  {name:'Onlyゝgl0ry',role:'PLAYER 04',av:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',device:'Poco X 7 Pro',uid:'7304502075479228417',aim:85,reflex:80,iq:88,leadership:75,aggression:82,teamwork:87,game:'Call of Duty: Mobile'},
+  {name:'onlyゝNotToday',role:'PLAYER 05',av:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',device:'iPhone 13 Pro Max',uid:'7080959186108350465',aim:84,reflex:86,iq:79,leadership:74,aggression:83,teamwork:80,game:'Call of Duty: Mobile'},
+  {name:'onlyゝDemo',role:'PLAYER 06',av:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>',device:'iPad Pro 2025',uid:'7136200059792130049',aim:86,reflex:84,iq:82,leadership:78,aggression:88,teamwork:83,game:'Call of Duty: Mobile'},
+  {name:'OnlyゝPahlavi',role:'PLAYER 07',av:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',device:'Poco X7 Pro',uid:'6975836124011495425',aim:83,reflex:80,iq:76,leadership:78,aggression:82,teamwork:79,game:'Call of Duty: Mobile'},
+  {name:'OnlyゝSinaYox',role:'PLAYER 08',av:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',device:'Poco X7 Pro',uid:'7505705546605854721',aim:85,reflex:83,iq:80,leadership:76,aggression:84,teamwork:81,game:'Call of Duty: Mobile'},
+  {name:'OnlyゝSianor',role:'PLAYER 09',av:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',device:'iPhone 15 Pro Max',uid:'6745135144770273281',aim:82,reflex:78,iq:85,leadership:80,aggression:79,teamwork:86,game:'Call of Duty: Mobile'},
+  {name:'onlyゝwarden',role:'PLAYER 10',av:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>',device:'Samsung A25',uid:'7644448436024705025',aim:79,reflex:81,iq:76,leadership:73,aggression:78,teamwork:75,game:'Call of Duty: Mobile'}
+];
+
+// Data for filled cards inside the ROSTER CHANGES section, keyed by data-change index.
+const CHANGES_PLAYERS=[
+  {name:'onlyゝLUIGI',role:'PLAYER 01',av:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',device:'Poco X 7',uid:'7424150550676963329',aim:88,reflex:92,iq:80,leadership:72,aggression:85,teamwork:78,game:'Call of Duty: Mobile'}
+];
+
+// Wire up every changes card that has a data-change index to open the modal (same as roster).
+document.querySelectorAll('.pc[data-change]').forEach(card=>{
+  const idx=parseInt(card.getAttribute('data-change'),10);
+  const p=CHANGES_PLAYERS[idx];
+  if(!p)return;
+  card.style.cursor='pointer';
+  card.addEventListener('click',()=>openPlayer(p));
+});
+
+// Wire up every roster card that has a data-player index to open the modal.
+document.querySelectorAll('.pc[data-player]').forEach(card=>{
+  const idx=parseInt(card.getAttribute('data-player'),10);
+  const p=PLAYERS[idx];
+  if(!p)return;
+  card.addEventListener('click',()=>openPlayer(p));
+});
+
+// ===== PLAYER MODAL =====
+function openPlayer(p){
+  sfxClick();
+  const {name,role,av,device,uid,aim,reflex,iq,leadership,aggression,teamwork,game}=p;
+  const avEl=document.getElementById('pm-av');
+  avEl.innerHTML=av;
+  document.getElementById('pm-name').textContent=name;
+  document.getElementById('pm-role').textContent=role;
+  const uidEl=document.getElementById('pm-uid');
+  uidEl.textContent=uid||'—';
+  uidEl.title=uid||'—';
+  document.getElementById('pm-device').textContent=device||'—';
+  const gameEl=document.getElementById('pm-game');
+  if(gameEl)gameEl.textContent=game||'Call of Duty: Mobile';
+  document.getElementById('pm-aim').textContent=aim;
+  document.getElementById('pm-reflex').textContent=reflex;
+  document.getElementById('pm-iq').textContent=iq;
+  const stats=[['aim',aim],['ref',reflex],['iq',iq],['lead',leadership],['agg',aggression],['team',teamwork]];
+  stats.forEach(([id,val])=>{
+    const b=document.getElementById('pg-'+id);
+    const v=document.getElementById('pgv-'+id);
+    if(b){setTimeout(()=>b.style.width=val+'%',100)}
+    if(v)v.textContent=val;
+  });
+  document.getElementById('player-modal').classList.add('open');
+}
+function closePlayer(){
+  document.getElementById('player-modal').classList.remove('open');
+  ['aim','ref','iq','lead','agg','team'].forEach(id=>{
+    const b=document.getElementById('pg-'+id);if(b)b.style.width='0';
+  });
+}
+function copyUID(){
+  const uid=document.getElementById('pm-uid').textContent;
+  if(!uid||uid==='—')return;
+  navigator.clipboard.writeText(uid).then(()=>{
+    const btn=document.getElementById('copy-uid-btn');
+    btn.textContent='✓ OK';btn.style.color='#4ade80';btn.style.borderColor='#4ade80';
+    setTimeout(()=>{btn.textContent='COPY';btn.style.color='var(--n)';btn.style.borderColor='rgba(34,211,238,.3)'},1500);
+  }).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=uid;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();
+    const btn=document.getElementById('copy-uid-btn');
+    btn.textContent='✓ OK';setTimeout(()=>btn.textContent='COPY',1500);
+  });
+}
+function copyRow(){
+  const name=document.getElementById('pm-name').textContent;
+  const uid=document.getElementById('pm-uid').textContent;
+  const device=document.getElementById('pm-device').textContent;
+  const row=`${name} | ${uid} | ${device}`;
+  navigator.clipboard.writeText(row).then(()=>{
+    const btn=document.getElementById('copy-row-btn');
+    btn.textContent='✓ COPIED!';btn.style.color='#4ade80';btn.style.borderColor='#4ade80';
+    setTimeout(()=>{btn.textContent='📋 COPY ROW';btn.style.color='var(--n)';btn.style.borderColor='rgba(34,211,238,.3)'},1800);
+  }).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=row;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();
+    const btn=document.getElementById('copy-row-btn');
+    btn.textContent='✓ COPIED!';setTimeout(()=>btn.textContent='📋 COPY ROW',1800);
+  });
+}
+document.getElementById('player-modal').addEventListener('click',function(e){if(e.target===this)closePlayer()});
+
+// ===== TELEGRAM =====
+async function tgSend(text){
+  return new Promise((resolve)=>{
+    const cbName='tgcb_'+Date.now();
+    const url=`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${encodeURIComponent(text)}&parse_mode=HTML&callback=${cbName}`;
+    window[cbName]=function(data){
+      delete window[cbName];
+      document.getElementById('_tgscript')?.remove();
+      resolve(data&&data.ok);
+    };
+    const s=document.createElement('script');
+    s.id='_tgscript';
+    s.src=url;
+    s.onerror=()=>{
+      delete window[cbName];
+      s.remove();
+      // fallback: try fetch no-cors (won't get response but message sends)
+      fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({chat_id:ADMIN_ID,text,parse_mode:'HTML'}),
+        mode:'no-cors'
+      }).catch(()=>{});
+      resolve(true); // assume sent
+    };
+    document.head.appendChild(s);
+    setTimeout(()=>{
+      if(window[cbName]){
+        delete window[cbName];
+        s.remove();
+        resolve(false);
+      }
+    },8000);
+  });
+}
+
+// ===== RECRUIT SUBMIT =====
+const adminReqs=[];
+async function submitRecruit(){
+  const ign=document.getElementById('r-ign').value.trim();
+  const uid=document.getElementById('r-uid').value.trim();
+  const tg=document.getElementById('r-tg').value.trim();
+  const rank=document.getElementById('r-rank').value;
+  const role=document.getElementById('r-role').value;
+  const device=document.getElementById('r-device').value.trim();
+  const note=document.getElementById('r-note').value.trim();
+  const st=document.getElementById('r-status');
+  const btn=document.getElementById('r-btn');
+  if(!ign||!uid||!tg||!rank||!role){sfxError();st.className='fstat err';st.textContent='> FILL ALL REQUIRED FIELDS';return}
+  sfxClick();btn.disabled=true;st.className='fstat loading';st.textContent='> SENDING TO COMMANDER...';
+  const msg=`🎮 <b>NEW CLAN APPLICATION</b>\n━━━━━━━━━━━━━━━\n👤 IGN: <code>${ign}</code>\n🔢 UID: <code>${uid}</code>\n📬 Telegram: ${tg}\n🏆 Rank: <b>${rank}</b>\n⚔️ Role: <b>${role}</b>\n📱 Device: ${device||'—'}\n📝 Note: ${note||'—'}\n⏰ ${new Date().toLocaleString('fa-IR')}\n━━━━━━━━━━━━━━━\n#recruit`;
+  const ok=await tgSend(msg);
+  if(ok){
+    sfxSuccess();st.className='fstat ok';st.textContent='> APPLICATION TRANSMITTED — AWAIT RESPONSE';
+    ['r-ign','r-uid','r-tg','r-device','r-note'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('r-rank').value='';document.getElementById('r-role').value='';
+    const req={ign,uid,tg,rank,role,device,note,time:'just now'};
+    adminReqs.push(req);renderAdminReqs();
+    acts.unshift({t:'just now',txt:`New application from <b>${ign}</b>`});acts.pop();renderActs();
+    showNotif('NEW APPLICATION',`${ign} applied to join the clan`);
+  } else {
+    sfxError();st.className='fstat err';st.textContent='> TRANSMISSION FAILED — RETRY OR CONTACT @VoidSpctre';
+  }
+  btn.disabled=false;
+}
+
+// ===== WAR SUBMIT =====
+async function submitWar(){
+  const title=document.getElementById('w-title').value.trim();
+  const time=document.getElementById('w-time').value.trim();
+  const tg=document.getElementById('w-tg').value.trim();
+  const type=document.getElementById('w-type').value;
+  const note=document.getElementById('w-note').value.trim();
+  const st=document.getElementById('w-status');
+  const btn=document.getElementById('w-btn');
+  if(!title||!time||!tg){sfxError();st.className='fstat err';st.textContent='> FILL REQUIRED FIELDS';return}
+  sfxClick();btn.disabled=true;st.className='fstat loading';st.textContent='> SENDING...';
+  const msg=`⚔️ <b>WAR/SCRIM REQUEST</b>\n━━━━━━━━━━━━━━━\n📌 <b>${title}</b>\n📅 Time: <b>${time}</b>\n🎮 Type: ${type}\n📬 Telegram: ${tg}\n📝 Notes: ${note||'—'}\n⏰ ${new Date().toLocaleString('fa-IR')}\n━━━━━━━━━━━━━━━\n#war #coordination`;
+  const ok=await tgSend(msg);
+  if(ok){
+    sfxSuccess();st.className='fstat ok';st.textContent='> SENT — LEADER WILL CONFIRM';
+    const wl=document.getElementById('war-list');
+    const wc=document.createElement('div');wc.className='wcard';
+    wc.innerHTML=`<div class="wicon">🗡️</div><div class="winfo"><div class="wtitle">${type.toUpperCase()} — ${title}</div><div class="wdetail">${time}</div><div class="wtg">📬 ${tg}</div></div><div class="wbadge ws-u">PENDING</div>`;
+    wl.prepend(wc);
+    ['w-title','w-time','w-tg','w-note'].forEach(id=>document.getElementById(id).value='');
+    showNotif('WAR REQUEST',`${type}: ${title} — sent to leader`);
+  } else {
+    sfxError();st.className='fstat err';st.textContent='> FAILED — CONTACT @VoidSpctre DIRECTLY';
+  }
+  btn.disabled=false;
+}
+
+// ===== ADMIN =====
+function renderAdminReqs(){
+  const el=document.getElementById('adm-requests');
+  const ct=document.getElementById('adm-req-n');
+  if(ct)ct.textContent=adminReqs.length;
+  if(!el)return;
+  if(!adminReqs.length){el.innerHTML='<div style="text-align:center;padding:20px;color:rgba(34,211,238,.2);font-size:.65rem;letter-spacing:2px;font-family:\'Share Tech Mono\',monospace">// NO PENDING REQUESTS</div>';return}
+  el.innerHTML=adminReqs.map((r,i)=>`
+    <div class="rcard">
+      <div class="rc-hdr"><div class="rc-ign">${r.ign}</div><div class="rc-time">${r.time}</div></div>
+      <div class="rc-info">
+        <div class="rf"><div class="rf-l">UID</div><div class="rf-v">${r.uid}</div></div>
+        <div class="rf"><div class="rf-l">TELEGRAM</div><div class="rf-v">${r.tg}</div></div>
+        <div class="rf"><div class="rf-l">RANK</div><div class="rf-v">${r.rank}</div></div>
+        <div class="rf"><div class="rf-l">ROLE</div><div class="rf-v">${r.role}</div></div>
+      </div>
+      ${r.note?`<div class="rc-note">${r.note}</div>`:''}
+      <div class="rc-actions">
+        <button class="rc-btn rc-ok" onclick="handleReq(${i},'accept')">✓ ACCEPT</button>
+        <button class="rc-btn rc-no" onclick="handleReq(${i},'reject')">✕ REJECT</button>
+      </div>
+    </div>`).join('');
+}
+async function handleReq(i,action){
+  sfxClick();
+  const r=adminReqs[i];
+  await tgSend(`${action==='accept'?'✅':'❌'} <b>${r.ign}</b> (${r.tg}) has been ${action}ed.`);
+  adminReqs.splice(i,1);renderAdminReqs();
+}
+function checkAdmin(){
+  const v=document.getElementById('adm-pass').value;
+  const st=document.getElementById('adm-st');
+  if(v===ADMIN_CODE){
+    sfxSuccess();
+    document.getElementById('adm-lock').style.display='none';
+    document.getElementById('adm-panel').style.display='block';
+    showNotif('ADMIN ACCESS','Welcome, Commander. All systems accessible.');
+  } else {
+    sfxError();st.className='fstat err';st.textContent='> INVALID CREDENTIALS';st.style.display='block';
+  }
+}
+const bcLog=[];
+async function sendBroadcast(){
+  const msg=document.getElementById('bc-msg').value.trim();
+  const st=document.getElementById('bc-status');
+  if(!msg){sfxError();st.className='fstat err';st.textContent='> EMPTY MESSAGE';st.style.display='block';return}
+  sfxClick();st.className='fstat loading';st.textContent='> BROADCASTING...';st.style.display='block';
+  const text=`📢 <b>CLAN BROADCAST</b>\n━━━━━━━━━━━━━━━\n${msg}\n━━━━━━━━━━━━━━━\n— ONLY FAMILY ESPORTS`;
+  const ok=await tgSend(text);
+  if(ok){
+    sfxSuccess();st.className='fstat ok';st.textContent='> BROADCAST TRANSMITTED';
+    bcLog.push(`[${new Date().toLocaleTimeString('en-US',{hour12:false})}] ${msg}`);
+    const logEl=document.getElementById('bc-log');
+    logEl.style.display='block';logEl.innerHTML=bcLog.map(l=>`<div class="bl-item">> ${l}</div>`).join('');
+    document.getElementById('bc-msg').value='';
+  } else {
+    sfxError();st.className='fstat err';st.textContent='> TRANSMISSION FAILED';
+  }
+}
+const legends=[{name:'𝙤𝙣𝙡𝙮ゝMaru',title:'FOUNDER · IGL · COMMANDER',av:'👑',achievements:['FOUNDER','IGL','LEGENDARY']}];
+function renderLegends(){
+  const el=document.querySelector('#legends .card');
+  if(!el)return;
+  const existing=el.querySelector('.legend-list');
+  if(existing)existing.remove();
+  const div=document.createElement('div');div.className='legend-list';
+  div.innerHTML=legends.map((l,i)=>`
+    <div class="legend-card">
+      <div class="legend-num">${String(i+1).padStart(2,'0')}</div>
+      <div class="legend-av">${l.av}</div>
+      <div class="legend-info">
+        <div class="legend-name">${l.name}</div>
+        <div class="legend-title">${l.title}</div>
+        <div class="legend-achievements">${l.achievements.map(a=>`<span class="la">${a}</span>`).join('')}</div>
+      </div>
+    </div>`).join('');
+  const placeholder=el.querySelector('.legend-placeholder');
+  if(placeholder)placeholder.remove();
+  el.insertBefore(div,el.querySelector('.sec-title').nextSibling);
+}
+function addLegend(){
+  const name=document.getElementById('leg-name').value.trim();
+  const title=document.getElementById('leg-title').value.trim();
+  const ach=document.getElementById('leg-ach').value.trim();
+  const st=document.getElementById('leg-status');
+  if(!name||!title){sfxError();st.className='fstat err';st.textContent='> FILL REQUIRED FIELDS';st.style.display='block';return}
+  sfxSuccess();
+  legends.push({name,title,av:'⭐',achievements:ach?ach.split(',').map(a=>a.trim()):[]});
+  renderLegends();
+  st.className='fstat ok';st.textContent='> ADDED TO HALL OF LEGENDS';st.style.display='block';
+  document.getElementById('leg-name').value='';document.getElementById('leg-title').value='';document.getElementById('leg-ach').value='';
+  showNotif('HALL OF LEGENDS',`${name} has been immortalized`);
+}
+
+// cursor trail removed for performance
+
+// ===== INIT =====
+function initApp(){
+  updateCD();renderActs();renderChart();drawRadar();
+  setTimeout(()=>animateWPRing(84),800);
+  setInterval(addKill,6000);
+  setInterval(cycleAI,6000);
+  setTimeout(()=>{
+    document.getElementById('ai-assist').classList.add('visible');
+    cycleAI();
+  },1000);
+  setTimeout(()=>showNotif('SYSTEM ONLINE','Welcome to OF-OS. All modules loaded.'),1500);
+}
+
+
+
+
+
+
+
+// ===== FULL COLOR SHIFT =====
+const _palettes=[
+  {a:'#22d3ee',b:'#0ea5e9',c:'#f43f5e',d:'#f59e0b',bg:'#03131a',bg2:'#051820'},
+  {a:'#00eeff',b:'#0066ff',c:'#0ea5e9',d:'#22d3ee',bg:'#03131a',bg2:'#040f18'},
+  {a:'#0ea5e9',b:'#22d3ee',c:'#f43f5e',d:'#aa88ff',bg:'#080314',bg2:'#0d041e'},
+  {a:'#f43f5e',b:'#ff8800',c:'#f59e0b',d:'#f43f5e',bg:'#180308',bg2:'#1e040a'},
+  {a:'#38bdf8',b:'#22d3ee',c:'#0ea5e9',d:'#66ccff',bg:'#030a14',bg2:'#04101e'},
+  {a:'#00ff88',b:'#22d3ee',c:'#0ea5e9',d:'#aaffcc',bg:'#031410',bg2:'#041a14'},
+  {a:'#f59e0b',b:'#ff6600',c:'#22d3ee',d:'#ffe066',bg:'#141000',bg2:'#1a1500'},
+  {a:'#ff00ff',b:'#0ea5e9',c:'#22d3ee',d:'#ff88ff',bg:'#12031a',bg2:'#180420'},
+];
+let _pi=0;
+const _s=document.createElement('style');
+_s.id='color-shift-style';
+document.head.appendChild(_s);
+
+function shiftColor(){
+
+  const p=_palettes[_pi%_palettes.length]; _pi++;
+  const r=document.documentElement;
+  // CSS vars
+  r.style.setProperty('--n',p.a);
+  r.style.setProperty('--n2',p.b);
+  r.style.setProperty('--n3',p.c);
+  r.style.setProperty('--n4',p.d);
+  r.style.setProperty('--n5',p.a);
+  r.style.setProperty('--bg',p.bg);
+  r.style.setProperty('--bg2',p.bg2);
+  r.style.setProperty('--bg3',p.bg2);
+  r.style.setProperty('--border',`${p.a}28`);
+  r.style.setProperty('--card',`${p.a}08`);
+  r.style.setProperty('--glow',`0 0 20px ${p.a}cc,0 0 60px ${p.a}44`);
+  r.style.setProperty('--glow2',`0 0 20px ${p.b}cc`);
+  r.style.setProperty('--border',`${p.a}22`);
+  r.style.setProperty('--card',`${p.a}06`);
+  r.style.setProperty('--text','#c8ffe8');
+
+  // Background
+  document.body.style.background=p.bg;
+
+  // Canvas hue rotate
+  const deg=(_pi*30)%360;
+  document.querySelectorAll('canvas').forEach(c=>c.style.filter=`hue-rotate(${deg}deg) saturate(1.5)`);
+
+  _s.textContent=`
+    body,#app{background:${p.bg} !important}
+    #top-bar,#sidebar,#bottom-nav{background:${p.bg}f8 !important;border-color:${p.a}20 !important}
+    .card{background:${p.a}06 !important;border-color:${p.a}18 !important}
+    .card::after{background:linear-gradient(90deg,transparent,${p.a}55,${p.b}55,transparent) !important}
+    .sec-title{color:${p.a} !important;text-shadow:0 0 10px ${p.a}66 !important}
+    .sec-title::after{background:linear-gradient(90deg,${p.a}30,transparent) !important}
+    .tb-logo{color:${p.a} !important;text-shadow:0 0 20px ${p.a}cc !important}
+    .tb-ping{color:${p.a} !important}
+    .hero-name{color:${p.a} !important;text-shadow:0 0 40px ${p.a}cc,0 0 80px ${p.a}44 !important}
+    .hero-sub,.hero-divider{color:${p.a}88 !important}
+    .hero-badge{color:${p.a} !important;border-color:${p.a}44 !important;background:${p.a}10 !important}
+    .nav-item{color:${p.a}55 !important}
+    .nav-item:hover{color:${p.a} !important;background:${p.a}10 !important;border-color:${p.a}25 !important}
+    .nav-item.active{color:${p.a} !important;background:${p.a}12 !important;border-color:${p.a}35 !important;box-shadow:inset 3px 0 0 ${p.a} !important}
+    .nav-item.active::after{background:${p.a} !important;box-shadow:0 0 6px ${p.a} !important}
+    .bnav-item{color:${p.a}55 !important}
+    .bnav-item:hover,.bnav-item.active{color:${p.a} !important;background:${p.a}10 !important;border-color:${p.a}25 !important}
+    .live-dot{background:${p.a} !important;box-shadow:0 0 8px ${p.a} !important}
+    .hq-cell{border-color:${p.a}18 !important;background:rgba(0,0,0,.5) !important}
+    .hq-cell:hover{border-color:${p.a} !important;background:${p.a}08 !important}
+    .hq-cell-label{color:${p.a}66 !important}
+    .hq-cell::before{background:radial-gradient(circle at 50% 0%,${p.a}12,transparent 70%) !important}
+    .cd-n{color:${p.a} !important;text-shadow:0 0 20px ${p.a}cc,0 0 60px ${p.a}44 !important}
+    .cd-l{color:${p.a}44 !important}
+    .countdown{border-color:${p.a}20 !important}
+    .pc{border-color:${p.a}18 !important;background:rgba(0,0,0,.4) !important}
+    .pc:hover{border-color:${p.a}44 !important;background:${p.a}06 !important}
+    .pc::before{background:linear-gradient(180deg,${p.a},${p.b}) !important}
+    .pav{border-color:${p.a}44 !important;background:${p.a}08 !important;box-shadow:0 0 14px ${p.a}25 !important}
+    .prole{color:${p.a} !important}
+    .puid{color:${p.a}33 !important}
+    .gen-bar{background:linear-gradient(90deg,${p.b},${p.a}) !important}
+    .gen-label{color:${p.a}55 !important}
+    .tbadge.t1{color:${p.a} !important;border-color:${p.a}44 !important;background:${p.a}18 !important}
+    .tbadge.t2{color:${p.b} !important;border-color:${p.b}44 !important;background:${p.b}18 !important}
+    .tbadge.t3{color:${p.c} !important;border-color:${p.c}44 !important;background:${p.c}18 !important}
+    .tline{background:${p.a}20 !important}
+    .kfk{color:${p.a} !important}
+    .kfw{color:${p.b} !important;background:${p.b}20 !important}
+    .kfs{color:${p.c} !important}
+    .b{background:linear-gradient(180deg,${p.a},${p.b}) !important;box-shadow:0 0 6px ${p.a}44 !important}
+    .actlog{border-color:${p.a}18 !important}
+    .act-t{color:${p.a}33 !important}
+    .act-txt b{color:${p.a} !important}
+    .ii{border-color:${p.a}18 !important;background:rgba(0,0,0,.35) !important}
+    .ii:hover{border-color:${p.a}33 !important}
+    .ii-l{color:${p.a}44 !important}
+    .threat-fill{background:linear-gradient(90deg,${p.a},${p.d},${p.c}) !important}
+    .threat-label,.threat-m{color:${p.a}55 !important}
+    .wp-pct{color:${p.a} !important;text-shadow:0 0 20px ${p.a} !important}
+    .wp-title{color:${p.a} !important}
+    .wp-detail{color:${p.a}55 !important}
+    .reactor-core{color:${p.a} !important;text-shadow:0 0 10px ${p.a} !important;border-color:${p.a}44 !important}
+    .reactor-power{color:${p.a} !important;text-shadow:0 0 10px ${p.a}88 !important}
+    .reactor-status{color:${p.a}44 !important}
+    .reactor-ring{border-top-color:${p.a}44 !important;border-right-color:${p.b}22 !important}
+    .radar-label{color:${p.a}44 !important}
+    .rule-block{border-left-color:${p.b} !important;background:rgba(2,10,28,.92) !important;box-shadow:inset 0 0 30px rgba(0,0,0,.5) !important}
+    .rule-block h3{color:${p.a} !important;text-shadow:0 0 10px ${p.a}88 !important}
+    .rule-block p{color:#e8f0ff !important;line-height:2.1 !important;font-size:.9rem !important}
+    .ok-t{color:#4ade80 !important}
+    .banned-t{color:${p.c} !important}
+    .fl{color:${p.a}55 !important}
+    .fi{border-color:${p.a}20 !important;background:rgba(0,0,0,.5) !important}
+    .fi:focus{border-color:${p.a} !important;box-shadow:0 0 0 2px ${p.a}14 !important}
+    .sbtn,.lt-btn{color:${p.a} !important;border-color:${p.a}44 !important}
+    .sbtn:hover,.lt-btn:hover{border-color:${p.a} !important;box-shadow:0 0 20px ${p.a}30 !important}
+    .sbtn::before,.lt-btn::before{background:${p.a}10 !important}
+    .fstat.ok{background:${p.a}10 !important;border-color:${p.a}33 !important;color:${p.a} !important}
+    .fstat.err{background:${p.c}10 !important;border-color:${p.c}33 !important;color:${p.c} !important}
+    .fstat.loading{border-color:${p.a}20 !important;color:${p.a} !important}
+    .pm-box{border-color:${p.a}33 !important}
+    .pm-avatar{border-color:${p.a} !important;box-shadow:0 0 20px ${p.a}33 !important}
+    .pm-role{color:${p.a} !important}
+    .pm-stat{border-color:${p.a}18 !important}
+    .pm-stat-n{color:${p.a} !important}
+    .pm-stat-l{color:${p.a}44 !important}
+    .pgr-b{background:linear-gradient(90deg,${p.b},${p.a}) !important}
+    .pgr-l{color:${p.a}55 !important}
+    .pgr-v{color:${p.a}66 !important}
+    .online{background:#4ade80 !important;box-shadow:0 0 8px #4ade80 !important}
+    .offline{background:rgba(255,255,255,.15) !important}
+    .psl{color:${p.a}33 !important}
+    .wcard{border-color:${p.a}18 !important}
+    .wbadge.ws-u{color:${p.d} !important;border-color:${p.d}44 !important;background:${p.d}10 !important}
+    .wbadge.ws-d{color:${p.a}66 !important;border-color:${p.a}22 !important}
+    .wtitle{color:#fff !important}
+    .wdetail,.wtg{color:${p.a}55 !important}
+    .wicon{color:${p.a} !important}
+    .ai-avatar{border-color:${p.a} !important;background:${p.a}08 !important}
+    .ai-name{color:${p.a} !important}
+    .ai-status{color:${p.a}55 !important}
+    .ai-typing span{background:${p.a}55 !important}
+    .ai-typing span:hover{background:${p.a} !important}
+    #ai-assist{border-color:${p.a}25 !important}
+    .notif{border-color:${p.a}25 !important;background:rgba(0,0,0,.95) !important}
+    .notif-bar{background:${p.a} !important}
+    .notif-title{color:${p.a} !important}
+    .legend-card{border-color:${p.a}18 !important;background:rgba(0,0,0,.4) !important}
+    .legend-name{color:${p.a} !important}
+    .legend-title{color:${p.a}66 !important}
+    .la{background:${p.a}15 !important;border-color:${p.a}33 !important;color:${p.a} !important}
+    .sb-section-label{color:${p.a}33 !important}
+    .sb-divider{background:${p.a}18 !important}
+    .sb-toggle-btn{border-color:${p.a}22 !important;color:${p.a}44 !important}
+    .sb-toggle-btn:hover{background:${p.a}08 !important;color:${p.a} !important;border-color:${p.a}44 !important}
+    .lt-box{border-color:${p.a}33 !important}
+    .lt-logo{color:${p.a} !important;text-shadow:0 0 20px ${p.a}cc !important}
+    .lt-sub{color:${p.a}44 !important}
+    .lt-prompt{border-color:${p.a}20 !important}
+    .lt-prompt-sym{color:${p.a} !important}
+    .lt-prompt input{color:#fff !important}
+    .lt-scanline{background:linear-gradient(180deg,${p.a}25,transparent) !important}
+    .lt-hint{color:${p.a}22 !important}
+    .boot-line{color:${p.a}cc !important}
+    .boot-cursor{background:${p.a} !important}
+    .bp-fill{background:${p.a} !important;box-shadow:0 0 10px ${p.a} !important}
+    #boot-pct{color:${p.a} !important;text-shadow:0 0 20px ${p.a}cc !important}
+    .ticker{border-color:${p.a}15 !important;background:${p.a}05 !important}
+    .ti b{color:${p.a} !important}
+    .actlog::-webkit-scrollbar-thumb{background:${p.a}33 !important}
+    .hq-cell-sub{color:${p.a}33 !important}
+    .kfeed{border-color:${p.a}18 !important}
+    .win-prob{border-color:${p.a}18 !important}
+    .threat-wrap{border-color:${p.a}18 !important}
+    .bp-bar{background:${p.a}18 !important}
+  `;
+}
+shiftColor();
+setInterval(shiftColor,30000);
+
+function togglePass(){
+  const inp=document.getElementById('code');
+  inp.type = inp.type==='password' ? 'text' : 'password';
+}
+
+// Try to auto-start ambient sound on first user interaction (required by browsers)
+function _autoStartAmbient(){
+  if(_ambAutoTried) return;
+  _ambAutoTried=true;
+  if(!_ambPlaying) toggleAmbient();
+  ['click','keydown','touchstart','pointerdown'].forEach(ev=>document.removeEventListener(ev,_autoStartAmbient));
+}
+['click','keydown','touchstart','pointerdown'].forEach(ev=>document.addEventListener(ev,_autoStartAmbient,{once:false}));
+
+// ===== AMBIENT RELAXING SOUNDSCAPE (generative, no external file) =====
+let _ambCtx=null,_ambNodes=[],_ambPlaying=false,_ambAutoTried=false;
+function buildAmbient(){
+  _ambCtx=new (window.AudioContext||window.webkitAudioContext)();
+  const master=_ambCtx.createGain();
+  master.gain.value=0;
+  master.connect(_ambCtx.destination);
+
+  const filter=_ambCtx.createBiquadFilter();
+  filter.type='lowpass';filter.frequency.value=900;
+  filter.connect(master);
+
+  // soft detuned pad chord (Cmaj9-ish, calming)
+  const freqs=[130.81,196.00,164.81,246.94,98.00];
+  freqs.forEach((f,i)=>{
+    const osc=_ambCtx.createOscillator();
+    osc.type='sine';
+    osc.frequency.value=f;
+    const g=_ambCtx.createGain();
+    g.gain.value=0.05+Math.random()*0.02;
+    const lfo=_ambCtx.createOscillator();
+    lfo.frequency.value=0.05+Math.random()*0.07;
+    const lfoGain=_ambCtx.createGain();
+    lfoGain.gain.value=2.5;
+    lfo.connect(lfoGain);lfoGain.connect(osc.frequency);
+    osc.connect(g);g.connect(filter);
+    osc.start();lfo.start();
+    _ambNodes.push(osc,lfo,g);
+  });
+
+  // gentle filter sweep for movement
+  const fLfo=_ambCtx.createOscillator();
+  fLfo.frequency.value=0.03;
+  const fLfoGain=_ambCtx.createGain();
+  fLfoGain.gain.value=250;
+  fLfo.connect(fLfoGain);fLfoGain.connect(filter.frequency);
+  fLfo.start();
+  _ambNodes.push(fLfo);
+
+  _ambMaster=master;
+}
+let _ambMaster=null;
+function toggleAmbient(){
+  const btn=document.getElementById('music-toggle');
+  if(!_ambPlaying){
+    if(!_ambCtx) buildAmbient();
+    if(_ambCtx.state==='suspended') _ambCtx.resume();
+    _ambMaster.gain.cancelScheduledValues(_ambCtx.currentTime);
+    _ambMaster.gain.linearRampToValueAtTime(0.55,_ambCtx.currentTime+2.5);
+    btn.classList.add('playing');
+    _ambPlaying=true;
+  }else{
+    _ambMaster.gain.cancelScheduledValues(_ambCtx.currentTime);
+    _ambMaster.gain.linearRampToValueAtTime(0,_ambCtx.currentTime+1.5);
+    btn.classList.remove('playing');
+    _ambPlaying=false;
+  }
+}
+
+</script>
+</body>
+</html>
